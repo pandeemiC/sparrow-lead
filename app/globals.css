@@ -45,3 +45,56 @@ body {
   pointer-events: none;
   z-index: 0;
 }
+
+/* Main container — centered with responsive horizontal padding */
+.container-main {
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .container-main {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container-main {
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
+}
+
+/* Signal card — the lead notification popup style */
+.signal-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.signal-card:hover {
+  border-color: rgba(204, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Fade mask — applied to the card grid wrapper so bottom cards dissolve */
+.fade-mask {
+  mask-image: linear-gradient(to bottom, white 40%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, white 40%, transparent 100%);
+}
+
+/* Video text mask — "Meet Sparrow" text becomes a window into the background */
+.text-video-mask {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
