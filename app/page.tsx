@@ -56,7 +56,8 @@ export default function Home() {
           </h1>
           <h3 className="text-lg text-white/50 max-w-md">
             AI-powered social listener that finds people asking for exactly what
-            you are looking to share — on Reddit, Twitter, and HackerNews.
+            you are looking to share — on Reddit, Twitter, HackerNews, Youtube
+            and Linkedin.
           </h3>
 
           <div className="flex items-center gap-4 pt-4">
