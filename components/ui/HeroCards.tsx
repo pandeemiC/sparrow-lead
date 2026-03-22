@@ -161,13 +161,14 @@ function ScrollColumn({
       }}
     >
       <motion.div
-        className="flex flex-col gap-4"
+        className="flex flex-col gap-4 will-change-transform"
         initial={{ y: offset ? "-50%" : "0%" }}
         animate={{ y: offset ? "0%" : "-50%" }}
         transition={{
           duration,
           repeat: Infinity,
           ease: "linear",
+          repeatType: "loop",
         }}
       >
         {doubled.map((card, i) => (

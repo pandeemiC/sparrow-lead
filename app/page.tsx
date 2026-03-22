@@ -10,7 +10,7 @@ export default function Home() {
 
   useEffect(() => {
     if (videoRef.current) {
-      videoRef.current.playbackRate = 0.3;
+      videoRef.current.playbackRate = 0.75;
     }
   }, []);
 
@@ -37,7 +37,7 @@ export default function Home() {
             <CanvasText
               text="Sparrow"
               className="font-serif font-light italic"
-              backgroundClassName="bg-sparrow-dark"
+              backgroundClassName="bg-sparrow-bright"
               colors={[
                 "rgba(255, 0, 0, 1)",
                 "rgba(255, 0, 0, 0.9)",
