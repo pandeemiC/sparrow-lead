@@ -2,6 +2,7 @@
 
 import { useRef, useEffect } from "react";
 import { Target } from "lucide-react";
+import { CanvasText } from "@/components/ui/canvas-text";
 import HeroCards from "@/components/ui/HeroCards";
 
 export default function Home() {
@@ -33,9 +34,25 @@ export default function Home() {
           </h2>
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-tight">
             <span className="text-white">Meet </span>
-            <span className="font-serif font-light italic text-glass">
-              Sparrow
-            </span>
+            <CanvasText
+              text="Sparrow"
+              className="font-serif font-light italic"
+              backgroundClassName="bg-sparrow-dark"
+              colors={[
+                "rgba(255, 0, 0, 1)",
+                "rgba(255, 0, 0, 0.9)",
+                "rgba(204, 0, 0, 0.8)",
+                "rgba(255, 30, 30, 0.7)",
+                "rgba(204, 0, 0, 0.6)",
+                "rgba(255, 50, 50, 0.5)",
+                "rgba(180, 0, 0, 0.8)",
+                "rgba(255, 0, 0, 0.4)",
+                "rgba(204, 0, 0, 0.6)",
+                "rgba(255, 20, 20, 0.3)",
+              ]}
+              lineGap={4}
+              animationDuration={20}
+            />
           </h1>
           <h3 className="text-lg text-white/50 max-w-md">
             AI-powered social listener that finds people asking for exactly what
