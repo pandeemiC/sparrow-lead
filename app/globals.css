@@ -46,7 +46,6 @@ body {
   z-index: 0;
 }
 
-/* Main container — centered with responsive horizontal padding */
 .container-main {
   width: 100%;
   max-width: 1200px;
@@ -70,7 +69,6 @@ body {
   }
 }
 
-/* Signal card — the lead notification popup style */
 .signal-card {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -85,13 +83,11 @@ body {
   background: rgba(255, 255, 255, 0.06);
 }
 
-/* Fade mask — applied to the card grid wrapper so bottom cards dissolve */
 .fade-mask {
   mask-image: linear-gradient(to bottom, white 40%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, white 40%, transparent 100%);
 }
 
-/* Video text mask — "Meet Sparrow" text becomes a window into the background */
 .text-video-mask {
   background-clip: text;
   -webkit-background-clip: text;
