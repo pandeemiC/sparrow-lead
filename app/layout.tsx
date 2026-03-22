@@ -10,7 +10,8 @@ const montserrat = Montserrat({
 
 export const metadata: Metadata = {
   title: "Sparrow",
-  description: "The lead generator",
+  description:
+    "AI-Powered social listener that finds exactly what you are looking to share.",
 };
 
 export default function RootLayout({
