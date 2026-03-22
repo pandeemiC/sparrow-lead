@@ -16,66 +16,74 @@ interface SignalCardProps {
 
 const cards: SignalCardProps[] = [
   {
-    icon: <FaRedditAlien className="text-orange-400" />,
+    icon: <FaRedditAlien className="text-white bg-orange-500" />,
     source: "r/startups",
     priority: "High",
-    quote: '"We\'ve been using Asana but it\'s too complex for our 5-person team. Any alternatives?"',
+    quote:
+      "\"We've been using Asana but it's too complex for our 5-person team. Any alternatives?\"",
     match: "92% match",
     time: "Signal hunted 2m ago",
   },
   {
-    icon: <FaXTwitter className="text-white" />,
+    icon: <FaXTwitter className="text-white bg-slate-900" />,
     source: "@founder_mike",
     priority: "Medium",
-    quote: '"Looking for a lightweight PM tool that doesn\'t require a PhD to set up. Suggestions?"',
+    quote:
+      '"Looking for a lightweight PM tool that doesn\'t require a PhD to set up. Suggestions?"',
     match: "87% match",
     time: "Signal hunted 8m ago",
   },
   {
-    icon: <FaYCombinator className="text-orange-400" />,
+    icon: <FaYCombinator className="bg-orange-400 text-white" />,
     source: "Hacker News",
     priority: "High",
-    quote: '"Ask HN: What do you use for managing small team projects without the bloat?"',
+    quote:
+      '"Ask HN: What do you use for managing small team projects without the bloat?"',
     match: "78% match",
     time: "Signal hunted 14m ago",
   },
   {
-    icon: <FaRedditAlien className="text-orange-400" />,
+    icon: <FaRedditAlien className="text-white bg-orange-500" />,
     source: "r/SaaS",
     priority: "Low",
-    quote: '"Any recommendations for tools that help track social mentions of your brand?"',
+    quote:
+      '"Any recommendations for tools that help track social mentions of your brand?"',
     match: "64% match",
     time: "Signal hunted 22m ago",
   },
   {
-    icon: <FaXTwitter className="text-white" />,
+    icon: <FaXTwitter className="text-white bg-slate-900" />,
     source: "@sarahbuilds",
     priority: "High",
-    quote: '"Our team just ditched Monday.com — too expensive for what you get. What are people switching to?"',
+    quote:
+      '"Our team just ditched Monday.com — too expensive for what you get. What are people switching to?"',
     match: "94% match",
     time: "Signal hunted 5m ago",
   },
   {
-    icon: <FaRedditAlien className="text-orange-400" />,
+    icon: <FaRedditAlien className="text-white bg-orange-500" />,
     source: "r/entrepreneur",
     priority: "Medium",
-    quote: '"Need a CRM that actually works for solo founders. Salesforce is overkill. Ideas?"',
+    quote:
+      '"Need a CRM that actually works for solo founders. Salesforce is overkill. Ideas?"',
     match: "81% match",
     time: "Signal hunted 11m ago",
   },
   {
-    icon: <FaYCombinator className="text-orange-400" />,
+    icon: <FaYCombinator className="text-white bg-orange-400" />,
     source: "Hacker News",
     priority: "Low",
-    quote: '"Show HN: I\'m building a tool to replace our internal project tracker. Anyone done this?"',
+    quote:
+      '"Show HN: I\'m building a tool to replace our internal project tracker. Anyone done this?"',
     match: "69% match",
     time: "Signal hunted 18m ago",
   },
   {
-    icon: <FaRedditAlien className="text-orange-400" />,
+    icon: <FaRedditAlien className="text-white bg-orange-500" />,
     source: "r/smallbusiness",
     priority: "High",
-    quote: '"We spend 2 hours a day on manual lead tracking. There has to be a better way."',
+    quote:
+      '"We spend 2 hours a day on manual lead tracking. There has to be a better way."',
     match: "96% match",
     time: "Signal hunted 1m ago",
   },
@@ -133,13 +141,21 @@ function SignalCard({
   );
 }
 
-function ScrollColumn({ items, duration, offset = false }: { items: SignalCardProps[]; duration: number; offset?: boolean }) {
+function ScrollColumn({
+  items,
+  duration,
+  offset = false,
+}: {
+  items: SignalCardProps[];
+  duration: number;
+  offset?: boolean;
+}) {
   const doubled = [...items, ...items];
 
   return (
-    <div className="relative h-[500px] overflow-hidden">
-      <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[var(--background)] to-transparent z-10 pointer-events-none" />
-      <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[var(--background)] to-transparent z-10 pointer-events-none" />
+    <div className="relative h-125 overflow-hidden">
+      <div className="absolute inset-x-0 top-0 h-20 bg-linear-to from-background to-transparent z-10 pointer-events-none" />
+      <div className="absolute inset-x-0 bottom-0 h-20 bg-linear-to from-background to-transparent z-10 pointer-events-none" />
       <motion.div
         className="flex flex-col gap-4"
         initial={{ y: offset ? "-50%" : "0%" }}
