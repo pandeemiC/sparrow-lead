@@ -153,9 +153,13 @@ function ScrollColumn({
   const doubled = [...items, ...items];
 
   return (
-    <div className="relative h-125 overflow-hidden">
-      <div className="absolute inset-x-0 top-0 h-20 bg-linear-to from-background to-transparent z-10 pointer-events-none" />
-      <div className="absolute inset-x-0 bottom-0 h-20 bg-linear-to from-background to-transparent z-10 pointer-events-none" />
+    <div
+      className="relative h-125 overflow-hidden"
+      style={{
+        maskImage: "linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)",
+        WebkitMaskImage: "linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)",
+      }}
+    >
       <motion.div
         className="flex flex-col gap-4"
         initial={{ y: offset ? "-50%" : "0%" }}
@@ -188,8 +192,8 @@ export default function HeroCards() {
 
   return (
     <div className="grid grid-cols-2 gap-4">
-      <ScrollColumn items={col1} duration={25} />
-      <ScrollColumn items={col2} duration={30} offset />
+      <ScrollColumn items={col1} duration={80} />
+      <ScrollColumn items={col2} duration={80} offset />
     </div>
   );
 }

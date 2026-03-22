@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import sparrowLogo from "@/public/sparrow-no-text-logo.png";
-import { Target } from "lucide-react";
 
 export default function Navbar() {
   return (

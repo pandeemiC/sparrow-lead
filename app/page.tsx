@@ -1,19 +1,39 @@
 "use client";
 
+import { useRef, useEffect } from "react";
 import { Target } from "lucide-react";
 import HeroCards from "@/components/ui/HeroCards";
 
 export default function Home() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = 0.3;
+    }
+  }, []);
+
   return (
-    <section className="min-h-screen flex items-center pt-20">
-      <div className="container-main flex flex-col md:flex-row items-center justify-between gap-16">
+    <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
+      <video
+        ref={videoRef}
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover z-0"
+      >
+        <source src="/hero-bg-rework.mp4" type="video/mp4" />
+      </video>
+      <div className="absolute inset-0 bg-black/85 z-0" />
+      <div className="container-main relative z-10 flex flex-col md:flex-row items-center justify-between gap-32">
         <div className="flex-1 space-y-2">
           <h2 className="text-xl md:text-2xl tracking-tight text-white">
             Find Leads Before Your Competitors
           </h2>
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-tight">
             <span className="text-white">Meet </span>
-            <span className=" font-serif font-light italic text-white">
+            <span className="font-serif font-light italic text-glass">
               Sparrow
             </span>
           </h1>
@@ -26,7 +46,7 @@ export default function Home() {
             <div className="relative group">
               <button
                 disabled
-                className="flex items-center gap-2 bg-sparrow-red/50 text-white/50 font-bold text-sm px-6 py-3 rounded-lg cursor-not-allowed"
+                className="flex items-center gap-2 bg-white/20 text-white/50 font-bold text-sm px-6 py-3 rounded-lg cursor-not-allowed"
               >
                 <Target size={16} />
                 Start Hunting
