@@ -10,11 +10,7 @@ export default function Home() {
 
   useEffect(() => {
     if (videoRef.current) {
-<<<<<<< HEAD
-      videoRef.current.playbackRate = 0.7;
-=======
       videoRef.current.playbackRate = 1;
->>>>>>> dev
     }
   }, []);
 
