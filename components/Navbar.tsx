@@ -7,7 +7,8 @@ import { usePathname } from "next/navigation";
 
 export default function Navbar() {
   const pathname = usePathname();
-  const isAuthPage = pathname === "/sign-in" || pathname === "/sign-up";
+  const isAuthPage =
+    pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
 
   if (isAuthPage) {
     return null;
