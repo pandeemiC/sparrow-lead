@@ -10,7 +10,11 @@ export default function Home() {
 
   useEffect(() => {
     if (videoRef.current) {
+<<<<<<< HEAD
       videoRef.current.playbackRate = 0.7;
+=======
+      videoRef.current.playbackRate = 1;
+>>>>>>> dev
     }
   }, []);
 
@@ -24,9 +28,9 @@ export default function Home() {
         playsInline
         className="absolute inset-0 w-full h-full object-cover z-0"
       >
-        <source src="/hero-bg-rework.mp4" type="video/mp4" />
+        <source src="/sparrow-bg.mp4" type="video/mp4" />
       </video>
-      <div className="absolute inset-0 bg-black/85 z-0" />
+      <div className="absolute inset-0 bg-black/70 z-0" />
       <div className="container-main relative z-10 flex flex-col md:flex-row items-center justify-between gap-32">
         <div className="flex-1 space-y-2">
           <h2 className="text-xl md:text-2xl tracking-tight text-white">
