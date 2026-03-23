@@ -3,13 +3,27 @@
 import Image from "next/image";
 import Link from "next/link";
 import sparrowLogo from "@/public/sparrow-no-text-logo.png";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
+  const pathname = usePathname();
+  const isAuthPage = pathname === "/sign-in" || pathname === "/sign-up";
+
+  if (isAuthPage) {
+    return null;
+  }
+
   return (
     <div className="fixed top-5 left-0 right-0 overflow-x-hidden z-50">
       <div className="flex items-center justify-between w-full max-w-6xl bg-neutral-700/20 mx-auto h-14 px-6 obsidian-glass rounded-full border border-white/10">
         <Link href="/" className="flex items-center">
-          <Image src={sparrowLogo} alt="Sparrow Logo" width={50} height={50} style={{ width: "auto", height: "auto" }} />
+          <Image
+            src={sparrowLogo}
+            alt="Sparrow Logo"
+            width={50}
+            height={50}
+            style={{ width: "auto", height: "auto" }}
+          />
           <span className="text-white text-xl font-serif italic tracking-tighter">
             Sparrow
           </span>
