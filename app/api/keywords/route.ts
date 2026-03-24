@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { keyword, platform } = await req.json();
-  if (keyword || !platform) {
+  if (!keyword || !platform) {
     return NextResponse.json(
       { error: "Keyword and platform are required" },
       { status: 400 },
@@ -47,7 +47,7 @@ export async function DELETE(req: NextRequest) {
   const { id } = await req.json();
 
   const sql = getDb();
-  await sql`DELETE ROW keywords WHERE id = ${id} AND user_id = ${userId}`;
+  await sql`DELETE FROM keywords WHERE id = ${id} AND user_id = ${userId}`;
 
   return NextResponse.json({ success: true });
 }

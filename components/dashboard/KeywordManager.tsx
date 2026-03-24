@@ -13,16 +13,15 @@ export default function KeywordManager({ userId }: { userId: string }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchKeywords();
+    async function loadKeywords() {
+      const res = await fetch("/api/keywords");
+      const data = await res.json();
+      setKeywords(data);
+    }
+    loadKeywords();
   }, []);
 
-  async function fetchKeywords() {
-    const res = await fetch("/api/keywords");
-    const data = await res.json();
-    setKeywords(data);
-  }
-
-  async function addKeyword(e: React.FormEvent) {
+  async function addKeyword(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!newKeyword.trim()) return;
 
@@ -48,9 +47,64 @@ export default function KeywordManager({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="text-white">
-      <h2 className="text-xl font-semibold">Your Keywords</h2>
-      <p className="text-white/50 mt-2">Keyword management coming soon...</p>
+    <div className="space-y-6">
+      <form onSubmit={addKeyword} className="flex gap-3">
+        <input
+          type="text"
+          onChange={(e) => setNewKeyword(e.target.value)}
+          placeholder="Enter a keyword to track..."
+          value={newKeyword}
+          className="flex-1 bg-white/5 border border-white/10 rounded-lg px-2 py-2 text-white placeholder:text-white/30 focus:outline-none focus:border-sparrow-red"
+        />
+
+        <select
+          value={platform}
+          onChange={(e) => setPlatform(e.target.value)}
+          className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-sparrow-red"
+        >
+          {PLATFORMS.map((p) => (
+            <option key={p} value={p} className="bg-neutral-900">
+              {p.charAt(0).toUpperCase() + p.slice(1)}
+            </option>
+          ))}
+        </select>
+        <button
+          type="submit"
+          disabled={loading || !newKeyword.trim()}
+          className="bg-sparrow-red hover:bg-sparrow-bright text-white text-sm font-bold px-5 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? "Adding..." : "Add"}
+        </button>
+      </form>
+
+      <div className="space-y-2">
+        <h2 className="text-xl font-semibold text-white">Your Keywords</h2>
+        {keywords.length === 0 ? (
+          <p>No keywords yet. Add one above to start hunting.</p>
+        ) : (
+          <div className="grid gap-2">
+            {keywords.map((k) => (
+              <div
+                key={k.id}
+                className="flex items-center justify-between bg-white/5 border border-white/10 rounded-lg px-4 py-3"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-xs bg-white/10 text-white/60 px-2 py-1 rounded">
+                    {k.platform}
+                  </span>
+                  <span className="text-white">{k.keyword}</span>
+                </div>
+                <button
+                  onClick={() => deleteKeyword(k.id)}
+                  className="text-white/30 hover:text-red-500 transition-colors cursor-pointer"
+                >
+                  <IoClose size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
