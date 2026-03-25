@@ -69,14 +69,15 @@ export async function POST() {
       `;
 
       if (existing.length === 0) {
-        const analysis = await analyzePost({
-          keyword: kw.keyword,
-          title: post.post_title,
-          body: post.post_body,
-        });
+        // const analysis = await analyzePost({
+        //   keyword: kw.keyword,
+        //   title: post.post_title,
+        //   body: post.post_body,
+        // });
 
+        // if you want to use CLAUDE add ai_analysis and relevance_score onto the keywords
         const inserted = await sql`
-        INSERT INTO mentions (keyword_id, platform, post_url, post_title, post_body, author, ai_analysis, relevance_score) VALUES (${kw.id}, ${post.platform}, ${post.post_url}, ${post.post_title}, ${post.post_body}, ${post.author}, ${JSON.stringify(analysis)}, ${analysis.relevance}) RETURNING *
+        INSERT INTO mentions (keyword_id, platform, post_url, post_title, post_body, author) VALUES (${kw.id}, ${post.platform}, ${post.post_url}, ${post.post_title}, ${post.post_body}, ${post.author}, ${JSON.stringify(analysis)}, ${analysis.relevance}) RETURNING *
         `;
         allResults.push(inserted[0]);
       }
