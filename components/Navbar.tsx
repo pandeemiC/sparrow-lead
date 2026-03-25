@@ -53,14 +53,17 @@ export default function Navbar() {
 
         <div className="flex items-center gap-4">
           <Link
-            href="#"
+            href="/sign-in"
             className="hidden sm:block text-[11px] text-white/60 uppercase tracking-widest hover:text-white transition-colors"
           >
             Log In
           </Link>
-          <button className="flex items-center cursor-pointer gap-2 bg-sparrow-red hover:bg-sparrow-bright text-white text-[11px] font-bold uppercase tracking-widest px-5 py-2 rounded-lg transition-colors">
+          <Link
+            href="/sign-up"
+            className="flex items-center cursor-pointer gap-2 bg-sparrow-red hover:bg-sparrow-bright text-white text-[11px] font-bold uppercase tracking-widest px-5 py-2 rounded-lg transition-colors"
+          >
             Get Started
-          </button>
+          </Link>
         </div>
       </div>
     </div>
