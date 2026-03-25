@@ -24,3 +24,38 @@ export type AiAnalysis = {
   reasoning: string;
   suggested_reply: string;
 };
+
+export type RedditPost = {
+  data: {
+    permalink: string;
+    title: string;
+    selftext: string;
+    author: string;
+  };
+};
+
+export type RedditResponse = {
+  data: {
+    children: RedditPost[];
+  };
+};
+
+export type HackerNewsHit = {
+  url: string | null;
+  objectID: string;
+  title: string;
+  story_text: string | null;
+  author: string;
+};
+
+export type HackerNewsResponse = {
+  hits: HackerNewsHit[];
+};
+
+export type ScannedPost = {
+  platform: string;
+  post_url: string;
+  post_title: string;
+  post_body: string;
+  author: string;
+};
