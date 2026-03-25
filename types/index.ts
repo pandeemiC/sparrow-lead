@@ -25,6 +25,12 @@ export type AiAnalysis = {
   suggested_reply: string;
 };
 
+export type AnalyzePostInput = {
+  keyword: string;
+  title: string;
+  body: string;
+};
+
 export type RedditPost = {
   data: {
     permalink: string;
