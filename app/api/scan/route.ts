@@ -3,7 +3,6 @@ import { getDb } from "@/lib/db";
 import { NextResponse } from "next/server";
 
 import { RedditResponse, HackerNewsResponse, ScannedPost } from "@/types";
-import { analyzePost } from "@/lib/analysis";
 
 async function searchReddit(keyword: string) {
   const url = `https://www.reddit.com/search.json?q=${encodeURIComponent(keyword)}&sort=new&limit=5`;
@@ -77,7 +76,7 @@ export async function POST() {
 
         // if you want to use CLAUDE add ai_analysis and relevance_score onto the keywords
         const inserted = await sql`
-        INSERT INTO mentions (keyword_id, platform, post_url, post_title, post_body, author) VALUES (${kw.id}, ${post.platform}, ${post.post_url}, ${post.post_title}, ${post.post_body}, ${post.author}, ${JSON.stringify(analysis)}, ${analysis.relevance}) RETURNING *
+        INSERT INTO mentions (keyword_id, platform, post_url, post_title, post_body, author) VALUES (${kw.id}, ${post.platform}, ${post.post_url}, ${post.post_title}, ${post.post_body}, ${post.author}) RETURNING *
         `;
         allResults.push(inserted[0]);
       }
