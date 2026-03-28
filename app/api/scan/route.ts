@@ -23,7 +23,7 @@ async function searchReddit(keyword: string) {
 }
 
 async function searchHackerNews(keyword: string) {
-  const url = `https://hn.algolia.com/api/v1/search_recent?query=${encodeURIComponent(keyword)}&tags=story&hitsPerPage=5`;
+  const url = `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(keyword)}&tags=(story,comment)&hitsPerPage=5`;
   const res = await fetch(url);
 
   if (!res.ok) return [];
@@ -31,8 +31,8 @@ async function searchHackerNews(keyword: string) {
   const data: HackerNewsResponse = await res.json();
   return data.hits.map((hit) => ({
     platform: "hackernews",
-    post_url: hit.url || `https://news.ycombinator.com/item?id=${hit.objectID}`,
-    post_title: hit.title,
+    post_url: `https://news.ycombinator.com/item?id=${hit.objectID}`,
+    post_title: hit.title || hit.story_text?.slice(0, 80) || "(no title)",
     post_body: hit.story_text?.slice(0, 500) || "",
     author: hit.author,
   }));

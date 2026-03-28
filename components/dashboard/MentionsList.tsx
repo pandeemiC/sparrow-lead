@@ -10,10 +10,17 @@ const platformIcon: Record<string, React.ReactNode> = {
   hackernews: <FaYCombinator className="text-orange-400" size={14} />,
 };
 
+const ITEMS_PER_PAGE = 10;
+
 export default function MentionsList() {
   const [mentions, setMentions] = useState<Mention[]>([]);
+  const [page, setPage] = useState(1);
   const [scanning, setScanning] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const totalPages = Math.ceil(mentions.length / ITEMS_PER_PAGE);
+  const start = (page - 1) * ITEMS_PER_PAGE;
+  const visibleMentions = mentions.slice(start, start + ITEMS_PER_PAGE);
 
   useEffect(() => {
     fetch("/api/mentions")
@@ -28,6 +35,7 @@ export default function MentionsList() {
     const res = await fetch("/api/mentions");
     const data = await res.json();
     setMentions(Array.isArray(data) ? data : []);
+    setPage(1);
   }
 
   async function handleScan() {
@@ -58,18 +66,26 @@ export default function MentionsList() {
       {loading ? (
         <div className="space-y-3">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-20 rounded-lg bg-white/5 border border-white/10 animate-pulse" />
+            <div
+              key={i}
+              className="h-20 rounded-lg bg-white/5 border border-white/10 animate-pulse"
+            />
           ))}
         </div>
       ) : mentions.length === 0 ? (
         <div className="text-center py-16 border border-dashed border-white/10 rounded-lg">
           <p className="text-white/40 text-sm">No signals yet.</p>
-          <p className="text-white/25 text-xs mt-1">Add keywords above and hit Hunt Now.</p>
+          <p className="text-white/25 text-xs mt-1">
+            Add keywords above and hit Hunt Now.
+          </p>
         </div>
       ) : (
         <div className="space-y-3">
-          {mentions.map((mention) => (
-            <div className="bg-white/5 border border-white/10 hover:border-sparrow-red/30 rounded-lg px-4 py-3 transition-colors" key={mention.id}>
+          {visibleMentions.map((mention) => (
+            <div
+              className="bg-white/5 border border-white/10 hover:border-sparrow-red/30 rounded-lg px-4 py-3 transition-colors"
+              key={mention.id}
+            >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-3 min-w-0">
                   <span className="mt-0.5 shrink-0">
@@ -99,12 +115,45 @@ export default function MentionsList() {
                     </div>
                   </div>
                 </div>
-                <a href={mention.post_url} target="_blank" rel="noopener noreferrer" className="shrink-0 text-white/20 hover:text-white transition-colors mt-0.5">
+                <a
+                  href={mention.post_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="shrink-0 text-white/20 hover:text-white transition-colors mt-0.5"
+                >
                   <ExternalLink size={14} />
                 </a>
               </div>
             </div>
           ))}
+        </div>
+      )}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          <button
+            onClick={() => setPage((p) => p - 1)}
+            disabled={page === 1}
+            className="px-3 py-1.5 text-xs rounded-lg bg-white/5 border border-white/10 text-white/50 hover:text-white hover:border-white/30 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          >
+            ←
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+            <button
+              key={p}
+              onClick={() => setPage(p)}
+              className={`px-3 py-1.5 text-xs rounded-lg border transition-colors ${page === p ? "bg-sparrow-red border-sparrow-red text-white" : "bg-white/5 border-white/10 text-white/50 hover:text-white hover:border-white/30"}`}
+            >
+              {p}
+            </button>
+          ))}
+          <button
+            disabled={page === totalPages}
+            onClick={() => setPage((p) => p + 1)}
+            className="px-3 py-1.5 text-xs rounded-lg bg-white/5 border border-white/10 text-white/50 hover:text-white hover:border-white/30 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          >
+            →
+          </button>
         </div>
       )}
     </div>
