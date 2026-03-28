@@ -1,6 +1,7 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import KeywordManager from "@/components/dashboard/KeywordManager";
+import MentionsList from "@/components/dashboard/MentionsList";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -12,7 +13,7 @@ export default async function DashboardPage() {
   const user = await currentUser();
 
   return (
-    <div className="min-h-screen bg-background pt-24 px-4">
+    <div className="min-h-screen bg-background px-4">
       <div className="max-w-4xl mx-auto space-y-8">
         <div>
           <h1 className="text-3xl font-bold text-white">Dashboard</h1>
@@ -22,6 +23,7 @@ export default async function DashboardPage() {
         </div>
 
         <KeywordManager userId={userId} />
+        <MentionsList />
       </div>
     </div>
   );

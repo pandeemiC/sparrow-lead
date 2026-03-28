@@ -12,7 +12,7 @@ export async function GET() {
   const mentions = await sql`
   SELECT m.*, k.keyword, k.platform as keyword_platform
   FROM mentions m
-  JOIN keywords k ON m.keryword_id = k.id 
+  JOIN keywords k ON m.keyword_id = k.id
   WHERE k.user_id = ${userId}
   ORDER BY m.created_at DESC
   `;
