@@ -78,7 +78,7 @@ export default function DashboardShell({
 
       <div className="flex flex-1 overflow-hidden">
         <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
-        <main className="flex-1 bg-[#111111] rounded-tr2xl rounded-br-2xl overflow-y-auto">
+        <main className="flex-1 bg-[#111111] rounded-tr-2xl rounded-br-2xl overflow-y-auto">
           {children}
         </main>
       </div>
