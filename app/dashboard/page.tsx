@@ -64,7 +64,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col justify-between px-5 py-4 rounded-xl glass-red border border-white/5 glow-down">
+        <div className="flex-1 flex flex-col justify-between px-5 py-4 rounded-xl glass-red border border-white/5">
           <div>
             <p className="text-sm font-medium text-white/50">Last scanned</p>
             <p className="text-xs text-white/20 mt-0.5">Never</p>

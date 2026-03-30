@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
+import useState from "react";
 import { SiDiscord, SiGithub, SiInstagram } from "react-icons/si";
 import { LayoutDashboard, Radio, Tag, Target, Settings } from "lucide-react";
 import sparrowLogo from "@/public/sparrow-no-text-logo.png";
@@ -14,12 +15,9 @@ const navItems = [
   { label: "Hunt Board", href: "/dashboard/hunt-board", icon: Target },
 ];
 
-type UserData = {
-  name: string;
-  imageUrl: string;
-};
+export default function Sidebar() {
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
-export default function Sidebar({ user }: { user: UserData }) {
   const pathname = usePathname();
 
   const activeClass = "nav-active";
@@ -61,6 +59,7 @@ export default function Sidebar({ user }: { user: UserData }) {
         })}
 
         <Link
+          onClick={() => setSettingsOpen(true)}
           href="/dashboard/settings"
           className={`flex items-center gap-3 pl-5 pr-3 py-4 rounded-lg transition-all ${
             pathname === "/dashboard/settings" ? activeClass : inactiveClass

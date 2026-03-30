@@ -20,7 +20,7 @@ export default function DashboardShell({
 }) {
   return (
     <div className="flex h-screen bg-sparrow-base overflow-hidden">
-      <Sidebar user={user} />
+      <Sidebar />
       <div className="flex flex-col flex-1 overflow-hidden">
         <header className="flex items-center h-16 shrink-0 px-6 gap-4">
           {user.imageUrl ? (
@@ -68,7 +68,7 @@ export default function DashboardShell({
           </button>
           <Link
             href="/dashboard/hunt"
-            className="flex items-center gap-2 px-4 py-2.5 bg-sparrow-red hover:bg-sparrow-bright text-white text-md font-semibold rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5   bg-sparrow-red hover:bg-sparrow-bright text-white text-md font-semibold rounded-lg transition-colors"
           >
             <Target size={15} />
             Hunt
