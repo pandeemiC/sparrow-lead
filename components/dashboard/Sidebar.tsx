@@ -10,7 +10,7 @@ const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Signals", href: "/dashboard/signals", icon: Radio },
   { label: "Keywords", href: "/dashboard/keywords", icon: Tag },
-  { label: "Hunt Board", href: "/dashboard/hunt", icon: Target },
+  { label: "Hunt Board", href: "/dashboard/hunt-board", icon: Target },
 ];
 
 type UserData = {
@@ -22,41 +22,27 @@ export default function Sidebar({ user }: { user: UserData }) {
   const pathname = usePathname();
 
   return (
-    <aside className="w-60 flex flex-col h-full bg-[#0d0d0d] border-r border-white/5 shrink-0">
+    <aside className="w-50 flex flex-col h-full bg-[#0d0d0d] border-r border-white/5 shrink-0">
       <div className="flex items-center gap-3 px-4 h-16 border-b border-white/5 shrink-0">
         <Image
           src={sparrowLogo}
           alt="Sparrow"
-          width={26}
-          height={26}
+          width={28}
+          height={28}
           style={{ width: "auto", height: "auto" }}
         />
         <span className="text-white font-black text-sm uppercase tracking-wider flex-1 whitespace-nowrap">
           Sparrow
         </span>
-        {user.imageUrl ? (
-          <Image
-            src={user.imageUrl}
-            alt={user.name}
-            width={28}
-            height={28}
-            className="rounded-full ring-1 ring-white/10 shrink-0"
-          />
-        ) : (
-          <div className="w-7 h-7 rounded-full bg-sparrow-red/30 flex items-center justify-center shrink-0 text-white text-xs font-bold">
-            {user.name.charAt(0).toUpperCase()}
-          </div>
-        )}
       </div>
-
-      <nav className="flex-1 py-4 space-y-1 px-2">
+      <nav className="flex-1 py-5 space-y-3 px-2">
         {navItems.map(({ label, href, icon: Icon }) => {
           const active = pathname === href;
           return (
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
+              className={`flex items-center gap-3 px-3 py-4 rounded-lg transition-all ${
                 active
                   ? "bg-linear-to-t from-sparrow-red/20 via-sparrow-red/6 to-transparent text-white shadow-[0_8px_20px_rgba(204,0,0,0.18)]"
                   : "text-white/40 hover:text-white hover:bg-white/5"
@@ -73,14 +59,15 @@ export default function Sidebar({ user }: { user: UserData }) {
           );
         })}
       </nav>
-
       <div className="py-4 px-2 border-t border-white/5">
         <Link
           href="/dashboard/settings"
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/40 hover:text-white hover:bg-white/5 transition-all"
         >
           <Settings size={18} className="shrink-0" />
-          <span className="text-sm font-medium whitespace-nowrap">Settings</span>
+          <span className="text-sm font-medium whitespace-nowrap">
+            Settings
+          </span>
         </Link>
       </div>
     </aside>

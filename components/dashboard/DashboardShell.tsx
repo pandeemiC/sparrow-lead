@@ -1,11 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "motion/react";
-import Image from "next/image";
 import Link from "next/link";
 import { Bell, Search, Target } from "lucide-react";
 import Sidebar from "./Sidebar";
+import Image from "next/image";
 
 type UserData = {
   name: string;
@@ -20,65 +18,57 @@ export default function DashboardShell({
   children: React.ReactNode;
   user: UserData;
 }) {
-  const [isOpen, setIsOpen] = useState(true);
   return (
-    <div className="flex flex-col h-screen bg-[#0a0a0a] overflow-hidden">
-      <header className="flex items-center h-16 shrink-0 border-b border-white/5 bg-[#0a0a0a]">
-        <motion.div
-          className="flex items-center gap-3 px-4 h-full border-r border-white/5 shrink-0 overflow-hidden"
-          transition={{ duration: 0.2, ease: "easeInOut" }}
-          animate={{ width: isOpen ? 240 : 64 }}
-        >
+    <div className="flex h-screen bg-[#0a0a0a] overflow-hidden">
+      <Sidebar user={user} />
+      <div className="flex flex-col flex-1 overflow-hidden">
+        <header className="flex items-center h-16 shrink-0 px-6 border-b border-white/5 gap-4">
           {user.imageUrl ? (
             <Image
               src={user.imageUrl}
               alt={user.name}
               width={32}
               height={32}
-              className="rounded-full shrink-0 ring-1 ring-white/10"
+              className="rounded-full ring-1 ring-white/10 shrink-0"
             />
           ) : (
-            <div className="w-8 h-8 rounded-full bg-sparrow-red/30 flex items-center justify-center shrink-0 text-white text-xs font-bold">
+            <div className="w-7 h-7 rounded-full bg-sparrow-red/30 flex items-center justify-center shrink-0 text-white text-xs font-bold">
               {user.name.charAt(0).toUpperCase()}
             </div>
           )}
-          {isOpen && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.15 }}
-              className="overflow-hidden min-w-0"
-            >
-              <p className="text-sm font-semibold text-white whitespace-nowrap truncate leading-tight">
-                {user.name}
+          <div className="flex items-center gap-4 px-5 py-2 rounded-xl bg-white/3 border border-white/6">
+            <div>
+              <p className="text-[11px] text-white/40 uppercase tracking-wider leading-none mb-1">
+                Signals
               </p>
-              <p className="text-xs text-white/40 whitespace-nowrap truncate leading-tight mt-0.5">
-                {user.email}
-              </p>
-            </motion.div>
-          )}
-        </motion.div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-lg font-bold text-white leading-none">
+                  0
+                </span>
+                <span className="text-xs text-white/25">0%</span>
+              </div>
+            </div>
+          </div>
 
-        <div className="flex-1 flex items-center justify-end gap-2 px-6">
+          <div className="flex-1" />
+
           <button className="p-2 text-white/30 hover:text-white/70 transition-colors rounded-lg hover:bg-white/5">
-            <Search size={18} />
+            <Search size={17} />
           </button>
           <button className="relative p-2 text-white/30 hover:text-white/70 transition-colors rounded-lg hover:bg-white/5">
-            <Bell size={18} />
+            <Bell size={17} />
             <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-sparrow-red rounded-full" />
           </button>
           <Link
             href="/dashboard/hunt"
-            className="flex items-center gap-2 px-4 py-1.5 bg-sparrow-red hover:bg-sparrow-bright text-white text-sm font-semibold rounded-lg transition-colors ml-1"
+            className="flex items-center gap-2 px-4 py-1.5 bg-sparrow-red hover:bg-sparrow-bright text-white text-sm font-semibold rounded-lg transition-colors"
           >
-            <Target size={14} /> Hunt
+            <Target size={14} />
+            Hunt
           </Link>
-        </div>
-      </header>
+        </header>
 
-      <div className="flex flex-1 overflow-hidden">
-        <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
-        <main className="flex-1 bg-[#111111] rounded-tr-2xl rounded-br-2xl overflow-y-auto">
+        <main className="flex-1 bg-[#111111] rounded-tl-2xl overflow-y-auto">
           {children}
         </main>
       </div>
