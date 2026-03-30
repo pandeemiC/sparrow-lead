@@ -19,7 +19,7 @@ export default function Sidebar() {
   const isSettingsActive = pathname.startsWith("/dashboard/settings");
 
   return (
-    <aside className="w-50 flex flex-col h-full bg-sparrow-base shrink-0">
+    <aside className="w-50 flex flex-col h-full bg-neutral-800/10 shrink-0">
       <div className="flex items-center gap-1 px-4 h-16 shrink-0">
         <Image
           src={sparrowLogo}
@@ -40,10 +40,15 @@ export default function Sidebar() {
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-3 pl-5 pr-3 py-4 rounded-lg transition-all ${active ? activeClass : inactiveClass}`}
+              className={`flex items-center gap-3 pl-5 pr-5 py-4 rounded-lg transition-all ${active ? activeClass : inactiveClass}`}
             >
-              <Icon size={18} className={`shrink-0 ${active ? "text-sparrow-red" : ""}`} />
-              <span className="text-sm font-medium whitespace-nowrap">{label}</span>
+              <Icon
+                size={18}
+                className={`shrink-0 ${active ? "text-sparrow-red" : ""}`}
+              />
+              <span className="text-sm font-medium whitespace-nowrap">
+                {label}
+              </span>
             </Link>
           );
         })}
@@ -52,9 +57,17 @@ export default function Sidebar() {
           onClick={() => setSettingsOpen((o) => !o)}
           className={`w-full flex items-center gap-3 pl-5 pr-3 py-4 rounded-lg transition-all ${isSettingsActive ? activeClass : inactiveClass}`}
         >
-          <Settings size={18} className={`shrink-0 ${isSettingsActive ? "text-sparrow-red" : ""}`} />
-          <span className="text-sm font-medium whitespace-nowrap flex-1 text-left">Settings</span>
-          <motion.div animate={{ rotate: settingsOpen ? 90 : 0 }} transition={{ duration: 0.15 }}>
+          <Settings
+            size={18}
+            className={`shrink-0 ${isSettingsActive ? "text-sparrow-red" : ""}`}
+          />
+          <span className="text-sm font-medium whitespace-nowrap flex-1 text-left">
+            Settings
+          </span>
+          <motion.div
+            animate={{ rotate: settingsOpen ? 90 : 0 }}
+            transition={{ duration: 0.15 }}
+          >
             <ChevronRight size={14} className="shrink-0 opacity-40" />
           </motion.div>
         </button>
@@ -77,8 +90,13 @@ export default function Sidebar() {
                       href={href}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${active ? activeClass : inactiveClass}`}
                     >
-                      <Icon size={15} className={`shrink-0 ${active ? "text-sparrow-red" : ""}`} />
-                      <span className="text-xs font-medium whitespace-nowrap">{label}</span>
+                      <Icon
+                        size={15}
+                        className={`shrink-0 ${active ? "text-sparrow-red" : ""}`}
+                      />
+                      <span className="text-xs font-medium whitespace-nowrap">
+                        {label}
+                      </span>
                     </Link>
                   );
                 })}

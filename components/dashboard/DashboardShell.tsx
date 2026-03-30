@@ -19,7 +19,7 @@ export default function DashboardShell({
   user: UserData;
 }) {
   return (
-    <div className="flex h-screen bg-sparrow-base overflow-hidden">
+    <div className="flex h-screen bg-neutral-500/10 overflow-hidden">
       <Sidebar />
       <div className="flex flex-col flex-1 overflow-hidden">
         <header className="flex items-center h-16 shrink-0 px-6 gap-4">
@@ -29,7 +29,7 @@ export default function DashboardShell({
               alt={user.name}
               width={34}
               height={34}
-              className="rounded-full ring-1 ring-white/10 shrink-0"
+              className="rounded-full shrink-0"
             />
           ) : (
             <div className="w-8 h-8 rounded-full bg-sparrow-red/30 flex items-center justify-center shrink-0 text-white text-xs font-bold">
@@ -48,7 +48,7 @@ export default function DashboardShell({
 
           <div className="w-px h-6 bg-white/10 mx-2" />
 
-          <div className="flex items-center gap-3 px-5 py-2.5 rounded-md glass-red glow-top">
+          <div className="flex items-center gap-3 px-5 py-2.5 rounded-md glass-red">
             <p className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">
               Signals
             </p>
