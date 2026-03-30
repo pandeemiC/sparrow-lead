@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
+import { SiDiscord, SiGithub, SiInstagram } from "react-icons/si";
 import { LayoutDashboard, Radio, Tag, Target, Settings } from "lucide-react";
 import sparrowLogo from "@/public/sparrow-no-text-logo.png";
 
@@ -23,15 +24,15 @@ export default function Sidebar({ user }: { user: UserData }) {
 
   return (
     <aside className="w-50 flex flex-col h-full bg-[#0d0d0d] border-r border-white/5 shrink-0">
-      <div className="flex items-center gap-3 px-4 h-16 border-b border-white/5 shrink-0">
+      <div className="flex items-center gap-1 px-4 h-16 border-b border-white/5 shrink-0">
         <Image
           src={sparrowLogo}
           alt="Sparrow"
-          width={28}
-          height={28}
+          width={45}
+          height={45}
           style={{ width: "auto", height: "auto" }}
         />
-        <span className="text-white font-black text-sm uppercase tracking-wider flex-1 whitespace-nowrap">
+        <span className="text-white font-semibold text-lg uppercase tracking-widest flex-1 whitespace-nowrap">
           Sparrow
         </span>
       </div>
@@ -58,8 +59,6 @@ export default function Sidebar({ user }: { user: UserData }) {
             </Link>
           );
         })}
-      </nav>
-      <div className="py-4 px-2 border-t border-white/5">
         <Link
           href="/dashboard/settings"
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/40 hover:text-white hover:bg-white/5 transition-all"
@@ -69,6 +68,17 @@ export default function Sidebar({ user }: { user: UserData }) {
             Settings
           </span>
         </Link>
+      </nav>
+      <div className="py-4 px-2 border-t border-white/5 flex items-center justify-center gap-5 text-white/40 py-7">
+        <a href="#" className="hover:text-white transition-colors">
+          <SiDiscord size={18} />
+        </a>
+        <a href="#" className="hover:text-white transition-colors">
+          <SiInstagram size={18} />
+        </a>
+        <a href="#" className="hover:text-white transition-colors">
+          <SiGithub size={18} />
+        </a>
       </div>
     </aside>
   );

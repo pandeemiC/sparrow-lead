@@ -52,10 +52,10 @@ export default function DashboardShell({
 
           <div className="flex-1" />
 
-          <button className="p-2 text-white/30 hover:text-white/70 transition-colors rounded-lg hover:bg-white/5">
+          <button className="p-2 text-white/30 hover:text-white/70 transition-colors rounded-lg hover:bg-white/5 cursor-pointer">
             <Search size={17} />
           </button>
-          <button className="relative p-2 text-white/30 hover:text-white/70 transition-colors rounded-lg hover:bg-white/5">
+          <button className="relative p-2 text-white/30 hover:text-white/70 transition-colors rounded-lg hover:bg-white/5 cursor-pointer">
             <Bell size={17} />
             <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-sparrow-red rounded-full" />
           </button>
