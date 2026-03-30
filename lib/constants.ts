@@ -20,7 +20,7 @@ export const navItems = [
 export const settingsItems = [
   { label: "Overview", href: "/dashboard/settings/overview", icon: LayoutList },
   { label: "Notifications", href: "/dashboard/settings/notifications", icon: Bell },
-  { label: "Scan Preferences", href: "/dashboard/settings/scan", icon: ScanLine },
+  { label: "Scan Preferences", href: "/dashboard/settings/scan-preferences", icon: ScanLine },
   { label: "Billing", href: "/dashboard/settings/billing", icon: CreditCard },
-  { label: "API Keys", href: "/dashboard/settings/api", icon: KeyRound },
+  { label: "API Keys", href: "/dashboard/settings/api-keys", icon: KeyRound },
 ];
