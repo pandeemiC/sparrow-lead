@@ -23,7 +23,7 @@ async function searchReddit(keyword: string) {
 }
 
 async function searchHackerNews(keyword: string) {
-  const url = `https://hn.algolia.com/api/v1/search_recent?query=${encodeURIComponent(keyword)}&tags=story&hitsPerPage=5`;
+  const url = `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(keyword)}&tags=(story,comment)&hitsPerPage=5`;
   const res = await fetch(url);
 
   if (!res.ok) return [];
@@ -31,8 +31,8 @@ async function searchHackerNews(keyword: string) {
   const data: HackerNewsResponse = await res.json();
   return data.hits.map((hit) => ({
     platform: "hackernews",
-    post_url: hit.url || `https://news.ycombinator.com/item?id=${hit.objectID}`,
-    post_title: hit.title,
+    post_url: `https://news.ycombinator.com/item?id=${hit.objectID}`,
+    post_title: hit.title || hit.story_text?.slice(0, 80) || "(no title)",
     post_body: hit.story_text?.slice(0, 500) || "",
     author: hit.author,
   }));
@@ -68,6 +68,13 @@ export async function POST() {
       `;
 
       if (existing.length === 0) {
+        // const analysis = await analyzePost({
+        //   keyword: kw.keyword,
+        //   title: post.post_title,
+        //   body: post.post_body,
+        // });
+
+        // if you want to use CLAUDE add ai_analysis and relevance_score onto the keywords
         const inserted = await sql`
         INSERT INTO mentions (keyword_id, platform, post_url, post_title, post_body, author) VALUES (${kw.id}, ${post.platform}, ${post.post_url}, ${post.post_title}, ${post.post_body}, ${post.author}) RETURNING *
         `;

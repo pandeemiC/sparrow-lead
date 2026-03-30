@@ -1,21 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0a0a;
+  --background: #111111;
   --foreground: #ededed;
 
-  /* Sparrow Red Palette */
-  --sparrow-black: #000000;
-  --sparrow-dark: #2b0000;
-  --sparrow-red: #cc0000;
+  --sparrow-base: #111111;
+  --sparrow-mid: #414141;
+  --sparrow-red: #af0404;
   --sparrow-bright: #ff0000;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-sparrow-black: var(--sparrow-black);
-  --color-sparrow-dark: var(--sparrow-dark);
+  --color-sparrow-base: var(--sparrow-base);
+  --color-sparrow-mid: var(--sparrow-mid);
   --color-sparrow-red: var(--sparrow-red);
   --color-sparrow-bright: var(--sparrow-bright);
   --font-sans: var(--font-montserrat);
@@ -67,6 +66,131 @@ body {
     padding-left: 1.25rem;
     padding-right: 1.25rem;
   }
+}
+
+.nav-active {
+  background:
+    radial-gradient(
+      ellipse at bottom right,
+      rgba(210, 27, 27, 0.35) 0%,
+      transparent 70%
+    ),
+    rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: white;
+}
+
+.glass-red {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glow-right {
+  background:
+    radial-gradient(
+      ellipse at right,
+      rgba(210, 27, 27, 0.12) 0%,
+      transparent 60%
+    ),
+    rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glow-left {
+  background:
+    radial-gradient(
+      ellipse at left,
+      rgba(210, 27, 27, 0.12) 0%,
+      transparent 60%
+    ),
+    rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glow-b-right {
+  background:
+    radial-gradient(
+      ellipse at bottom right,
+      rgba(210, 27, 27, 0.12) 0%,
+      transparent 60%
+    ),
+    rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glow-top {
+  background:
+    radial-gradient(
+      ellipse at top left,
+      rgba(210, 27, 27, 0.1) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at top right,
+      rgba(210, 27, 27, 0.1) 0%,
+      transparent 55%
+    ),
+    rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glow-down {
+  background:
+    radial-gradient(
+      ellipse at bottom left,
+      rgba(210, 27, 27, 0.1) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at bottom right,
+      rgba(210, 27, 27, 0.1) 0%,
+      transparent 55%
+    ),
+    rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glow-b-left {
+  background:
+    radial-gradient(
+      ellipse at bottom left,
+      rgba(210, 27, 27, 0.12) 0%,
+      transparent 60%
+    ),
+    rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glow-t-left {
+  background:
+    radial-gradient(
+      ellipse at top left,
+      rgba(210, 27, 27, 0.12) 0%,
+      transparent 60%
+    ),
+    rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glow-t-right {
+  background:
+    radial-gradient(
+      ellipse at top right,
+      rgba(210, 27, 27, 0.12) 0%,
+      transparent 60%
+    ),
+    rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .signal-card {

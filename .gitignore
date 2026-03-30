@@ -41,6 +41,9 @@ CLAUDE.md
 AGENTS.md
 .claude/
 
+# project planning (local only)
+project.md
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
