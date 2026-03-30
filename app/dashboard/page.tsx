@@ -29,7 +29,7 @@ export default function DashboardPage() {
               <p className="text-2xl font-bold text-white leading-none">0</p>
             </div>
           </div>
-          <div className="flex-1 flex items-center gap-4 px-5 py-4 rounded-xl glass-red border border-white/5 glow-t-right">
+          <div className="flex-1 flex items-center gap-4 px-5 py-4 rounded-xl glass-red border border-white/5">
             <Radio size={18} className="text-sparrow-red shrink-0" />
             <div>
               <p className="text-[10px] text-white/40 uppercase tracking-widest leading-none mb-1.5">
@@ -38,7 +38,7 @@ export default function DashboardPage() {
               <p className="text-2xl font-bold text-white leading-none">0</p>
             </div>
           </div>
-          <div className="flex-1 flex items-center gap-4 px-5 py-4 rounded-xl glass-red border border-white/5 glow-top">
+          <div className="flex-1 flex items-center gap-4 px-5 py-4 rounded-xl glass-red border border-white/5">
             <Tag size={18} className="text-sparrow-red shrink-0" />
             <div>
               <p className="text-[10px] text-white/40 uppercase tracking-widest leading-none mb-1.5">
@@ -64,7 +64,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col justify-between px-5 py-4 rounded-xl glass-red border border-white/5 glow-t-left">
+        <div className="flex-1 flex flex-col justify-between px-5 py-4 rounded-xl glass-red border border-white/5 glow-down">
           <div>
             <p className="text-sm font-medium text-white/50">Last scanned</p>
             <p className="text-xs text-white/20 mt-0.5">Never</p>

@@ -48,7 +48,7 @@ export default function DashboardShell({
 
           <div className="w-px h-6 bg-white/10 mx-2" />
 
-          <div className="flex items-center gap-3 px-5 py-2.5 rounded-xl glass-red">
+          <div className="flex items-center gap-3 px-5 py-2.5 rounded-md glass-red glow-top">
             <p className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">
               Signals
             </p>
@@ -68,9 +68,9 @@ export default function DashboardShell({
           </button>
           <Link
             href="/dashboard/hunt"
-            className="flex items-center gap-2 px-4 py-1.5 bg-sparrow-red hover:bg-sparrow-bright text-white text-sm font-semibold rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 bg-sparrow-red hover:bg-sparrow-bright text-white text-md font-semibold rounded-lg transition-colors"
           >
-            <Target size={14} />
+            <Target size={15} />
             Hunt
           </Link>
         </header>
