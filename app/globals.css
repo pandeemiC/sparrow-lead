@@ -90,9 +90,14 @@ body {
 .glow-right {
   background:
     radial-gradient(
-      ellipse at right,
-      rgba(210, 27, 27, 0.12) 0%,
-      transparent 60%
+      ellipse at bottom right,
+      rgba(210, 27, 27, 0.1) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at top right,
+      rgba(210, 27, 27, 0.1) 0%,
+      transparent 55%
     ),
     rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(12px);
@@ -102,9 +107,14 @@ body {
 .glow-left {
   background:
     radial-gradient(
-      ellipse at left,
-      rgba(210, 27, 27, 0.12) 0%,
-      transparent 60%
+      ellipse at top left,
+      rgba(210, 27, 27, 0.1) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at bottom left,
+      rgba(210, 27, 27, 0.1) 0%,
+      transparent 55%
     ),
     rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(12px);
