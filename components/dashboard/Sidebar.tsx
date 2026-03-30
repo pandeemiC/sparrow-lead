@@ -22,9 +22,12 @@ type UserData = {
 export default function Sidebar({ user }: { user: UserData }) {
   const pathname = usePathname();
 
+  const activeClass = "nav-active";
+  const inactiveClass = "text-white/40 hover:text-white hover:bg-white/5";
+
   return (
-    <aside className="w-50 flex flex-col h-full bg-[#0d0d0d] border-r border-white/5 shrink-0">
-      <div className="flex items-center gap-1 px-4 h-16 border-b border-white/5 shrink-0">
+    <aside className="w-50 flex flex-col h-full bg-sparrow-base shrink-0">
+      <div className="flex items-center gap-1 px-4 h-16 shrink-0">
         <Image
           src={sparrowLogo}
           alt="Sparrow"
@@ -36,6 +39,7 @@ export default function Sidebar({ user }: { user: UserData }) {
           Sparrow
         </span>
       </div>
+
       <nav className="flex-1 py-5 space-y-3 px-2">
         {navItems.map(({ label, href, icon: Icon }) => {
           const active = pathname === href;
@@ -43,11 +47,7 @@ export default function Sidebar({ user }: { user: UserData }) {
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-3 px-3 py-4 rounded-lg transition-all ${
-                active
-                  ? "bg-linear-to-t from-sparrow-red/20 via-sparrow-red/6 to-transparent text-white shadow-[0_8px_20px_rgba(204,0,0,0.18)]"
-                  : "text-white/40 hover:text-white hover:bg-white/5"
-              }`}
+              className={`flex items-center gap-3 pl-5 pr-3 py-4 rounded-lg transition-all ${active ? activeClass : inactiveClass}`}
             >
               <Icon
                 size={18}
@@ -59,17 +59,24 @@ export default function Sidebar({ user }: { user: UserData }) {
             </Link>
           );
         })}
+
         <Link
           href="/dashboard/settings"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/40 hover:text-white hover:bg-white/5 transition-all"
+          className={`flex items-center gap-3 pl-5 pr-3 py-4 rounded-lg transition-all ${
+            pathname === "/dashboard/settings" ? activeClass : inactiveClass
+          }`}
         >
-          <Settings size={18} className="shrink-0" />
+          <Settings
+            size={18}
+            className={`shrink-0 ${pathname === "/dashboard/settings" ? "text-sparrow-red" : ""}`}
+          />
           <span className="text-sm font-medium whitespace-nowrap">
             Settings
           </span>
         </Link>
       </nav>
-      <div className="py-4 px-2 border-t border-white/5 flex items-center justify-center gap-5 text-white/40 py-7">
+
+      <div className="py-6 px-2 flex items-center justify-center gap-5 text-white/40">
         <a href="#" className="hover:text-white transition-colors">
           <SiDiscord size={18} />
         </a>

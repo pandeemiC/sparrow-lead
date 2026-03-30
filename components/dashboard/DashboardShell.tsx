@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { Bell, Search, Target } from "lucide-react";
-import Sidebar from "./Sidebar";
 import Image from "next/image";
+import Sidebar from "./Sidebar";
 
 type UserData = {
   name: string;
@@ -19,35 +19,42 @@ export default function DashboardShell({
   user: UserData;
 }) {
   return (
-    <div className="flex h-screen bg-[#0a0a0a] overflow-hidden">
+    <div className="flex h-screen bg-sparrow-base overflow-hidden">
       <Sidebar user={user} />
       <div className="flex flex-col flex-1 overflow-hidden">
-        <header className="flex items-center h-16 shrink-0 px-6 border-b border-white/5 gap-4">
+        <header className="flex items-center h-16 shrink-0 px-6 gap-4">
           {user.imageUrl ? (
             <Image
               src={user.imageUrl}
               alt={user.name}
-              width={32}
-              height={32}
+              width={34}
+              height={34}
               className="rounded-full ring-1 ring-white/10 shrink-0"
             />
           ) : (
-            <div className="w-7 h-7 rounded-full bg-sparrow-red/30 flex items-center justify-center shrink-0 text-white text-xs font-bold">
+            <div className="w-8 h-8 rounded-full bg-sparrow-red/30 flex items-center justify-center shrink-0 text-white text-xs font-bold">
               {user.name.charAt(0).toUpperCase()}
             </div>
           )}
-          <div className="flex items-center gap-4 px-5 py-2 rounded-xl bg-white/3 border border-white/6">
-            <div>
-              <p className="text-[11px] text-white/40 uppercase tracking-wider leading-none mb-1">
-                Signals
-              </p>
-              <div className="flex items-baseline gap-2">
-                <span className="text-lg font-bold text-white leading-none">
-                  0
-                </span>
-                <span className="text-xs text-white/25">0%</span>
-              </div>
-            </div>
+
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-white leading-tight truncate">
+              {user.name}
+            </p>
+            <p className="text-xs text-white/35 leading-tight truncate mt-0.5">
+              {user.email}
+            </p>
+          </div>
+
+          <div className="w-px h-6 bg-white/10 mx-2" />
+
+          <div className="flex items-center gap-3 px-5 py-2.5 rounded-xl glass-red">
+            <p className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">
+              Signals
+            </p>
+            <span className="text-2xl font-bold text-white leading-none">
+              0
+            </span>
           </div>
 
           <div className="flex-1" />
@@ -68,7 +75,7 @@ export default function DashboardShell({
           </Link>
         </header>
 
-        <main className="flex-1 bg-[#111111] rounded-tl-2xl overflow-y-auto">
+        <main className="flex-1 bg-sparrow-base rounded-tl-2xl overflow-y-auto">
           {children}
         </main>
       </div>
