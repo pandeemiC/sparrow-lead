@@ -6,7 +6,7 @@ export default function DashboardPage() {
   return (
     <div className="p-5 h-full flex gap-4">
       <div className="flex flex-col flex-6 gap-4 min-h-0">
-        <div className="flex-1 rounded-xl glass-red border border-white/5 p-5 flex flex-col min-h-0 basis-1/2">
+        <div className="flex-1 rounded-xl glass-red border border-white/5 p-5 flex flex-col glow-b-right min-h-0 basis-1/2">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-sm font-semibold text-white">Recent Signals</h2>
             <Radio size={14} className="text-white/20" />

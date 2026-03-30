@@ -70,49 +70,63 @@ body {
 
 .nav-active {
   background:
-    radial-gradient(
-      ellipse at bottom right,
-      rgba(210, 27, 27, 0.002) 0%,
-      transparent 70%
-    ),
-    rgba(255, 255, 255, 0.01);
-  backdrop-filter: blur(60px);
-  -webkit-backdrop-filter: blur(120px);
+    radial-gradient(ellipse at bottom right, rgba(210, 27, 27, 0.35) 0%, transparent 70%),
+    rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: white;
+}
+
+.glass-red {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .glow-right {
   background:
-    radial-gradient(
-      ellipse at right,
-      rgba(210, 27, 27, 0.55) 0%,
-      transparent 65%
-    ),
-    rgba(251, 6, 6, 0.053);
+    radial-gradient(ellipse at right, rgba(210, 27, 27, 0.12) 0%, transparent 60%),
+    rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
 
 .glow-left {
   background:
-    radial-gradient(
-      ellipse at left,
-      rgba(210, 27, 27, 0.55) 0%,
-      transparent 65%
-    ),
-    rgba(251, 6, 6, 0.053);
+    radial-gradient(ellipse at left, rgba(210, 27, 27, 0.12) 0%, transparent 60%),
+    rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
 
 .glow-b-right {
   background:
-    radial-gradient(
-      ellipse at bottom right,
-      rgba(210, 27, 27, 0.55) 0%,
-      transparent 65%
-    ),
-    rgba(251, 6, 6, 0.053);
+    radial-gradient(ellipse at bottom right, rgba(210, 27, 27, 0.12) 0%, transparent 60%),
+    rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glow-top {
+  background:
+    radial-gradient(ellipse at top, rgba(210, 27, 27, 0.12) 0%, transparent 60%),
+    rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glow-down {
+  background:
+    radial-gradient(ellipse at bottom, rgba(210, 27, 27, 0.12) 0%, transparent 60%),
+    rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glow-b-left {
+  background:
+    radial-gradient(ellipse at bottom left, rgba(210, 27, 27, 0.12) 0%, transparent 60%),
+    rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
