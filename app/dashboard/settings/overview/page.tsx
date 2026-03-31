@@ -30,7 +30,7 @@ export default function SettingsOverview() {
   const email = user?.emailAddresses[0]?.emailAddress ?? "";
 
   const connectedProviders = (user?.externalAccounts ?? []).map((a) =>
-    a.provider.toLowerCase()
+    a.provider.toLowerCase(),
   );
 
   if (!user) return null;
@@ -58,7 +58,9 @@ export default function SettingsOverview() {
                 </div>
               )}
               <div className="min-w-0 space-y-1">
-                <p className="text-base font-semibold text-white truncate">{name}</p>
+                <p className="text-base font-semibold text-white truncate">
+                  {name}
+                </p>
                 <p className="text-sm text-white/40 truncate">{email}</p>
                 {isOAuthUser && (
                   <div className="flex items-center gap-1.5 pt-1">
@@ -81,7 +83,7 @@ export default function SettingsOverview() {
                 <button
                   key={t.value}
                   onClick={() => setTheme(t.value)}
-                  className={`flex-1 py-3 rounded-lg border text-sm font-medium transition-all ${
+                  className={`flex-1 py-3 cursor-pointer rounded-lg border text-sm font-medium transition-all ${
                     theme === t.value
                       ? "border-white/20 text-white bg-white/5"
                       : "border-white/5 text-white/35 hover:border-white/10 hover:text-white/50"
@@ -101,7 +103,9 @@ export default function SettingsOverview() {
           <div className="flex items-start justify-between gap-3">
             <div className="space-y-1.5">
               <p className="text-base font-semibold text-white">Free</p>
-              <p className="text-sm text-white/35">5 keywords · 100 signals/mo</p>
+              <p className="text-sm text-white/35">
+                5 keywords · 100 signals/mo
+              </p>
             </div>
             <button className="edit-btn">Upgrade</button>
           </div>
@@ -109,8 +113,24 @@ export default function SettingsOverview() {
             <div className="flex-1 flex flex-col items-center gap-3">
               <div className="relative w-28 h-28">
                 <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                  <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="2.5" />
-                  <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(175,4,4,0.5)" strokeWidth="2.5" strokeDasharray="0 94" strokeLinecap="round" />
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="15"
+                    fill="none"
+                    stroke="rgba(255,255,255,0.05)"
+                    strokeWidth="2.5"
+                  />
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="15"
+                    fill="none"
+                    stroke="rgba(175,4,4,0.5)"
+                    strokeWidth="2.5"
+                    strokeDasharray="0 94"
+                    strokeLinecap="round"
+                  />
                 </svg>
                 <span className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-white">
                   0%
@@ -122,8 +142,24 @@ export default function SettingsOverview() {
             <div className="flex-1 flex flex-col items-center gap-3">
               <div className="relative w-28 h-28">
                 <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                  <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="2.5" />
-                  <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(175,4,4,0.5)" strokeWidth="2.5" strokeDasharray="0 94" strokeLinecap="round" />
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="15"
+                    fill="none"
+                    stroke="rgba(255,255,255,0.05)"
+                    strokeWidth="2.5"
+                  />
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="15"
+                    fill="none"
+                    stroke="rgba(175,4,4,0.5)"
+                    strokeWidth="2.5"
+                    strokeDasharray="0 94"
+                    strokeLinecap="round"
+                  />
                 </svg>
                 <span className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-white">
                   0%
