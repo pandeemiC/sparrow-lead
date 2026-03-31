@@ -7,7 +7,9 @@ import {
   Bell,
   ScanLine,
   CreditCard,
-  KeyRound,
+  Shield,
+  BarChart2,
+  User,
 } from "lucide-react";
 
 export const navItems = [
@@ -19,8 +21,10 @@ export const navItems = [
 
 export const settingsItems = [
   { label: "Overview", href: "/dashboard/settings/overview", icon: LayoutList },
-  { label: "Notifications", href: "/dashboard/settings/notifications", icon: Bell },
+  { label: "Account", href: "/dashboard/settings/account", icon: User },
   { label: "Scan Preferences", href: "/dashboard/settings/scan-preferences", icon: ScanLine },
+  { label: "Notifications", href: "/dashboard/settings/notifications", icon: Bell },
+  { label: "Privacy", href: "/dashboard/settings/privacy", icon: Shield },
   { label: "Billing", href: "/dashboard/settings/billing", icon: CreditCard },
-  { label: "API Keys", href: "/dashboard/settings/api-keys", icon: KeyRound },
+  { label: "Usage", href: "/dashboard/settings/usage", icon: BarChart2 },
 ];
