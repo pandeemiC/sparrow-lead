@@ -68,6 +68,18 @@ body {
   }
 }
 
+.edit-btn {
+  @apply text-sm px-4 py-2 rounded-lg border border-white/10 text-white/50 transition-all shrink-0;
+
+  &:hover {
+    @apply text-white border-white/20;
+  }
+}
+
+.select-act {
+  @apply bg-white/5 border border-white/10 text-white text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-white/20 cursor-pointer shrink-0;
+}
+
 .nav-active {
   background:
     radial-gradient(

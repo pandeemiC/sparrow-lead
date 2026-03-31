@@ -17,9 +17,6 @@ export default function SettingsOverview() {
 
   if (!user) return null;
 
-  const editBtn =
-    "text-sm px-4 py-2 rounded-lg border border-white/10 text-white/50 hover:text-white hover:border-white/20 transition-all shrink-0";
-
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-6 gap-4 items-start">
@@ -69,7 +66,7 @@ export default function SettingsOverview() {
                   <p className="text-sm font-medium text-white">Display Name</p>
                   <p className="text-sm text-white/35">{name}</p>
                 </div>
-                <button className={editBtn}>Edit</button>
+                <button className="edit-btn">Edit</button>
               </div>
               <div className="h-px bg-white/5" />
               <div className="flex items-center justify-between">
@@ -79,7 +76,7 @@ export default function SettingsOverview() {
                     {email}
                   </p>
                 </div>
-                {!isOAuthUser && <button className={editBtn}>Change</button>}
+                {!isOAuthUser && <button className="edit-btn">Change</button>}
               </div>
             </div>
           </div>
@@ -96,7 +93,7 @@ export default function SettingsOverview() {
                 5 keywords · 100 signals/mo
               </p>
             </div>
-            <button className={editBtn}>Upgrade</button>
+            <button className="edit-btn">Upgrade</button>
           </div>
           <div className="flex gap-4 pt-10 justify-center">
             <div className="flex-1 flex flex-col items-center gap-3">
@@ -171,7 +168,7 @@ export default function SettingsOverview() {
             <p className="text-sm font-medium text-white">Change Password</p>
             <p className="text-sm text-white/35">••••••••••••</p>
           </div>
-          {!isOAuthUser && <button className={editBtn}>Change</button>}
+          {!isOAuthUser && <button className="edit-btn">Change</button>}
         </div>
       </div>
     </div>
