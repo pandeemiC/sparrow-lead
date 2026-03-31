@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export function Toggle({
   enabled,
@@ -55,10 +55,21 @@ export function Select({
   onChange: (val: string) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
   const selected = options.find((o) => o.value === value);
 
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <div className="relative shrink-0">
+    <div ref={ref} className="relative shrink-0">
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center gap-3 bg-white/5 border border-white/10 text-white text-sm rounded-lg px-3 py-1.5 hover:border-white/20 transition-colors min-w-36"
