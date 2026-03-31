@@ -77,7 +77,11 @@ body {
 }
 
 .select-act {
-  @apply bg-white/5 border border-white/10 text-white text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-white/20 cursor-pointer shrink-0;
+  @apply bg-white/5 border border-white/10 text-white text-sm rounded-lg px-3 py-1.5cursor-pointer shrink-0;
+
+  &:focus {
+    @apply outline-noneborder-white/20;
+  }
 }
 
 .nav-active {
