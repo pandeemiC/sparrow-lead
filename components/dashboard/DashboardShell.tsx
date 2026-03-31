@@ -19,7 +19,7 @@ export default function DashboardShell({
   user: UserData;
 }) {
   return (
-    <div className="flex h-screen bg-neutral-500/10 overflow-hidden">
+    <div className="flex h-screen bg-[#1a1a1a] overflow-hidden">
       <Sidebar />
       <div className="flex flex-col flex-1 overflow-hidden">
         <header className="flex items-center h-16 shrink-0 px-6 gap-4">
@@ -48,13 +48,35 @@ export default function DashboardShell({
 
           <div className="w-px h-6 bg-white/10 mx-2" />
 
-          <div className="flex items-center gap-3 px-5 py-2.5 rounded-md glass-red">
-            <p className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">
-              Signals
-            </p>
-            <span className="text-2xl font-bold text-white leading-none">
-              0
-            </span>
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col gap-1.5 px-4 py-2 rounded-md glass-red border border-white/5 min-w-28">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">
+                  Signals
+                </p>
+                <span className="text-[10px] text-white/25">0 / 100</span>
+              </div>
+              <div className="h-1 rounded-full bg-white/5 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-[rgba(175,4,4,0.6)]"
+                  style={{ width: "0%" }}
+                />
+              </div>
+            </div>
+            <div className="flex flex-col gap-1.5 px-4 py-2 rounded-md glass-red border border-white/5 min-w-28">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">
+                  Keywords
+                </p>
+                <span className="text-[10px] text-white/25">0 / 5</span>
+              </div>
+              <div className="h-1 rounded-full bg-white/5 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-[rgba(175,4,4,0.6)]"
+                  style={{ width: "0%" }}
+                />
+              </div>
+            </div>
           </div>
 
           <div className="flex-1" />

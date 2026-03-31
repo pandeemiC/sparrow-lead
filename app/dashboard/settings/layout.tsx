@@ -14,7 +14,7 @@ export default function SettingsLayout({
 
   return (
     <div className="flex h-full overflow-hidden px-15 min-[1920px]:px-35">
-      <div className="w-60 min-[1920px]:w-70 shrink-0 border-r border-white/5 p-4 pl-5 flex flex-col gap-1">
+      <div className="w-60 min-[1920px]:w-70 shrink-0 border-r border-white/5 p-4 pl-5 flex flex-col gap-1 mt-20">
         <div className="flex items-center gap-2.5 px-3 py-2 mb-2">
           <FaCogs size={18} className="text-white/40" />
           <span className="text-sm font-semibold text-white/40 uppercase tracking-widest">

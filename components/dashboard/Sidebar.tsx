@@ -16,7 +16,7 @@ export default function Sidebar() {
   const isSettingsActive = pathname.startsWith("/dashboard/settings");
 
   return (
-    <aside className="w-50 flex flex-col h-full bg-neutral-800/10 shrink-0">
+    <aside className="w-50 flex flex-col h-full bg-[#1a1a1a] shrink-0">
       <div className="flex items-center gap-1 px-4 h-16 shrink-0">
         <Image
           src={sparrowLogo}
