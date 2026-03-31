@@ -92,7 +92,7 @@ export function Select({
         </svg>
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 z-10 glass-red border border-white/10 rounded-lg overflow-hidden min-w-36 shadow-lg">
+        <div className="absolute right-0 top-full mt-1 z-50 bg-[#1a1a1a] border border-white/10 rounded-lg overflow-hidden min-w-36 shadow-xl">
           {options.map((opt) => (
             <button
               key={opt.value}
