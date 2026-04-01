@@ -20,7 +20,7 @@ export default function KeywordsPage() {
             How Keywords Work
           </h2>
         </div>
-        <div className="flex flex-col gap-5 text-sm text-white/40 leading-relaxed">
+        <div className="flex flex-col gap-5 text-sm text-white/40 leading-relaxed mt-5">
           <div className="flex flex-col gap-1.5">
             <p className="text-xs font-semibold text-white/60 uppercase tracking-widest">
               1. Add a keyword

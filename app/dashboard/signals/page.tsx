@@ -13,8 +13,6 @@ import {
 } from "lucide-react";
 import { FaRedditAlien, FaYCombinator } from "react-icons/fa6";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
 type Platform = "reddit" | "hackernews";
 type SignalType =
   | "seeking_recommendation"
@@ -26,7 +24,7 @@ type SignalType =
 type Signal = {
   id: string;
   platform: Platform;
-  source: string; // e.g. "r/entrepreneur"
+  source: string;
   author: string;
   timeAgo: string;
   keyword: string;
@@ -38,8 +36,6 @@ type Signal = {
   aiType: SignalType | null;
   status: "new" | "hunting" | "dismissed";
 };
-
-// ─── Mock data (replace with TanStack Query + /api/mentions later) ───────────
 
 const MOCK_SIGNALS: Signal[] = [
   {
@@ -101,7 +97,8 @@ const MOCK_SIGNALS: Signal[] = [
     body: "Just getting started tracking customers more seriously. Don't need anything fancy.",
     postUrl: "#",
     aiScore: 5,
-    aiReason: "Early stage, low urgency — unclear timeline and budget, but actively asking.",
+    aiReason:
+      "Early stage, low urgency — unclear timeline and budget, but actively asking.",
     aiType: "question",
     status: "new",
   },
@@ -116,7 +113,8 @@ const MOCK_SIGNALS: Signal[] = [
     body: "Wrote up my experience with Pipedrive, Close, and a couple others. Generally the category feels bloated.",
     postUrl: "#",
     aiScore: 3,
-    aiReason: "Informational post, not an active buyer — reviewing tools, not seeking one.",
+    aiReason:
+      "Informational post, not an active buyer — reviewing tools, not seeking one.",
     aiType: "general",
     status: "new",
   },
@@ -127,7 +125,8 @@ const MOCK_SIGNALS: Signal[] = [
     author: "b2b_founder_kim",
     timeAgo: "4d ago",
     keyword: "better CRM",
-    title: "Switching from Salesforce — need something that doesn't require a consultant",
+    title:
+      "Switching from Salesforce — need something that doesn't require a consultant",
     body: "We're a 15-person B2B SaaS. Salesforce is way too much for us and our admin left. Need something we can self-serve in a day.",
     postUrl: "#",
     aiScore: null,
@@ -136,8 +135,6 @@ const MOCK_SIGNALS: Signal[] = [
     status: "new",
   },
 ];
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const TYPE_LABELS: Record<SignalType, string> = {
   seeking_recommendation: "Seeking Rec",
@@ -191,8 +188,6 @@ function PlatformIcon({ platform }: { platform: Platform }) {
   return <FaYCombinator size={13} className="text-orange-400 shrink-0" />;
 }
 
-// ─── Signal Card ─────────────────────────────────────────────────────────────
-
 function SignalCard({ signal }: { signal: Signal }) {
   const [dismissed, setDismissed] = useState(false);
   const [hunting, setHunting] = useState(signal.status === "hunting");
@@ -201,11 +196,12 @@ function SignalCard({ signal }: { signal: Signal }) {
 
   return (
     <div className="signal-card rounded-xl p-5 flex flex-col gap-4">
-      {/* Top row */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2 flex-wrap">
           <PlatformIcon platform={signal.platform} />
-          <span className="text-xs text-white/50 font-medium">{signal.source}</span>
+          <span className="text-xs text-white/50 font-medium">
+            {signal.source}
+          </span>
           <span className="text-white/20 text-xs">·</span>
           <span className="text-xs text-white/30">{signal.timeAgo}</span>
         </div>
@@ -214,13 +210,15 @@ function SignalCard({ signal }: { signal: Signal }) {
         </span>
       </div>
 
-      {/* Title + body */}
       <div>
-        <p className="text-sm font-semibold text-white leading-snug mb-1.5">{signal.title}</p>
-        <p className="text-sm text-white/40 leading-relaxed line-clamp-2">{signal.body}</p>
+        <p className="text-sm font-semibold text-white leading-snug mb-1.5">
+          {signal.title}
+        </p>
+        <p className="text-sm text-white/40 leading-relaxed line-clamp-2">
+          {signal.body}
+        </p>
       </div>
 
-      {/* AI Analysis block */}
       <div className="rounded-lg bg-white/[0.02] border border-white/8 p-3.5 flex flex-col gap-2.5">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 text-white/40">
@@ -244,7 +242,6 @@ function SignalCard({ signal }: { signal: Signal }) {
         )}
       </div>
 
-      {/* Actions */}
       <div className="flex items-center gap-2 flex-wrap">
         <button
           onClick={() => setHunting(true)}
@@ -285,8 +282,6 @@ function SignalCard({ signal }: { signal: Signal }) {
     </div>
   );
 }
-
-// ─── Filter Sidebar ───────────────────────────────────────────────────────────
 
 type Filters = {
   platform: "all" | "reddit" | "hackernews";
@@ -350,8 +345,6 @@ function RadioGroup<T extends string>({
   );
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
-
 export default function SignalsPage() {
   const [filters, setFilters] = useState<Filters>({
     platform: "all",
@@ -363,25 +356,31 @@ export default function SignalsPage() {
   const set = <K extends keyof Filters>(key: K, val: Filters[K]) =>
     setFilters((f) => ({ ...f, [key]: val }));
 
-  // Filter signals (will be server-side via API later)
   const filtered = MOCK_SIGNALS.filter((s) => {
-    if (filters.platform !== "all" && s.platform !== filters.platform) return false;
-    if (filters.type !== "all" && s.aiType !== filters.type) return false;
-    if (filters.intent === "high" && (s.aiScore === null || s.aiScore < 8)) return false;
-    if (filters.intent === "medium" && (s.aiScore === null || s.aiScore < 5 || s.aiScore > 7))
+    if (filters.platform !== "all" && s.platform !== filters.platform)
       return false;
-    if (filters.intent === "low" && (s.aiScore === null || s.aiScore > 4)) return false;
+    if (filters.type !== "all" && s.aiType !== filters.type) return false;
+    if (filters.intent === "high" && (s.aiScore === null || s.aiScore < 8))
+      return false;
+    if (
+      filters.intent === "medium" &&
+      (s.aiScore === null || s.aiScore < 5 || s.aiScore > 7)
+    )
+      return false;
+    if (filters.intent === "low" && (s.aiScore === null || s.aiScore > 4))
+      return false;
     return true;
   }).sort((a, b) => {
     if (filters.sort === "score") return (b.aiScore ?? -1) - (a.aiScore ?? -1);
     return 0;
   });
 
-  const hotCount = MOCK_SIGNALS.filter((s) => s.aiScore !== null && s.aiScore >= 8).length;
+  const hotCount = MOCK_SIGNALS.filter(
+    (s) => s.aiScore !== null && s.aiScore >= 8,
+  ).length;
 
   return (
     <div className="p-5 h-full flex gap-4 min-h-0">
-      {/* ── Filter Sidebar ── */}
       <div className="flex-2 rounded-xl glass-red border border-white/5 p-5 flex flex-col gap-4 min-h-0 overflow-y-auto shrink-0">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-white">Filters</h2>
@@ -443,9 +442,7 @@ export default function SignalsPage() {
         </div>
       </div>
 
-      {/* ── Signal Feed ── */}
       <div className="flex-8 flex flex-col gap-4 min-h-0 min-w-0">
-        {/* Feed header */}
         <div className="rounded-xl glass-red border border-white/5 px-5 py-3.5 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <Radio size={14} className="text-sparrow-red" />
@@ -462,18 +459,23 @@ export default function SignalsPage() {
           )}
         </div>
 
-        {/* Cards */}
         <div className="flex-1 overflow-y-auto min-h-0 flex flex-col gap-3 pr-0.5">
           {filtered.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center py-24">
               <div className="w-12 h-12 rounded-full bg-white/3 flex items-center justify-center">
                 <Radio size={20} className="text-white/15" />
               </div>
-              <p className="text-sm text-white/25">No signals match your filters</p>
-              <p className="text-xs text-white/15">Try adjusting or clearing the filters</p>
+              <p className="text-sm text-white/25">
+                No signals match your filters
+              </p>
+              <p className="text-xs text-white/15">
+                Try adjusting or clearing the filters
+              </p>
             </div>
           ) : (
-            filtered.map((signal) => <SignalCard key={signal.id} signal={signal} />)
+            filtered.map((signal) => (
+              <SignalCard key={signal.id} signal={signal} />
+            ))
           )}
         </div>
       </div>

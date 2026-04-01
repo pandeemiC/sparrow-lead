@@ -65,3 +65,28 @@ export type ScannedPost = {
   post_body: string;
   author: string;
 };
+
+export type SignalPlatform = "reddit" | "hackernews";
+
+export type SignalType =
+  | "seeking_recommendation"
+  | "pain_point"
+  | "competitor_complaint"
+  | "question"
+  | "general";
+
+export type Signal = {
+  id: string;
+  platform: SignalPlatform;
+  source: string;
+  author: string;
+  timeAgo: string;
+  keyword: string;
+  title: string;
+  body: string;
+  postUrl: string;
+  aiScore: number | null;
+  aiReason: string | null;
+  aiType: SignalType | null;
+  status: "new" | "hunting" | "dismissed";
+};
