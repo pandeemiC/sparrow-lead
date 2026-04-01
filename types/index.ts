@@ -91,6 +91,13 @@ export type Signal = {
   status: "new" | "hunting" | "dismissed";
 };
 
+export type SignalFilters = {
+  platform: "all" | "reddit" | "hackernews";
+  intent: "all" | "high" | "medium" | "low";
+  sort: "score" | "newest" | "oldest";
+  type: "all" | SignalType;
+};
+
 export type HuntStatus = "hunting" | "interested" | "replied" | "won";
 
 export type Lead = {

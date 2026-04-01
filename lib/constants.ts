@@ -11,7 +11,7 @@ import {
   BarChart2,
   User,
 } from "lucide-react";
-import type { Signal, SignalType, HuntStatus } from "@/types";
+import type { Signal, SignalType, HuntStatus, Lead } from "@/types";
 
 export const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -153,10 +153,72 @@ export const settingsItems = [
   { label: "Usage", href: "/dashboard/settings/usage", icon: BarChart2 },
 ];
 
-export const HUNT_COLUMNS: { id: HuntStatus; label: string; color: string }[] =
-  [
-    { id: "hunting", label: "New", color: "text-white/50" },
-    { id: "interested", label: "Interested", color: "text-blue-400" },
-    { id: "replied", label: "Replied", color: "text-amber-400" },
-    { id: "won", label: "Won", color: "text-emerald-400" },
-  ];
+export const HUNT_COLUMNS: { id: HuntStatus; label: string; color: string }[] = [
+  { id: "hunting",    label: "New",        color: "text-white/50" },
+  { id: "interested", label: "Interested", color: "text-blue-400" },
+  { id: "replied",    label: "Replied",    color: "text-amber-400" },
+  { id: "won",        label: "Won",        color: "text-emerald-400" },
+];
+
+export const MOCK_LEADS: Lead[] = [
+  {
+    id: "l1",
+    platform: "reddit",
+    source: "r/entrepreneur",
+    keyword: "better CRM",
+    timeAgo: "3h ago",
+    title: "Looking for a CRM that won't break the bank",
+    aiScore: 9,
+    aiReason: "Actively switching CRMs due to cost — strong buyer intent, team size mentioned.",
+    status: "hunting",
+    notes: null,
+  },
+  {
+    id: "l2",
+    platform: "hackernews",
+    source: "HN",
+    keyword: "lead tracking",
+    timeAgo: "6h ago",
+    title: "Ask HN: How are indie hackers tracking sales leads?",
+    aiScore: 8,
+    aiReason: "Indie hacker actively seeking lightweight CRM, explicit budget constraint.",
+    status: "hunting",
+    notes: null,
+  },
+  {
+    id: "l3",
+    platform: "reddit",
+    source: "r/SaaS",
+    keyword: "outreach tool",
+    timeAgo: "1d ago",
+    title: "Pain with current outreach stack — considering switching",
+    aiScore: 6,
+    aiReason: "Has a problem but hasn't committed to switching — medium intent.",
+    status: "interested",
+    notes: "Replied in thread, waiting for response.",
+  },
+  {
+    id: "l4",
+    platform: "reddit",
+    source: "r/startups",
+    keyword: "better CRM",
+    timeAgo: "4d ago",
+    title: "Switching from Salesforce — need something that doesn't require a consultant",
+    aiScore: 9,
+    aiReason: "B2B SaaS team actively leaving Salesforce, self-serve is key requirement.",
+    status: "replied",
+    notes: "Sent DM with Sparrow link.",
+  },
+  {
+    id: "l5",
+    platform: "hackernews",
+    source: "HN",
+    keyword: "sales pipeline",
+    timeAgo: "5d ago",
+    title: "Ask HN: Best lightweight sales pipeline tool for a solo founder?",
+    aiScore: 8,
+    aiReason: "Solo founder actively seeking, mentioned frustration with existing tools.",
+    status: "won",
+    notes: "Signed up on free plan.",
+  },
+];
