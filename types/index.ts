@@ -90,3 +90,18 @@ export type Signal = {
   aiType: SignalType | null;
   status: "new" | "hunting" | "dismissed";
 };
+
+export type HuntStatus = "hunting" | "interested" | "replied" | "won";
+
+export type Lead = {
+  id: string;
+  title: string;
+  source: string;
+  platform: "reddit" | "hackernews";
+  keyword: string;
+  timeAgo: string;
+  aiScore: number | null;
+  aiReason: string | null;
+  status: HuntStatus;
+  notes: string | null;
+};

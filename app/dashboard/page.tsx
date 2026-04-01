@@ -43,7 +43,9 @@ export default function DashboardPage() {
               <Radio size={18} className="text-white/15" />
             </div>
             <p className="text-sm text-white/25">No signals yet</p>
-            <p className="text-xs text-white/15">Run a scan to start listening</p>
+            <p className="text-xs text-white/15">
+              Run a scan to start listening
+            </p>
           </div>
         </div>
 
@@ -68,7 +70,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="flex flex-col flex-4 gap-4 min-h-0">
-        <div className="flex-1 rounded-xl glass-red border border-white/5 p-5 flex flex-col min-h-0 glow-b-left">
+        <div className="flex-1 rounded-xl glass-red border border-white/5 p-5 flex flex-col min-h-0 glow-t-right">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-sm font-semibold text-white">Hunt Board</h2>
             <Target size={14} className="text-white/20" />
@@ -93,9 +95,7 @@ export default function DashboardPage() {
               <Target size={18} className="text-white/15" />
             </div>
             <p className="text-sm text-white/25">No leads yet</p>
-            <p className="text-xs text-white/15">
-              Signal replies become leads
-            </p>
+            <p className="text-xs text-white/15">Signal replies become leads</p>
           </div>
         </div>
 
@@ -111,10 +111,17 @@ export default function DashboardPage() {
             <div className="flex items-center gap-3">
               {sources.map(({ label, icon: Icon, active }) => (
                 <div key={label} className="flex items-center gap-1.5">
-                  <Icon size={13} className={active ? "text-white/40" : "text-white/15"} />
+                  <Icon
+                    size={13}
+                    className={active ? "text-white/40" : "text-white/15"}
+                  />
                   <Circle
                     size={5}
-                    className={active ? "fill-green-400 text-green-400" : "fill-white/20 text-white/20"}
+                    className={
+                      active
+                        ? "fill-green-400 text-green-400"
+                        : "fill-white/20 text-white/20"
+                    }
                   />
                 </div>
               ))}
