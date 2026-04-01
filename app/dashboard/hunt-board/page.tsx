@@ -123,6 +123,8 @@ function LeadCard({
           <p className="text-white/40 leading-relaxed">{lead.notes}</p>
         </div>
       )}
+
+      {/* time (past) */}
     </div>
   );
 }
