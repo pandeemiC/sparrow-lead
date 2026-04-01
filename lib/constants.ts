@@ -11,7 +11,7 @@ import {
   BarChart2,
   User,
 } from "lucide-react";
-import type { Signal, SignalType } from "@/types";
+import type { Signal, SignalType, HuntStatus } from "@/types";
 
 export const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -48,7 +48,8 @@ export const MOCK_SIGNALS: Signal[] = [
     body: "We've been on HubSpot for 2 years but the price jumped 40% at renewal. Team is 8 people, we just need pipeline tracking and contact notes. What are you all using these days?",
     postUrl: "#",
     aiScore: 9,
-    aiReason: "Actively switching CRMs due to cost — strong buyer intent, team size mentioned, evaluating alternatives now.",
+    aiReason:
+      "Actively switching CRMs due to cost — strong buyer intent, team size mentioned, evaluating alternatives now.",
     aiType: "competitor_complaint",
     status: "new",
   },
@@ -63,7 +64,8 @@ export const MOCK_SIGNALS: Signal[] = [
     body: "Spreadsheet is getting unwieldy. Tried Notion but it's overkill for what I need. Looking for something lightweight that doesn't cost $80/mo.",
     postUrl: "#",
     aiScore: 8,
-    aiReason: "Indie hacker actively seeking lightweight CRM alternative, explicit budget constraint, comparing options.",
+    aiReason:
+      "Indie hacker actively seeking lightweight CRM alternative, explicit budget constraint, comparing options.",
     aiType: "seeking_recommendation",
     status: "new",
   },
@@ -78,7 +80,8 @@ export const MOCK_SIGNALS: Signal[] = [
     body: "Our SDR team uses 3 different tools to do what should be one workflow. Anyone solved this? Sick of the context switching.",
     postUrl: "#",
     aiScore: 6,
-    aiReason: "Has a problem but hasn't committed to switching — medium intent, operational pain expressed.",
+    aiReason:
+      "Has a problem but hasn't committed to switching — medium intent, operational pain expressed.",
     aiType: "pain_point",
     status: "new",
   },
@@ -93,7 +96,8 @@ export const MOCK_SIGNALS: Signal[] = [
     body: "Just getting started tracking customers more seriously. Don't need anything fancy.",
     postUrl: "#",
     aiScore: 5,
-    aiReason: "Early stage, low urgency — unclear timeline and budget, but actively asking.",
+    aiReason:
+      "Early stage, low urgency — unclear timeline and budget, but actively asking.",
     aiType: "question",
     status: "new",
   },
@@ -108,7 +112,8 @@ export const MOCK_SIGNALS: Signal[] = [
     body: "Wrote up my experience with Pipedrive, Close, and a couple others. Generally the category feels bloated.",
     postUrl: "#",
     aiScore: 3,
-    aiReason: "Informational post, not an active buyer — reviewing tools, not seeking one.",
+    aiReason:
+      "Informational post, not an active buyer — reviewing tools, not seeking one.",
     aiType: "general",
     status: "new",
   },
@@ -119,7 +124,8 @@ export const MOCK_SIGNALS: Signal[] = [
     author: "b2b_founder_kim",
     timeAgo: "4d ago",
     keyword: "better CRM",
-    title: "Switching from Salesforce — need something that doesn't require a consultant",
+    title:
+      "Switching from Salesforce — need something that doesn't require a consultant",
     body: "We're a 15-person B2B SaaS. Salesforce is way too much for us and our admin left. Need something we can self-serve in a day.",
     postUrl: "#",
     aiScore: null,
@@ -132,9 +138,25 @@ export const MOCK_SIGNALS: Signal[] = [
 export const settingsItems = [
   { label: "Overview", href: "/dashboard/settings/overview", icon: LayoutList },
   { label: "Account", href: "/dashboard/settings/account", icon: User },
-  { label: "Scan Preferences", href: "/dashboard/settings/scan-preferences", icon: ScanLine },
-  { label: "Notifications", href: "/dashboard/settings/notifications", icon: Bell },
+  {
+    label: "Scan Preferences",
+    href: "/dashboard/settings/scan-preferences",
+    icon: ScanLine,
+  },
+  {
+    label: "Notifications",
+    href: "/dashboard/settings/notifications",
+    icon: Bell,
+  },
   { label: "Privacy", href: "/dashboard/settings/privacy", icon: Shield },
   { label: "Billing", href: "/dashboard/settings/billing", icon: CreditCard },
   { label: "Usage", href: "/dashboard/settings/usage", icon: BarChart2 },
 ];
+
+export const HUNT_COLUMNS: { id: HuntStatus; label: string; color: string }[] =
+  [
+    { id: "hunting", label: "New", color: "text-white/50" },
+    { id: "interested", label: "Interested", color: "text-blue-400" },
+    { id: "replied", label: "Replied", color: "text-amber-400" },
+    { id: "won", label: "Won", color: "text-emerald-400" },
+  ];
