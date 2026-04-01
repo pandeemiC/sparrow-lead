@@ -15,6 +15,7 @@ import type { Lead, HuntStatus } from "@/types";
 import { MOCK_LEADS, HUNT_COLUMNS } from "@/lib/constants";
 
 const COLUMN_ORDER: HuntStatus[] = ["hunting", "interested", "replied", "won"];
+
 function scoreVariant(
   score: number | null,
 ): "hot" | "warm" | "cold" | "unscored" {
