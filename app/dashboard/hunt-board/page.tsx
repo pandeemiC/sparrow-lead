@@ -97,7 +97,6 @@ function LeadCard({
         </div>
       </div>
 
-      {/* title row */}
       <p className="text-sm font-semibold text-white leading-snug">
         {lead.title}
       </p>
@@ -124,7 +123,52 @@ function LeadCard({
         </div>
       )}
 
-      {/* time (past) */}
+      <div className="flex items-center justify-between gap-2 pt-1">
+        <span className="text-[10px] text-white/20">{lead.timeAgo}</span>
+        <div className="flex items-center gap-1.5">
+          {prev && (
+            <button
+              onClick={() => onMove(lead.id, prev)}
+              className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold text-white/30 hover:text-white/60 border border-white/8 hover:border-white/20 transition-colors"
+            >
+              <ChevronLeft size={10} /> Back
+            </button>
+          )}
+          {next && (
+            <button
+              onClick={() => onMove(lead.id, next)}
+              className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold bg-white/5 text-white/60 border border-white/10 hover:bg-white/8 hover:text-white hover:border-white/20 transition-colors"
+            >
+              {nextLabel} <ChevronRight size={10} />
+            </button>
+          )}
+          {!next && (
+            <span className="text-[10px] px-2 py-1 rounded-md font-semibold text-emerald-400 border border-emerald-500/10">
+              Closed
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function KanbanColumn({
+  id,
+  label,
+  color,
+  leads,
+  onMove,
+}: {
+  id: HuntStatus;
+  label: string;
+  color: string;
+  leads: Lead[];
+  onMove: (id: string, status: HuntStatus) => void;
+}) {
+  return (
+    <div>
+      <div>header</div>
     </div>
   );
 }
