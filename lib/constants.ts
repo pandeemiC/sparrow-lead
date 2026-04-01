@@ -20,6 +20,14 @@ export const navItems = [
   { label: "Hunt Board", href: "/dashboard/hunt-board", icon: Target },
 ];
 
+export const SIGNAL_TYPE_TAG_CLASS: Record<SignalType, string> = {
+  seeking_recommendation: "type-tag-seeking",
+  pain_point: "type-tag-pain",
+  competitor_complaint: "type-tag-competitor",
+  question: "type-tag-question",
+  general: "type-tag-general",
+};
+
 export const SIGNAL_TYPE_LABELS: Record<SignalType, string> = {
   seeking_recommendation: "Seeking Rec",
   pain_point: "Pain Point",

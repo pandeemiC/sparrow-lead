@@ -14,33 +14,42 @@ import { FaRedditAlien, FaYCombinator } from "react-icons/fa6";
 import Fire from "@/public/animations/fire.json";
 import Lottie from "lottie-react";
 import type { Signal, SignalType } from "@/types";
-import { MOCK_SIGNALS, SIGNAL_TYPE_LABELS } from "@/lib/constants";
+import { MOCK_SIGNALS, SIGNAL_TYPE_LABELS, SIGNAL_TYPE_TAG_CLASS } from "@/lib/constants";
+
+function scoreVariant(score: number | null): "hot" | "warm" | "cold" | "unscored" {
+  if (score === null) return "unscored";
+  if (score >= 8) return "hot";
+  if (score >= 5) return "warm";
+  return "cold";
+}
 
 function ScoreBadge({ score }: { score: number | null }) {
-  if (score === null) {
+  const variant = scoreVariant(score);
+
+  if (variant === "unscored") {
     return (
-      <span className="animate-pulse inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border bg-white/5 text-white/20 border-white/10">
+      <span className="animate-pulse inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border badge-cold">
         <span className="w-12 h-2 rounded bg-white/10" />
       </span>
     );
   }
-  if (score >= 8) {
+  if (variant === "hot") {
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border bg-[rgba(175,4,4,0.3)] text-red-300 border-red-500/30">
-        <Lottie animationData={Fire} loop style={{ width: 16, height: 16 }} />
+      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border badge-hot">
+        <Lottie animationData={Fire} loop style={{ width: 16, height: 16, marginBottom: "0.3rem" }} />
         {score}/10 HOT
       </span>
     );
   }
-  if (score >= 5) {
+  if (variant === "warm") {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border bg-[rgba(180,120,0,0.2)] text-amber-300 border-amber-500/30">
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border badge-warm">
         {score}/10 WARM
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border bg-white/5 text-white/30 border-white/10">
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border badge-cold">
       {score}/10 COLD
     </span>
   );
@@ -48,36 +57,45 @@ function ScoreBadge({ score }: { score: number | null }) {
 
 function TypeTag({ type }: { type: SignalType }) {
   return (
-    <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-medium bg-white/5 text-white/40 border border-white/8">
+    <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-medium border ${SIGNAL_TYPE_TAG_CLASS[type]}`}>
       {SIGNAL_TYPE_LABELS[type]}
     </span>
   );
 }
 
-function PlatformIcon({ platform }: { platform: Signal["platform"] }) {
-  if (platform === "reddit")
-    return <FaRedditAlien size={13} className="text-orange-500 shrink-0" />;
-  return <FaYCombinator size={13} className="text-orange-400 shrink-0" />;
+function PlatformPill({ platform, source }: { platform: Signal["platform"]; source: string }) {
+  if (platform === "reddit") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-xs font-medium text-orange-400 platform-pill-reddit">
+        <FaRedditAlien size={11} />
+        {source}
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-xs font-medium text-orange-300 platform-pill-hn">
+      <FaYCombinator size={11} />
+      {source}
+    </span>
+  );
 }
 
 function SignalCard({ signal }: { signal: Signal }) {
   const [dismissed, setDismissed] = useState(false);
   const [hunting, setHunting] = useState(signal.status === "hunting");
+  const variant = scoreVariant(signal.aiScore);
 
   if (dismissed) return null;
 
   return (
-    <div className="signal-card rounded-xl p-5 flex flex-col gap-4">
+    <div className={`signal-card signal-card-${variant} rounded-xl p-5 flex flex-col gap-4`}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2 flex-wrap">
-          <PlatformIcon platform={signal.platform} />
-          <span className="text-xs text-white/50 font-medium">
-            {signal.source}
-          </span>
+          <PlatformPill platform={signal.platform} source={signal.source} />
           <span className="text-white/20 text-xs">·</span>
           <span className="text-xs text-white/30">{signal.timeAgo}</span>
         </div>
-        <span className="shrink-0 text-[10px] px-2 py-0.5 rounded-md bg-white/5 border border-white/8 text-white/40 font-medium">
+        <span className="shrink-0 text-[10px] px-2 py-0.5 rounded-md border keyword-tag font-medium">
           {signal.keyword}
         </span>
       </div>
@@ -91,7 +109,7 @@ function SignalCard({ signal }: { signal: Signal }) {
         </p>
       </div>
 
-      <div className="rounded-lg bg-white/[0.02] border border-white/8 p-3.5 flex flex-col gap-2.5">
+      <div className={`rounded-lg border p-3.5 flex flex-col gap-2.5 ai-block-${variant === "unscored" ? "cold" : variant}`}>
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 text-white/40">
             <Sparkles size={12} className="text-sparrow-red" />
@@ -325,7 +343,7 @@ export default function SignalsPage() {
           </div>
           {hotCount > 0 && (
             <div className="flex items-center gap-1 text-red-300 text-xs font-semibold">
-              <Lottie animationData={Fire} loop style={{ width: 16, height: 16 }} />
+              <Lottie animationData={Fire} loop style={{ width: 16, height: 16, marginBottom: "0.3rem" }} />
               {hotCount} hot lead{hotCount !== 1 ? "s" : ""}
             </div>
           )}
