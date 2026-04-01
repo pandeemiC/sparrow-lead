@@ -14,9 +14,15 @@ import { FaRedditAlien, FaYCombinator } from "react-icons/fa6";
 import Fire from "@/public/animations/fire.json";
 import Lottie from "lottie-react";
 import type { Signal, SignalType } from "@/types";
-import { MOCK_SIGNALS, SIGNAL_TYPE_LABELS, SIGNAL_TYPE_TAG_CLASS } from "@/lib/constants";
+import {
+  MOCK_SIGNALS,
+  SIGNAL_TYPE_LABELS,
+  SIGNAL_TYPE_TAG_CLASS,
+} from "@/lib/constants";
 
-function scoreVariant(score: number | null): "hot" | "warm" | "cold" | "unscored" {
+function scoreVariant(
+  score: number | null,
+): "hot" | "warm" | "cold" | "unscored" {
   if (score === null) return "unscored";
   if (score >= 8) return "hot";
   if (score >= 5) return "warm";
@@ -36,7 +42,11 @@ function ScoreBadge({ score }: { score: number | null }) {
   if (variant === "hot") {
     return (
       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border badge-hot">
-        <Lottie animationData={Fire} loop style={{ width: 16, height: 16, marginBottom: "0.3rem" }} />
+        <Lottie
+          animationData={Fire}
+          loop
+          style={{ width: 16, height: 16, marginBottom: "0.3rem" }}
+        />
         {score}/10 HOT
       </span>
     );
@@ -57,13 +67,21 @@ function ScoreBadge({ score }: { score: number | null }) {
 
 function TypeTag({ type }: { type: SignalType }) {
   return (
-    <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-medium border ${SIGNAL_TYPE_TAG_CLASS[type]}`}>
+    <span
+      className={`inline-flex px-2 py-0.5 rounded text-[10px] font-medium border ${SIGNAL_TYPE_TAG_CLASS[type]}`}
+    >
       {SIGNAL_TYPE_LABELS[type]}
     </span>
   );
 }
 
-function PlatformPill({ platform, source }: { platform: Signal["platform"]; source: string }) {
+function PlatformPill({
+  platform,
+  source,
+}: {
+  platform: Signal["platform"];
+  source: string;
+}) {
   if (platform === "reddit") {
     return (
       <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-xs font-medium text-orange-400 platform-pill-reddit">
@@ -88,7 +106,9 @@ function SignalCard({ signal }: { signal: Signal }) {
   if (dismissed) return null;
 
   return (
-    <div className={`signal-card signal-card-${variant} rounded-xl p-5 flex flex-col gap-4`}>
+    <div
+      className={`signal-card signal-card-${variant} rounded-xl p-5 flex flex-col gap-4`}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2 flex-wrap">
           <PlatformPill platform={signal.platform} source={signal.source} />
@@ -109,7 +129,9 @@ function SignalCard({ signal }: { signal: Signal }) {
         </p>
       </div>
 
-      <div className={`rounded-lg border p-3.5 flex flex-col gap-2.5 ai-block-${variant === "unscored" ? "cold" : variant}`}>
+      <div
+        className={`rounded-lg border p-3.5 flex flex-col gap-2.5 ai-block-${variant === "unscored" ? "cold" : variant}`}
+      >
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 text-white/40">
             <Sparkles size={12} className="text-sparrow-red" />
@@ -271,7 +293,7 @@ export default function SignalsPage() {
 
   return (
     <div className="p-5 h-full flex gap-4 min-h-0">
-      <div className="flex-2 rounded-xl glass-red border border-white/5 p-5 flex flex-col gap-4 min-h-0 overflow-y-auto shrink-0">
+      <div className="w-70 rounded-xl glass-red border border-white/5 p-5 flex flex-col gap-4 min-h-0 overflow-y-auto shrink-0">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-white">Filters</h2>
           <SlidersHorizontal size={14} className="text-white/20" />
@@ -343,7 +365,11 @@ export default function SignalsPage() {
           </div>
           {hotCount > 0 && (
             <div className="flex items-center gap-1 text-red-300 text-xs font-semibold">
-              <Lottie animationData={Fire} loop style={{ width: 16, height: 16, marginBottom: "0.3rem" }} />
+              <Lottie
+                animationData={Fire}
+                loop
+                style={{ width: 16, height: 16, marginBottom: "0.3rem" }}
+              />
               {hotCount} hot lead{hotCount !== 1 ? "s" : ""}
             </div>
           )}
