@@ -14,9 +14,15 @@ import { FaRedditAlien, FaYCombinator } from "react-icons/fa6";
 import Fire from "@/public/animations/fire.json";
 import Lottie from "lottie-react";
 import type { Signal, SignalType, SignalFilters } from "@/types";
-import { MOCK_SIGNALS, SIGNAL_TYPE_LABELS, SIGNAL_TYPE_TAG_CLASS } from "@/lib/constants";
+import {
+  MOCK_SIGNALS,
+  SIGNAL_TYPE_LABELS,
+  SIGNAL_TYPE_TAG_CLASS,
+} from "@/lib/constants";
 
-function scoreVariant(score: number | null): "hot" | "warm" | "cold" | "unscored" {
+function scoreVariant(
+  score: number | null,
+): "hot" | "warm" | "cold" | "unscored" {
   if (score === null) return "unscored";
   if (score >= 8) return "hot";
   if (score >= 5) return "warm";
@@ -36,7 +42,11 @@ function ScoreBadge({ score }: { score: number | null }) {
   if (variant === "hot") {
     return (
       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border badge-hot">
-        <Lottie animationData={Fire} loop style={{ width: 16, height: 16, marginBottom: "0.3rem" }} />
+        <Lottie
+          animationData={Fire}
+          loop
+          style={{ width: 16, height: 16, marginBottom: "0.3rem" }}
+        />
         {score}/10 HOT
       </span>
     );
@@ -57,13 +67,21 @@ function ScoreBadge({ score }: { score: number | null }) {
 
 function TypeTag({ type }: { type: SignalType }) {
   return (
-    <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-medium border ${SIGNAL_TYPE_TAG_CLASS[type]}`}>
+    <span
+      className={`inline-flex px-2 py-0.5 rounded text-[10px] font-medium border ${SIGNAL_TYPE_TAG_CLASS[type]}`}
+    >
       {SIGNAL_TYPE_LABELS[type]}
     </span>
   );
 }
 
-function PlatformPill({ platform, source }: { platform: Signal["platform"]; source: string }) {
+function PlatformPill({
+  platform,
+  source,
+}: {
+  platform: Signal["platform"];
+  source: string;
+}) {
   if (platform === "reddit") {
     return (
       <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-xs font-medium text-orange-400 platform-pill-reddit">
@@ -80,7 +98,13 @@ function PlatformPill({ platform, source }: { platform: Signal["platform"]; sour
   );
 }
 
-function FilterSection({ label, children }: { label: string; children: React.ReactNode }) {
+function FilterSection({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   const [open, setOpen] = useState(true);
   return (
     <div className="border-b border-white/5 pb-4 last:border-0 last:pb-0">
@@ -137,7 +161,9 @@ function SignalCard({ signal }: { signal: Signal }) {
   if (dismissed) return null;
 
   return (
-    <div className={`signal-card signal-card-${variant} rounded-xl p-5 flex flex-col gap-4`}>
+    <div
+      className={`signal-card signal-card-${variant} rounded-xl p-5 flex flex-col gap-4`}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2 flex-wrap">
           <PlatformPill platform={signal.platform} source={signal.source} />
@@ -150,21 +176,31 @@ function SignalCard({ signal }: { signal: Signal }) {
       </div>
 
       <div>
-        <p className="text-sm font-semibold text-white leading-snug mb-1.5">{signal.title}</p>
-        <p className="text-sm text-white/40 leading-relaxed line-clamp-2">{signal.body}</p>
+        <p className="text-sm font-semibold text-white leading-snug mb-1.5">
+          {signal.title}
+        </p>
+        <p className="text-sm text-white/40 leading-relaxed line-clamp-2">
+          {signal.body}
+        </p>
       </div>
 
-      <div className={`rounded-lg border p-3.5 flex flex-col gap-2.5 ai-block-${variant === "unscored" ? "cold" : variant}`}>
+      <div
+        className={`rounded-lg border p-3.5 flex flex-col gap-2.5 ai-block-${variant === "unscored" ? "cold" : variant}`}
+      >
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 text-white/40">
             <Sparkles size={12} className="text-sparrow-red" />
-            <span className="text-[10px] font-semibold uppercase tracking-widest">AI Analysis</span>
+            <span className="text-[10px] font-semibold uppercase tracking-widest">
+              AI Analysis
+            </span>
           </div>
           <ScoreBadge score={signal.aiScore} />
         </div>
         {signal.aiScore !== null ? (
           <div className="flex items-start gap-2 flex-wrap">
-            <p className="text-xs text-white/55 leading-relaxed flex-1 min-w-0">{signal.aiReason}</p>
+            <p className="text-xs text-white/55 leading-relaxed flex-1 min-w-0">
+              {signal.aiReason}
+            </p>
             {signal.aiType && <TypeTag type={signal.aiType} />}
           </div>
         ) : (
@@ -225,18 +261,27 @@ export default function SignalsPage() {
     setFilters((f) => ({ ...f, [key]: val }));
 
   const filtered = MOCK_SIGNALS.filter((s) => {
-    if (filters.platform !== "all" && s.platform !== filters.platform) return false;
+    if (filters.platform !== "all" && s.platform !== filters.platform)
+      return false;
     if (filters.type !== "all" && s.aiType !== filters.type) return false;
-    if (filters.intent === "high" && (s.aiScore === null || s.aiScore < 8)) return false;
-    if (filters.intent === "medium" && (s.aiScore === null || s.aiScore < 5 || s.aiScore > 7)) return false;
-    if (filters.intent === "low" && (s.aiScore === null || s.aiScore > 4)) return false;
+    if (filters.intent === "high" && (s.aiScore === null || s.aiScore < 8))
+      return false;
+    if (
+      filters.intent === "medium" &&
+      (s.aiScore === null || s.aiScore < 5 || s.aiScore > 7)
+    )
+      return false;
+    if (filters.intent === "low" && (s.aiScore === null || s.aiScore > 4))
+      return false;
     return true;
   }).sort((a, b) => {
     if (filters.sort === "score") return (b.aiScore ?? -1) - (a.aiScore ?? -1);
     return 0;
   });
 
-  const hotCount = MOCK_SIGNALS.filter((s) => s.aiScore !== null && s.aiScore >= 8).length;
+  const hotCount = MOCK_SIGNALS.filter(
+    (s) => s.aiScore !== null && s.aiScore >= 8,
+  ).length;
 
   return (
     <div className="p-5 h-full flex gap-4 min-h-0">
@@ -311,8 +356,12 @@ export default function SignalsPage() {
             </span>
           </div>
           {hotCount > 0 && (
-            <div className="flex items-center gap-1 text-red-300 text-xs font-semibold">
-              <Lottie animationData={Fire} loop style={{ width: 16, height: 16, marginBottom: "0.3rem" }} />
+            <div className="flex items-center gap-1 text-red-300 text-md uppercase font-semibold">
+              <Lottie
+                animationData={Fire}
+                loop
+                style={{ width: 24, height: 24, marginBottom: "0.4rem" }}
+              />
               {hotCount} hot lead{hotCount !== 1 ? "s" : ""}
             </div>
           )}
@@ -324,11 +373,17 @@ export default function SignalsPage() {
               <div className="w-12 h-12 rounded-full bg-white/3 flex items-center justify-center">
                 <Radio size={20} className="text-white/15" />
               </div>
-              <p className="text-sm text-white/25">No signals match your filters</p>
-              <p className="text-xs text-white/15">Try adjusting or clearing the filters</p>
+              <p className="text-sm text-white/25">
+                No signals match your filters
+              </p>
+              <p className="text-xs text-white/15">
+                Try adjusting or clearing the filters
+              </p>
             </div>
           ) : (
-            filtered.map((signal) => <SignalCard key={signal.id} signal={signal} />)
+            filtered.map((signal) => (
+              <SignalCard key={signal.id} signal={signal} />
+            ))
           )}
         </div>
       </div>
