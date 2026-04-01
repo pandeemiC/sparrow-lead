@@ -8,141 +8,13 @@ import {
   XCircle,
   Target,
   SlidersHorizontal,
-  Flame,
   ChevronDown,
 } from "lucide-react";
 import { FaRedditAlien, FaYCombinator } from "react-icons/fa6";
-
-type Platform = "reddit" | "hackernews";
-type SignalType =
-  | "seeking_recommendation"
-  | "pain_point"
-  | "competitor_complaint"
-  | "question"
-  | "general";
-
-type Signal = {
-  id: string;
-  platform: Platform;
-  source: string;
-  author: string;
-  timeAgo: string;
-  keyword: string;
-  title: string;
-  body: string;
-  postUrl: string;
-  aiScore: number | null;
-  aiReason: string | null;
-  aiType: SignalType | null;
-  status: "new" | "hunting" | "dismissed";
-};
-
-const MOCK_SIGNALS: Signal[] = [
-  {
-    id: "1",
-    platform: "reddit",
-    source: "r/entrepreneur",
-    author: "startupfounder_jay",
-    timeAgo: "3h ago",
-    keyword: "better CRM",
-    title: "Looking for a CRM that won't break the bank",
-    body: "We've been on HubSpot for 2 years but the price jumped 40% at renewal. Team is 8 people, we just need pipeline tracking and contact notes. What are you all using these days?",
-    postUrl: "#",
-    aiScore: 9,
-    aiReason:
-      "Actively switching CRMs due to cost — strong buyer intent, team size mentioned, evaluating alternatives now.",
-    aiType: "competitor_complaint",
-    status: "new",
-  },
-  {
-    id: "2",
-    platform: "hackernews",
-    source: "HN",
-    author: "mkonstantinov",
-    timeAgo: "6h ago",
-    keyword: "lead tracking",
-    title: "Ask HN: How are indie hackers tracking sales leads?",
-    body: "Spreadsheet is getting unwieldy. Tried Notion but it's overkill for what I need. Looking for something lightweight that doesn't cost $80/mo.",
-    postUrl: "#",
-    aiScore: 8,
-    aiReason:
-      "Indie hacker actively seeking lightweight CRM alternative, explicit budget constraint, comparing options.",
-    aiType: "seeking_recommendation",
-    status: "new",
-  },
-  {
-    id: "3",
-    platform: "reddit",
-    source: "r/SaaS",
-    author: "growthops99",
-    timeAgo: "1d ago",
-    keyword: "outreach tool",
-    title: "Pain with current outreach stack — considering switching",
-    body: "Our SDR team uses 3 different tools to do what should be one workflow. Anyone solved this? Sick of the context switching.",
-    postUrl: "#",
-    aiScore: 6,
-    aiReason:
-      "Has a problem but hasn't committed to switching — medium intent, operational pain expressed.",
-    aiType: "pain_point",
-    status: "new",
-  },
-  {
-    id: "4",
-    platform: "reddit",
-    source: "r/smallbusiness",
-    author: "local_coffee_ops",
-    timeAgo: "2d ago",
-    keyword: "CRM software",
-    title: "What CRM do you use for a 3-person team?",
-    body: "Just getting started tracking customers more seriously. Don't need anything fancy.",
-    postUrl: "#",
-    aiScore: 5,
-    aiReason:
-      "Early stage, low urgency — unclear timeline and budget, but actively asking.",
-    aiType: "question",
-    status: "new",
-  },
-  {
-    id: "5",
-    platform: "hackernews",
-    source: "HN",
-    author: "dev_lurker",
-    timeAgo: "3d ago",
-    keyword: "sales pipeline",
-    title: "Sales pipeline tools I've tried (thread)",
-    body: "Wrote up my experience with Pipedrive, Close, and a couple others. Generally the category feels bloated.",
-    postUrl: "#",
-    aiScore: 3,
-    aiReason:
-      "Informational post, not an active buyer — reviewing tools, not seeking one.",
-    aiType: "general",
-    status: "new",
-  },
-  {
-    id: "6",
-    platform: "reddit",
-    source: "r/startups",
-    author: "b2b_founder_kim",
-    timeAgo: "4d ago",
-    keyword: "better CRM",
-    title:
-      "Switching from Salesforce — need something that doesn't require a consultant",
-    body: "We're a 15-person B2B SaaS. Salesforce is way too much for us and our admin left. Need something we can self-serve in a day.",
-    postUrl: "#",
-    aiScore: null,
-    aiReason: null,
-    aiType: null,
-    status: "new",
-  },
-];
-
-const TYPE_LABELS: Record<SignalType, string> = {
-  seeking_recommendation: "Seeking Rec",
-  pain_point: "Pain Point",
-  competitor_complaint: "Competitor",
-  question: "Question",
-  general: "General",
-};
+import Fire from "@/public/animations/fire.json";
+import Lottie from "lottie-react";
+import type { Signal, SignalType } from "@/types";
+import { MOCK_SIGNALS, SIGNAL_TYPE_LABELS } from "@/lib/constants";
 
 function ScoreBadge({ score }: { score: number | null }) {
   if (score === null) {
@@ -154,8 +26,8 @@ function ScoreBadge({ score }: { score: number | null }) {
   }
   if (score >= 8) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border bg-[rgba(175,4,4,0.3)] text-red-300 border-red-500/30">
-        <Flame size={10} />
+      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border bg-[rgba(175,4,4,0.3)] text-red-300 border-red-500/30">
+        <Lottie animationData={Fire} loop style={{ width: 16, height: 16 }} />
         {score}/10 HOT
       </span>
     );
@@ -177,12 +49,12 @@ function ScoreBadge({ score }: { score: number | null }) {
 function TypeTag({ type }: { type: SignalType }) {
   return (
     <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-medium bg-white/5 text-white/40 border border-white/8">
-      {TYPE_LABELS[type]}
+      {SIGNAL_TYPE_LABELS[type]}
     </span>
   );
 }
 
-function PlatformIcon({ platform }: { platform: Platform }) {
+function PlatformIcon({ platform }: { platform: Signal["platform"] }) {
   if (platform === "reddit")
     return <FaRedditAlien size={13} className="text-orange-500 shrink-0" />;
   return <FaYCombinator size={13} className="text-orange-400 shrink-0" />;
@@ -452,8 +324,8 @@ export default function SignalsPage() {
             </span>
           </div>
           {hotCount > 0 && (
-            <div className="flex items-center gap-1.5 text-red-300 text-xs font-semibold">
-              <Flame size={12} />
+            <div className="flex items-center gap-1 text-red-300 text-xs font-semibold">
+              <Lottie animationData={Fire} loop style={{ width: 16, height: 16 }} />
               {hotCount} hot lead{hotCount !== 1 ? "s" : ""}
             </div>
           )}
