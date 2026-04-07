@@ -176,6 +176,7 @@ function KanbanColumn({
 export default function HuntBoardPage() {
   return (
     <div>
+      {/* str */}
       <p>Hunt-Board Page</p>
     </div>
   );
