@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Radio,
   Sparkles,
@@ -14,11 +14,7 @@ import { FaRedditAlien, FaYCombinator } from "react-icons/fa6";
 import Fire from "@/public/animations/fire.json";
 import Lottie from "lottie-react";
 import type { Signal, SignalType, SignalFilters } from "@/types";
-import {
-  MOCK_SIGNALS,
-  SIGNAL_TYPE_LABELS,
-  SIGNAL_TYPE_TAG_CLASS,
-} from "@/lib/constants";
+import { SIGNAL_TYPE_LABELS, SIGNAL_TYPE_TAG_CLASS } from "@/lib/constants";
 
 function scoreVariant(
   score: number | null,
@@ -247,6 +243,18 @@ function SignalCard({ signal }: { signal: Signal }) {
       </div>
     </div>
   );
+}
+
+function timeAgo(dateStr: string): string {
+  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  // sec
+  if (diff < 60) return `${diff}s ago`;
+  // mins
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  // hrs
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  // else days
+  return `${Math.floor(diff / 86400)}d ago`;
 }
 
 export default function SignalsPage() {
