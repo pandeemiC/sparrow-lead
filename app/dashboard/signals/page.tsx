@@ -288,32 +288,30 @@ export default function SignalsPage() {
     sort: "score",
     type: "all",
   });
+  const [signals, setSignals] = useState<Signal[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const set = <K extends keyof SignalFilters>(key: K, val: SignalFilters[K]) =>
     setFilters((f) => ({ ...f, [key]: val }));
 
-  const filtered = MOCK_SIGNALS.filter((s) => {
-    if (filters.platform !== "all" && s.platform !== filters.platform)
-      return false;
-    if (filters.type !== "all" && s.aiType !== filters.type) return false;
-    if (filters.intent === "high" && (s.aiScore === null || s.aiScore < 8))
-      return false;
-    if (
-      filters.intent === "medium" &&
-      (s.aiScore === null || s.aiScore < 5 || s.aiScore > 7)
-    )
-      return false;
-    if (filters.intent === "low" && (s.aiScore === null || s.aiScore > 4))
-      return false;
-    return true;
-  }).sort((a, b) => {
-    if (filters.sort === "score") return (b.aiScore ?? -1) - (a.aiScore ?? -1);
-    return 0;
-  });
+  useEffect(() => {
+    const params = new URLSearchParams({
+      platform: filters.platform,
+      intent: filters.intent,
+      type: filters.type,
+      sort: filters.sort,
+    });
 
-  const hotCount = MOCK_SIGNALS.filter(
-    (s) => s.aiScore !== null && s.aiScore >= 8,
-  ).length;
+    (async () => {
+      setLoading(true);
+      const r = await fetch(`/api/mentions?${params}`);
+      const rows = await r.json();
+      setSignals(rows.map(toSignal));
+      setLoading(false);
+    })();
+  }, [filters]);
+
+  const hotCount = signals.filter((s) => s.aiScore !== null && s.aiScore >= 8).length;
 
   return (
     <div className="p-5 h-full flex gap-4 min-h-0">
@@ -384,7 +382,7 @@ export default function SignalsPage() {
             <Radio size={14} className="text-sparrow-red" />
             <h2 className="text-sm font-semibold text-white">Signals Inbox</h2>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/40 font-semibold">
-              {filtered.length} signals
+              {loading ? "—" : `${signals.length} signals`}
             </span>
           </div>
           {hotCount > 0 && (
@@ -400,7 +398,14 @@ export default function SignalsPage() {
         </div>
 
         <div className="flex-1 overflow-y-auto min-h-0 flex flex-col gap-3 pr-0.5">
-          {filtered.length === 0 ? (
+          {loading ? (
+            <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center py-24">
+              <div className="w-12 h-12 rounded-full bg-white/3 flex items-center justify-center">
+                <Radio size={20} className="text-white/15 animate-pulse" />
+              </div>
+              <p className="text-sm text-white/25">Loading signals...</p>
+            </div>
+          ) : signals.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center py-24">
               <div className="w-12 h-12 rounded-full bg-white/3 flex items-center justify-center">
                 <Radio size={20} className="text-white/15" />
@@ -413,7 +418,7 @@ export default function SignalsPage() {
               </p>
             </div>
           ) : (
-            filtered.map((signal) => (
+            signals.map((signal) => (
               <SignalCard key={signal.id} signal={signal} />
             ))
           )}
