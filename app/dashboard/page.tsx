@@ -18,10 +18,10 @@ const stats = [
 ];
 
 const huntColumns = [
-  { label: "New", value: 0 },
+  { label: "Hunting", value: 0 },
   { label: "Interested", value: 0 },
-  { label: "Replied", value: 0 },
-  { label: "Won", value: 0 },
+  { label: "Engaged", value: 0 },
+  { label: "Hunted", value: 0 },
 ];
 
 const sources = [

@@ -28,7 +28,7 @@ export async function GET(req: Request) {
     m.ai_score,
     m.ai_reason,
     m.ai_type,
-    m.ai_suggest_reply,
+    m.ai_suggested_reply,
     m.status,
     m.notes,
     m.created_at,
