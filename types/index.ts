@@ -98,13 +98,14 @@ export type SignalFilters = {
   type: "all" | SignalType;
 };
 
-export type HuntStatus = "hunting" | "interested" | "replied" | "won";
+export type HuntStatus = "hunting" | "interested" | "engaged" | "hunted";
 
 export type Lead = {
   id: string;
   title: string;
   source: string;
   platform: "reddit" | "hackernews";
+  postUrl: string;
   keyword: string;
   timeAgo: string;
   aiScore: number | null;

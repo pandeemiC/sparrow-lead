@@ -14,7 +14,12 @@ import Lottie from "lottie-react";
 import type { Lead, HuntStatus } from "@/types";
 import { MOCK_LEADS, HUNT_COLUMNS } from "@/lib/constants";
 
-const COLUMN_ORDER: HuntStatus[] = ["hunting", "interested", "replied", "won"];
+const COLUMN_ORDER: HuntStatus[] = [
+  "hunting",
+  "interested",
+  "engaged",
+  "hunted",
+];
 
 function scoreVariant(
   score: number | null,
@@ -184,7 +189,9 @@ function KanbanColumn({
             <p className="text-xs text-white/20">No leads here</p>
           </div>
         ) : (
-          leads.map((lead) => <LeadCard key={id} lead={lead} onMove={onMove} />)
+          leads.map((lead) => (
+            <LeadCard key={lead.id} lead={lead} onMove={onMove} />
+          ))
         )}
       </div>
     </div>
@@ -192,9 +199,21 @@ function KanbanColumn({
 }
 
 export default function HuntBoardPage() {
+  const [leads, setLeads] = useState<Lead[]>(MOCK_LEADS);
+
+  function move(id: string, status: HuntStatus) {
+    setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, status } : l)));
+  }
   return (
-    <div>
-      <h1>Hunt-board</h1>
+    <div className="p-5 h-full flex gap-4 min-h-0">
+      {HUNT_COLUMNS.map((col) => (
+        <KanbanColumn
+          key={col.id}
+          {...col}
+          leads={leads.filter((l) => l.status === col.id)}
+          onMove={move}
+        />
+      ))}
     </div>
   );
 }
