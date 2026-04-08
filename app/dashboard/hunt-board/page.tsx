@@ -7,6 +7,7 @@ import {
   ChevronLeft,
   Target,
   StickyNote,
+  ExternalLink,
 } from "lucide-react";
 import { FaRedditAlien, FaYCombinator } from "react-icons/fa6";
 import Fire from "@/public/animations/fire.json";
@@ -75,10 +76,14 @@ function PlatformIcon({ platform }: { platform: Lead["platform"] }) {
 function LeadCard({
   lead,
   onMove,
+  onUpdateNotes,
 }: {
   lead: Lead;
   onMove: (id: string, status: HuntStatus) => void;
+  onUpdateNotes: (id: string, notes: string) => void;
 }) {
+  const [editingNotes, setEditingNotes] = useState(false);
+  const [notesValue, setNotesValue] = useState(lead.notes ?? "");
   const currentIndex = COLUMN_ORDER.indexOf(lead.status);
   const prev = COLUMN_ORDER[currentIndex - 1] as HuntStatus | undefined;
   const next = COLUMN_ORDER[currentIndex + 1] as HuntStatus | undefined;
@@ -121,15 +126,47 @@ function LeadCard({
         </div>
       )}
 
-      {lead.notes && (
-        <div className="flex items-start gap-1.5 px-2.5 py-2 rounded-lg bg-white/3 border border-white/5">
+      {editingNotes ? (
+        <textarea
+          autoFocus
+          value={notesValue}
+          onChange={(e) => setNotesValue(e.target.value)}
+          onBlur={() => {
+            setEditingNotes(false);
+            onUpdateNotes(lead.id, notesValue);
+          }}
+          placeholder="Add a note..."
+          rows={2}
+          className="w-full text-xs text-white/50 bg-white/3 border border-white/10 rounded-lg px-2.5 py-2 resize-none outline-none focus:border-white/20 leading-relaxed placeholder:text-white/20"
+        />
+      ) : (
+        <button
+          onClick={() => setEditingNotes(true)}
+          className="w-full flex items-start gap-1.5 px-2.5 py-2 rounded-lg bg-white/3 border border-white/5 text-left hover:border-white/10 transition-colors"
+        >
           <StickyNote size={10} className="text-white/25 shrink-0 mt-0.5" />
-          <p className="text-white/40 leading-relaxed">{lead.notes}</p>
-        </div>
+          {lead.notes ? (
+            <p className="text-xs text-white/40 leading-relaxed">
+              {lead.notes}
+            </p>
+          ) : (
+            <p className="text-xs text-white/20">Add a note...</p>
+          )}
+        </button>
       )}
 
       <div className="flex items-center justify-between gap-2 pt-1">
-        <span className="text-[10px] text-white/20">{lead.timeAgo}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-white/20">{lead.timeAgo}</span>
+          <a
+            href={lead.postUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 text-[10px] text-white/25 hover:text-white/50 transition-colors"
+          >
+            <ExternalLink size={9} /> View Post
+          </a>
+        </div>
         <div className="flex items-center gap-1.5">
           {prev && (
             <button
@@ -147,11 +184,6 @@ function LeadCard({
               {nextLabel} <ChevronRight size={10} />
             </button>
           )}
-          {!next && (
-            <span className="text-[10px] px-2 py-1 rounded-md font-semibold text-emerald-400 border border-emerald-500/10">
-              Closed
-            </span>
-          )}
         </div>
       </div>
     </div>
@@ -164,12 +196,14 @@ function KanbanColumn({
   color,
   leads,
   onMove,
+  onUpdateNotes,
 }: {
   id: HuntStatus;
   label: string;
   color: string;
   leads: Lead[];
   onMove: (id: string, status: HuntStatus) => void;
+  onUpdateNotes: (id: string, notes: string) => void;
 }) {
   return (
     <div className="flex-1 flex flex-col gap-3 min-h-0">
@@ -190,7 +224,12 @@ function KanbanColumn({
           </div>
         ) : (
           leads.map((lead) => (
-            <LeadCard key={lead.id} lead={lead} onMove={onMove} />
+            <LeadCard
+              key={lead.id}
+              lead={lead}
+              onMove={onMove}
+              onUpdateNotes={onUpdateNotes}
+            />
           ))
         )}
       </div>
@@ -204,6 +243,10 @@ export default function HuntBoardPage() {
   function move(id: string, status: HuntStatus) {
     setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, status } : l)));
   }
+
+  function updateNotes(id: string, notes: string) {
+    setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, notes } : l)));
+  }
   return (
     <div className="p-5 h-full flex gap-4 min-h-0">
       {HUNT_COLUMNS.map((col) => (
@@ -212,6 +255,7 @@ export default function HuntBoardPage() {
           {...col}
           leads={leads.filter((l) => l.status === col.id)}
           onMove={move}
+          onUpdateNotes={updateNotes}
         />
       ))}
     </div>
