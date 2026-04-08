@@ -167,8 +167,26 @@ function KanbanColumn({
   onMove: (id: string, status: HuntStatus) => void;
 }) {
   return (
-    <div>
-      <div>header</div>
+    <div className="flex-1 flex flex-col gap-3 min-h-0">
+      <div className="rounded-xl glass-red border border-white/5 px-4 py-3 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-2">
+          <Target size={13} className={color} />
+          <span className={`text-sm font-semibold ${color}`}>{label}</span>
+        </div>
+        <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/8 text-white/40 font-semibold">
+          {leads.length}
+        </span>
+      </div>
+
+      <div className="flex-1 overflow-y-auto min-h-0 flex flex-col gap-2.5 pr-0.5">
+        {leads.length === 0 ? (
+          <div className="flex-1 flex items-center justify-center py-12 rounded-xl border border-dashed border-white/8">
+            <p className="text-xs text-white/20">No leads here</p>
+          </div>
+        ) : (
+          leads.map((lead) => <LeadCard key={id} lead={lead} onMove={onMove} />)
+        )}
+      </div>
     </div>
   );
 }
@@ -176,7 +194,7 @@ function KanbanColumn({
 export default function HuntBoardPage() {
   return (
     <div>
-      <p>Hunt-Board Page</p>
+      <h1>Hunt-board</h1>
     </div>
   );
 }

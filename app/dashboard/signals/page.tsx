@@ -356,7 +356,7 @@ export default function SignalsPage() {
             </span>
           </div>
           {hotCount > 0 && (
-            <div className="flex items-center gap-1 text-red-300 text-md uppercase font-semibold">
+            <div className="flex items-center gap-1 text-red-300 text-sm uppercase font-semibold">
               <Lottie
                 animationData={Fire}
                 loop
