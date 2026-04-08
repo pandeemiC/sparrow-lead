@@ -257,6 +257,30 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
+function extractSub(platform: string, postUrl: string): string {
+  if (platform !== "reddit") return "HN";
+  const match = postUrl.match(/reddit\.com\/(r\/[^/]+)/);
+  return match ? match[1] : "Reddit";
+}
+
+function toSignal(row: Record<string, unknown>): Signal {
+  return {
+    id: row.id as string,
+    platform: row.platform as Signal["platform"],
+    source: extractSub(row.platform as string, row.post_url as string),
+    author: (row.author as string) ?? "unknown",
+    timeAgo: timeAgo(row.created_at as string),
+    keyword: row.keyword as string,
+    title: (row.post_title as string) ?? "(no title)",
+    body: row.post_body as string,
+    postUrl: row.post_url as string,
+    aiScore: row.ai_score as number | null,
+    aiReason: row.ai_reason as string | null,
+    aiType: row.ai_type as Signal["aiType"],
+    status: (row.status as Signal["status"]) ?? "new",
+  };
+}
+
 export default function SignalsPage() {
   const [filters, setFilters] = useState<SignalFilters>({
     platform: "all",
