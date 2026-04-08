@@ -2,29 +2,39 @@
 
 import { useState, useEffect } from "react";
 import { IoClose } from "react-icons/io5";
+import { Tag, Plus } from "lucide-react";
+import { FaRedditAlien, FaYCombinator } from "react-icons/fa6";
+import { Select } from "@/components/ui/SettingsUI";
 import { Keyword } from "@/types";
 
-const PLATFORMS = ["reddit", "twitter", "hackernews", "linkedin", "youtube"];
+const PLATFORMS = [
+  { label: "Reddit", value: "reddit" },
+  { label: "Hacker News", value: "hackernews" },
+  { label: "Twitter", value: "twitter" },
+  { label: "LinkedIn", value: "linkedin" },
+  { label: "YouTube", value: "youtube" },
+];
 
-export default function KeywordManager({ userId }: { userId: string }) {
+const platformIcon: Record<string, React.ReactNode> = {
+  reddit: <FaRedditAlien className="text-orange-500" size={12} />,
+  hackernews: <FaYCombinator className="text-orange-400" size={12} />,
+};
+
+export default function KeywordManager() {
   const [keywords, setKeywords] = useState<Keyword[]>([]);
   const [newKeyword, setNewKeyword] = useState("");
   const [platform, setPlatform] = useState("reddit");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    async function loadKeywords() {
-      const res = await fetch("/api/keywords");
-      const data = await res.json();
-      setKeywords(data);
-    }
-    loadKeywords();
+    fetch("/api/keywords")
+      .then((r) => r.json())
+      .then(setKeywords);
   }, []);
 
   async function addKeyword(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!newKeyword.trim()) return;
-
     setLoading(true);
     const res = await fetch("/api/keywords", {
       method: "POST",
@@ -47,64 +57,76 @@ export default function KeywordManager({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="space-y-6">
-      <form onSubmit={addKeyword} className="flex gap-3">
+    <div className="flex flex-col gap-5 h-full">
+      <form onSubmit={addKeyword} className="flex flex-col gap-3">
         <input
           type="text"
           onChange={(e) => setNewKeyword(e.target.value)}
-          placeholder="Enter a keyword to track..."
+          placeholder="Add a keyword..."
           value={newKeyword}
-          className="flex-1 bg-white/5 border border-white/10 rounded-lg px-2 py-2 text-white placeholder:text-white/30 focus:outline-none focus:border-sparrow-red"
+          className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-sparrow-red/50 transition-colors"
         />
-
-        <select
-          value={platform}
-          onChange={(e) => setPlatform(e.target.value)}
-          className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-sparrow-red"
-        >
-          {PLATFORMS.map((p) => (
-            <option key={p} value={p} className="bg-neutral-900">
-              {p.charAt(0).toUpperCase() + p.slice(1)}
-            </option>
-          ))}
-        </select>
-        <button
-          type="submit"
-          disabled={loading || !newKeyword.trim()}
-          className="bg-sparrow-red hover:bg-sparrow-bright text-white text-sm font-bold px-5 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? "Adding..." : "Add"}
-        </button>
+        <div className="flex items-center gap-2">
+          <div className="flex-1">
+            <Select
+              value={platform}
+              onChange={setPlatform}
+              options={PLATFORMS}
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={loading || !newKeyword.trim()}
+            className="flex items-center gap-2 bg-sparrow-red hover:bg-sparrow-bright text-white text-sm font-semibold px-4 py-1.5 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shrink-0"
+          >
+            <Plus size={15} />
+            {loading ? "Adding..." : "Add"}
+          </button>
+        </div>
       </form>
 
-      <div className="space-y-2">
-        <h2 className="text-xl font-semibold text-white">Your Keywords</h2>
-        {keywords.length === 0 ? (
-          <p>No keywords yet. Add one above to start hunting.</p>
-        ) : (
-          <div className="grid gap-2">
-            {keywords.map((k) => (
-              <div
-                key={k.id}
-                className="flex items-center justify-between bg-white/5 border border-white/10 rounded-lg px-4 py-3"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-xs bg-white/10 text-white/60 px-2 py-1 rounded">
-                    {k.platform}
-                  </span>
-                  <span className="text-white">{k.keyword}</span>
-                </div>
-                <button
-                  onClick={() => deleteKeyword(k.id)}
-                  className="text-white/30 hover:text-red-500 transition-colors cursor-pointer"
-                >
-                  <IoClose size={16} />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+      <div className="h-px bg-white/5" />
+
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold text-white/40 uppercase tracking-widest">
+          Tracked Keywords
+        </p>
+        <span className="text-xs text-white/25">{keywords.length} / 5</span>
       </div>
+
+      {keywords.length === 0 ? (
+        <div className="flex-1 flex flex-col items-center justify-center gap-2">
+          <div className="w-10 h-10 rounded-full bg-white/3 flex items-center justify-center">
+            <Tag size={18} className="text-white/15" />
+          </div>
+          <p className="text-sm text-white/25">No keywords yet</p>
+          <p className="text-xs text-white/15">Add one above to start tracking</p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2 overflow-y-auto">
+          {keywords.map((k) => (
+            <div
+              key={k.id}
+              className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-white/3 border border-white/5 hover:border-white/10 transition-colors group"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="shrink-0">
+                  {platformIcon[k.platform] ?? (
+                    <Tag size={12} className="text-white/20" />
+                  )}
+                </span>
+                <span className="text-sm text-white truncate">{k.keyword}</span>
+              </div>
+              <button
+                onClick={() => deleteKeyword(k.id)}
+                className="text-white/20 hover:text-red-400 transition-colors shrink-0 opacity-0 group-hover:opacity-100"
+              >
+                <IoClose size={15} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -4,8 +4,8 @@
   --background: #111111;
   --foreground: #ededed;
 
-  --sparrow-base: #111111;
-  --sparrow-mid: #414141;
+  --sparrow-base: #1c1b1be7;
+  --sparrow-mid: #100d0d;
   --sparrow-red: #af0404;
   --sparrow-bright: #ff0000;
 }
@@ -68,6 +68,22 @@ body {
   }
 }
 
+.edit-btn {
+  @apply text-sm px-4 py-2 rounded-lg border border-white/10 text-white/50 transition-all shrink-0 cursor-pointer;
+
+  &:hover {
+    @apply text-white border-white/20;
+  }
+}
+
+.select-act {
+  @apply bg-white/5 border border-white/10 text-white text-sm rounded-lg px-3 py-1.5 cursor-pointer shrink-0;
+
+  &:focus {
+    @apply outline-none border-white/20;
+  }
+}
+
 .nav-active {
   background:
     radial-gradient(
@@ -90,9 +106,14 @@ body {
 .glow-right {
   background:
     radial-gradient(
-      ellipse at right,
-      rgba(210, 27, 27, 0.12) 0%,
-      transparent 60%
+      ellipse at bottom right,
+      rgba(210, 27, 27, 0.1) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at top right,
+      rgba(210, 27, 27, 0.1) 0%,
+      transparent 55%
     ),
     rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(12px);
@@ -102,9 +123,14 @@ body {
 .glow-left {
   background:
     radial-gradient(
-      ellipse at left,
-      rgba(210, 27, 27, 0.12) 0%,
-      transparent 60%
+      ellipse at top left,
+      rgba(210, 27, 27, 0.1) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at bottom left,
+      rgba(210, 27, 27, 0.1) 0%,
+      transparent 55%
     ),
     rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(12px);
@@ -196,16 +222,131 @@ body {
 .signal-card {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left-width: 2px;
   border-radius: 0.75rem;
-  padding: 0.625rem;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   font-size: 0.75rem;
 }
 
-.signal-card:hover {
-  border-color: rgba(204, 0, 0, 0.3);
-  background: rgba(255, 255, 255, 0.06);
+.signal-card-hot {
+  border-left-color: rgba(210, 27, 27, 0.6);
+}
+
+.signal-card-warm {
+  border-left-color: rgba(200, 130, 0, 0.5);
+}
+
+.signal-card-cold {
+  border-left-color: rgba(255, 255, 255, 0.12);
+}
+
+.signal-card-unscored {
+  border-left-color: rgba(255, 255, 255, 0.08);
+}
+
+.ai-block-hot {
+  background: rgba(175, 4, 4, 0.07);
+  border-color: rgba(175, 4, 4, 0.2);
+}
+
+.ai-block-warm {
+  background: rgba(180, 120, 0, 0.07);
+  border-color: rgba(180, 120, 0, 0.2);
+}
+
+.ai-block-cold {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.badge-hot {
+  background: rgba(175, 4, 4, 0.3);
+  color: rgb(252, 165, 165);
+  border-color: rgba(239, 68, 68, 0.3);
+  box-shadow: 0 0 10px rgba(175, 4, 4, 0.35), inset 0 0 8px rgba(255, 80, 80, 0.08);
+}
+
+.badge-warm {
+  background: rgba(180, 120, 0, 0.2);
+  color: rgb(252, 211, 77);
+  border-color: rgba(245, 158, 11, 0.3);
+  box-shadow: 0 0 10px rgba(180, 120, 0, 0.25), inset 0 0 8px rgba(255, 180, 0, 0.06);
+}
+
+.badge-cold {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.type-tag-seeking {
+  background: rgba(99, 102, 241, 0.12);
+  color: rgb(165, 180, 252);
+  border-color: rgba(99, 102, 241, 0.25);
+}
+
+.type-tag-pain {
+  background: rgba(234, 88, 12, 0.12);
+  color: rgb(253, 186, 116);
+  border-color: rgba(234, 88, 12, 0.25);
+}
+
+.type-tag-competitor {
+  background: rgba(147, 51, 234, 0.12);
+  color: rgb(216, 180, 254);
+  border-color: rgba(147, 51, 234, 0.25);
+}
+
+.type-tag-question {
+  background: rgba(20, 184, 166, 0.12);
+  color: rgb(94, 234, 212);
+  border-color: rgba(20, 184, 166, 0.25);
+}
+
+.type-tag-general {
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.35);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.platform-pill-reddit {
+  background: rgba(255, 100, 0, 0.1);
+  border-color: rgba(255, 100, 0, 0.2);
+}
+
+.platform-pill-hn {
+  background: rgba(255, 140, 0, 0.1);
+  border-color: rgba(255, 140, 0, 0.2);
+}
+
+.keyword-tag {
+  background: rgba(175, 4, 4, 0.1);
+  color: rgba(255, 160, 160, 0.7);
+  border-color: rgba(175, 4, 4, 0.2);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .fade-mask {

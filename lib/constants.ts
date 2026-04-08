@@ -7,8 +7,11 @@ import {
   Bell,
   ScanLine,
   CreditCard,
-  KeyRound,
+  Shield,
+  BarChart2,
+  User,
 } from "lucide-react";
+import type { Signal, SignalType, HuntStatus, Lead } from "@/types";
 
 export const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -17,10 +20,217 @@ export const navItems = [
   { label: "Hunt Board", href: "/dashboard/hunt-board", icon: Target },
 ];
 
+export const SIGNAL_TYPE_TAG_CLASS: Record<SignalType, string> = {
+  seeking_recommendation: "type-tag-seeking",
+  pain_point: "type-tag-pain",
+  competitor_complaint: "type-tag-competitor",
+  question: "type-tag-question",
+  general: "type-tag-general",
+};
+
+export const SIGNAL_TYPE_LABELS: Record<SignalType, string> = {
+  seeking_recommendation: "Seeking Rec",
+  pain_point: "Pain Point",
+  competitor_complaint: "Competitor",
+  question: "Question",
+  general: "General",
+};
+
+export const MOCK_SIGNALS: Signal[] = [
+  {
+    id: "1",
+    platform: "reddit",
+    source: "r/entrepreneur",
+    author: "startupfounder_jay",
+    timeAgo: "3h ago",
+    keyword: "better CRM",
+    title: "Looking for a CRM that won't break the bank",
+    body: "We've been on HubSpot for 2 years but the price jumped 40% at renewal. Team is 8 people, we just need pipeline tracking and contact notes. What are you all using these days?",
+    postUrl: "#",
+    aiScore: 9,
+    aiReason:
+      "Actively switching CRMs due to cost — strong buyer intent, team size mentioned, evaluating alternatives now.",
+    aiType: "competitor_complaint",
+    status: "new",
+  },
+  {
+    id: "2",
+    platform: "hackernews",
+    source: "HN",
+    author: "mkonstantinov",
+    timeAgo: "6h ago",
+    keyword: "lead tracking",
+    title: "Ask HN: How are indie hackers tracking sales leads?",
+    body: "Spreadsheet is getting unwieldy. Tried Notion but it's overkill for what I need. Looking for something lightweight that doesn't cost $80/mo.",
+    postUrl: "#",
+    aiScore: 8,
+    aiReason:
+      "Indie hacker actively seeking lightweight CRM alternative, explicit budget constraint, comparing options.",
+    aiType: "seeking_recommendation",
+    status: "new",
+  },
+  {
+    id: "3",
+    platform: "reddit",
+    source: "r/SaaS",
+    author: "growthops99",
+    timeAgo: "1d ago",
+    keyword: "outreach tool",
+    title: "Pain with current outreach stack — considering switching",
+    body: "Our SDR team uses 3 different tools to do what should be one workflow. Anyone solved this? Sick of the context switching.",
+    postUrl: "#",
+    aiScore: 6,
+    aiReason:
+      "Has a problem but hasn't committed to switching — medium intent, operational pain expressed.",
+    aiType: "pain_point",
+    status: "new",
+  },
+  {
+    id: "4",
+    platform: "reddit",
+    source: "r/smallbusiness",
+    author: "local_coffee_ops",
+    timeAgo: "2d ago",
+    keyword: "CRM software",
+    title: "What CRM do you use for a 3-person team?",
+    body: "Just getting started tracking customers more seriously. Don't need anything fancy.",
+    postUrl: "#",
+    aiScore: 5,
+    aiReason:
+      "Early stage, low urgency — unclear timeline and budget, but actively asking.",
+    aiType: "question",
+    status: "new",
+  },
+  {
+    id: "5",
+    platform: "hackernews",
+    source: "HN",
+    author: "dev_lurker",
+    timeAgo: "3d ago",
+    keyword: "sales pipeline",
+    title: "Sales pipeline tools I've tried (thread)",
+    body: "Wrote up my experience with Pipedrive, Close, and a couple others. Generally the category feels bloated.",
+    postUrl: "#",
+    aiScore: 3,
+    aiReason:
+      "Informational post, not an active buyer — reviewing tools, not seeking one.",
+    aiType: "general",
+    status: "new",
+  },
+  {
+    id: "6",
+    platform: "reddit",
+    source: "r/startups",
+    author: "b2b_founder_kim",
+    timeAgo: "4d ago",
+    keyword: "better CRM",
+    title:
+      "Switching from Salesforce — need something that doesn't require a consultant",
+    body: "We're a 15-person B2B SaaS. Salesforce is way too much for us and our admin left. Need something we can self-serve in a day.",
+    postUrl: "#",
+    aiScore: null,
+    aiReason: null,
+    aiType: null,
+    status: "new",
+  },
+];
+
 export const settingsItems = [
   { label: "Overview", href: "/dashboard/settings/overview", icon: LayoutList },
-  { label: "Notifications", href: "/dashboard/settings/notifications", icon: Bell },
-  { label: "Scan Preferences", href: "/dashboard/settings/scan-preferences", icon: ScanLine },
+  { label: "Account", href: "/dashboard/settings/account", icon: User },
+  {
+    label: "Scan Preferences",
+    href: "/dashboard/settings/scan-preferences",
+    icon: ScanLine,
+  },
+  {
+    label: "Notifications",
+    href: "/dashboard/settings/notifications",
+    icon: Bell,
+  },
+  { label: "Privacy", href: "/dashboard/settings/privacy", icon: Shield },
   { label: "Billing", href: "/dashboard/settings/billing", icon: CreditCard },
-  { label: "API Keys", href: "/dashboard/settings/api-keys", icon: KeyRound },
+  { label: "Usage", href: "/dashboard/settings/usage", icon: BarChart2 },
+];
+
+export const HUNT_COLUMNS: { id: HuntStatus; label: string; color: string }[] =
+  [
+    { id: "hunting", label: "Hunting (NEW)", color: "text-white/50" },
+    { id: "interested", label: "Interested", color: "text-blue-400" },
+    { id: "engaged", label: "Engaged", color: "text-amber-400" },
+    { id: "hunted", label: "Hunted", color: "text-emerald-400" },
+  ];
+
+export const MOCK_LEADS: Lead[] = [
+  {
+    id: "l1",
+    platform: "reddit",
+    postUrl: "#",
+    source: "r/entrepreneur",
+    keyword: "better CRM",
+    timeAgo: "3h ago",
+    title: "Looking for a CRM that won't break the bank",
+    aiScore: 9,
+    aiReason:
+      "Actively switching CRMs due to cost — strong buyer intent, team size mentioned.",
+    status: "hunting",
+    notes: null,
+  },
+  {
+    id: "l2",
+    platform: "hackernews",
+    postUrl: "#",
+    source: "HN",
+    keyword: "lead tracking",
+    timeAgo: "6h ago",
+    title: "Ask HN: How are indie hackers tracking sales leads?",
+    aiScore: 8,
+    aiReason:
+      "Indie hacker actively seeking lightweight CRM, explicit budget constraint.",
+    status: "hunting",
+    notes: null,
+  },
+  {
+    id: "l3",
+    platform: "reddit",
+    postUrl: "#",
+    source: "r/SaaS",
+    keyword: "outreach tool",
+    timeAgo: "1d ago",
+    title: "Pain with current outreach stack — considering switching",
+    aiScore: 6,
+    aiReason:
+      "Has a problem but hasn't committed to switching — medium intent.",
+    status: "interested",
+    notes: "Replied in thread, waiting for response.",
+  },
+  {
+    id: "l4",
+    platform: "reddit",
+    postUrl: "#",
+    source: "r/startups",
+    keyword: "better CRM",
+    timeAgo: "4d ago",
+    title:
+      "Switching from Salesforce — need something that doesn't require a consultant",
+    aiScore: 9,
+    aiReason:
+      "B2B SaaS team actively leaving Salesforce, self-serve is key requirement.",
+    status: "engaged",
+    notes: "Sent DM with Sparrow link.",
+  },
+  {
+    id: "l5",
+    platform: "hackernews",
+    postUrl: "#",
+    source: "HN",
+    keyword: "sales pipeline",
+    timeAgo: "5d ago",
+    title: "Ask HN: Best lightweight sales pipeline tool for a solo founder?",
+    aiScore: 8,
+    aiReason:
+      "Solo founder actively seeking, mentioned frustration with existing tools.",
+    status: "hunted",
+    notes: "Signed up on free plan.",
+  },
 ];

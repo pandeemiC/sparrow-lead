@@ -65,3 +65,51 @@ export type ScannedPost = {
   post_body: string;
   author: string;
 };
+
+export type SignalPlatform = "reddit" | "hackernews";
+
+export type SignalType =
+  | "seeking_recommendation"
+  | "pain_point"
+  | "competitor_complaint"
+  | "question"
+  | "general";
+
+export type Signal = {
+  id: string;
+  platform: SignalPlatform;
+  source: string;
+  author: string;
+  timeAgo: string;
+  keyword: string;
+  title: string;
+  body: string;
+  postUrl: string;
+  aiScore: number | null;
+  aiReason: string | null;
+  aiType: SignalType | null;
+  status: "new" | "hunting" | "dismissed";
+};
+
+export type SignalFilters = {
+  platform: "all" | "reddit" | "hackernews";
+  intent: "all" | "high" | "medium" | "low";
+  sort: "score" | "newest" | "oldest";
+  type: "all" | SignalType;
+};
+
+export type HuntStatus = "hunting" | "interested" | "engaged" | "hunted";
+
+export type Lead = {
+  id: string;
+  title: string;
+  source: string;
+  platform: "reddit" | "hackernews";
+  postUrl: string;
+  keyword: string;
+  timeAgo: string;
+  aiScore: number | null;
+  aiReason: string | null;
+  status: HuntStatus;
+  notes: string | null;
+};
