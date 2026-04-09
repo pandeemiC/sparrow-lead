@@ -20,9 +20,9 @@ export type Mention = {
 };
 
 export type AiAnalysis = {
-  relevance: number;
-  reasoning: string;
-  suggested_reply: string;
+  score: number;
+  reason: string;
+  type: string;
 };
 
 export type AnalyzePostInput = {
