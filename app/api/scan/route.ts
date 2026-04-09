@@ -3,6 +3,7 @@ import { getDb } from "@/lib/db";
 import { NextResponse } from "next/server";
 
 import { RedditResponse, HackerNewsResponse, ScannedPost } from "@/types";
+import { analyzePost } from "@/lib/analysis";
 
 async function searchReddit(keyword: string) {
   const url = `https://www.reddit.com/search.json?q=${encodeURIComponent(keyword)}&sort=new&limit=5`;
@@ -68,15 +69,15 @@ export async function POST() {
       `;
 
       if (existing.length === 0) {
-        // const analysis = await analyzePost({
-        //   keyword: kw.keyword,
-        //   title: post.post_title,
-        //   body: post.post_body,
-        // });
+        const analysis = await analyzePost({
+          keyword: kw.keyword,
+          title: post.post_title,
+          body: post.post_body,
+        });
 
         // if you want to use CLAUDE add ai_analysis and relevance_score onto the keywords
         const inserted = await sql`
-        INSERT INTO mentions (keyword_id, platform, post_url, post_title, post_body, author) VALUES (${kw.id}, ${post.platform}, ${post.post_url}, ${post.post_title}, ${post.post_body}, ${post.author}) RETURNING *
+        INSERT INTO mentions (keyword_id, platform, post_url, post_title, post_body, author, ai_score, ai_reason, ai_type, ai_scored_at) VALUES (${kw.id}, ${post.platform}, ${post.post_url}, ${post.post_title}, ${post.post_body}, ${post.author}, ${analysis.score}, ${analysis.reason}, ${analysis.type}, NOW()) RETURNING *
         `;
         allResults.push(inserted[0]);
       }
