@@ -130,6 +130,16 @@ export type KeywordStat = {
   mention_count: number;
 };
 
+export type HuntLeadPreview = {
+  id: string;
+  platform: string;
+  post_title: string;
+  post_url: string;
+  ai_score: number | null;
+  status: string;
+  keyword: string;
+};
+
 export type Stats = {
   totalSignals: number;
   signalsToday: number;
@@ -144,4 +154,5 @@ export type Stats = {
   recentSignals: SignalPreview[];
   topSignals: SignalPreview[];
   keywords: KeywordStat[];
+  huntLeads: HuntLeadPreview[];
 };
