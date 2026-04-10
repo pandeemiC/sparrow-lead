@@ -114,6 +114,22 @@ export type Lead = {
   notes: string | null;
 };
 
+export type SignalPreview = {
+  id: string;
+  platform: string;
+  post_title: string;
+  post_url: string;
+  ai_score: number | null;
+  created_at: string;
+  keyword: string;
+};
+
+export type KeywordStat = {
+  keyword: string;
+  platform: string;
+  mention_count: number;
+};
+
 export type Stats = {
   totalSignals: number;
   signalsToday: number;
@@ -125,27 +141,7 @@ export type Stats = {
     engaged: number;
     hunted: number;
   };
-  recentSignals: {
-    id: string;
-    platform: string;
-    post_title: string;
-    post_url: string;
-    ai_score: number | null;
-    created_at: string;
-    keyword: string;
-  }[];
-  topSignals: {
-    id: string;
-    platform: string;
-    post_title: string;
-    post_url: string;
-    ai_score: number | null;
-    created_at: string;
-    keyword: string;
-  }[];
-  keywords: {
-    keyword: string;
-    platform: string;
-    mention_count: number;
-  };
+  recentSignals: SignalPreview[];
+  topSignals: SignalPreview[];
+  keywords: KeywordStat[];
 };
