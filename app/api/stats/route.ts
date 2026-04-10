@@ -68,6 +68,16 @@ export async function GET() {
     ORDER BY k.created_at DESC
   `;
 
+  const huntLeads = await sql`
+    SELECT m.id, m.platform, m.post_title, m.post_url, m.ai_score, m.status, k.keyword
+    FROM mentions m
+    JOIN keywords k ON m.keyword_id = k.id
+    WHERE k.user_id = ${userId}
+      AND m.status IN ('hunting', 'interested')
+    ORDER BY m.ai_score DESC NULLS LAST
+    LIMIT 3
+  `;
+
   return NextResponse.json({
     totalSignals: totals.total_signals,
     signalsToday: totals.signals_today,
@@ -77,5 +87,6 @@ export async function GET() {
     topSignals,
     recentSignals,
     keywords,
+    huntLeads,
   });
 }
