@@ -10,15 +10,15 @@ import {
   Circle,
 } from "lucide-react";
 import { SiReddit, SiYcombinator } from "react-icons/si";
-import { Stats } from "@/types/index";
+import type { Stats } from "@/types";
 import { useState, useEffect } from "react";
 
 const huntColumns = [
-  { key: "hunting", label: "Hunting", value: 0 },
-  { key: "interested", label: "Interested", value: 0 },
-  { key: "engaged", label: "Engaged", value: 0 },
-  { key: "hunted", label: "Hunted", value: 0 },
-];
+  { key: "hunting",    label: "Hunting" },
+  { key: "interested", label: "Interested" },
+  { key: "engaged",    label: "Engaged" },
+  { key: "hunted",     label: "Hunted" },
+] as const;
 
 const sources = [
   { label: "Reddit", icon: SiReddit, active: true },
@@ -35,12 +35,34 @@ function timeAgo(dateStr: string): string {
 
 export default function DashboardPage() {
   const [scanning, setScanning] = useState(false);
+  const [stats, setStats] = useState<Stats | null>(null);
+
+  async function loadStats() {
+    const res = await fetch("/api/stats");
+    const data = await res.json();
+    setStats(data);
+  }
+
+  useEffect(() => {
+    async function load() {
+      await loadStats();
+    }
+    load();
+  }, []);
 
   async function scan() {
     setScanning(true);
     await fetch("/api/scan", { method: "POST" });
     setScanning(false);
+    loadStats();
   }
+
+  const statCards = [
+    { label: "Total Signals", icon: Radio, value: stats?.totalSignals },
+    { label: "Signals Today", icon: TrendingUp, value: stats?.signalsToday },
+    { label: "Keywords Tracked", icon: Tag, value: stats?.keywordsTracked },
+  ];
+
   return (
     <div className="p-5 h-full flex gap-4">
       <div className="flex flex-col flex-6 gap-4 min-h-0">
@@ -61,7 +83,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex gap-4 basis-1/2">
-          {stats.map(({ label, icon: Icon }) => (
+          {statCards.map(({ label, value }) => (
             <div
               key={label}
               className="flex-1 flex flex-col px-5 py-4 rounded-xl glass-red border border-white/5"
@@ -70,10 +92,22 @@ export default function DashboardPage() {
                 <p className="text-[10px] text-white/40 uppercase tracking-widest leading-none">
                   {label}
                 </p>
-                <Icon size={13} className="text-white/20" />
+                {label === "Total Signals" && (
+                  <Radio size={13} className="text-white/20" />
+                )}
+                {label === "Signals Today" && (
+                  <TrendingUp size={13} className="text-white/20" />
+                )}
+                {label === "Keywords Tracked" && (
+                  <Tag size={13} className="text-white/20" />
+                )}
               </div>
               <div className="flex-1 flex items-center justify-center py-3">
-                <p className="text-xs text-white/20">No data yet</p>
+                {value !== undefined ? (
+                  <p className="text-2xl font-bold text-white">{value}</p>
+                ) : (
+                  <p className="text-xs text-white/20">—</p>
+                )}
               </div>
             </div>
           ))}
@@ -88,12 +122,14 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid grid-cols-4 gap-2 mb-5">
-            {huntColumns.map(({ label, value }) => (
+            {huntColumns.map(({ key, label }) => (
               <div
-                key={label}
+                key={key}
                 className="flex flex-col items-center gap-1.5 py-2.5 rounded-lg bg-white/3 border border-white/5"
               >
-                <span className="text-lg font-bold text-white">{value}</span>
+                <span className="text-lg font-bold text-white">
+                  {stats ? stats.huntCounts[key] : "—"}
+                </span>
                 <span className="text-[10px] text-white/30 uppercase tracking-wider">
                   {label}
                 </span>
@@ -116,7 +152,11 @@ export default function DashboardPage() {
               <p className="text-sm font-medium text-white">Last Scanned</p>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <Clock size={11} className="text-white/20" />
-                <p className="text-xs text-white/25">Never</p>
+                <p className="text-xs text-white/25">
+                  {stats?.lastScannedAt
+                    ? timeAgo(stats.lastScannedAt)
+                    : "Never"}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">

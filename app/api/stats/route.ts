@@ -12,10 +12,10 @@ export async function GET() {
 
   const [totals] = await sql`
     SELECT
-      COUNT(*)::intent AS total_signals,
-      COUNT(*) FILTER (WHERE m.created_at >= NOW() - INTERVAL '1 day')::int   AS signals_today,
+      COUNT(*)::int AS total_signals,
+      COUNT(*) FILTER (WHERE m.created_at >= NOW() - INTERVAL '1 day')::int AS signals_today,
       MAX(m.created_at) AS last_scanned_at
-    FROM mentions map
+    FROM mentions m
     JOIN keywords k ON m.keyword_id = k.id
     WHERE k.user_id = ${userId}
   `;
