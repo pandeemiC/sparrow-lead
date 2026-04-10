@@ -113,3 +113,39 @@ export type Lead = {
   status: HuntStatus;
   notes: string | null;
 };
+
+export type Stats = {
+  totalSignals: number;
+  signalsToday: number;
+  keywordsTracked: number;
+  lastScannedAt: string | null;
+  huntCounts: {
+    hunting: number;
+    interested: number;
+    engaged: number;
+    hunted: number;
+  };
+  recentSignals: {
+    id: string;
+    platform: string;
+    post_title: string;
+    post_url: string;
+    ai_score: number | null;
+    created_at: string;
+    keyword: string;
+  }[];
+  topSignals: {
+    id: string;
+    platform: string;
+    post_title: string;
+    post_url: string;
+    ai_score: number | null;
+    created_at: string;
+    keyword: string;
+  }[];
+  keywords: {
+    keyword: string;
+    platform: string;
+    mention_count: number;
+  };
+};
