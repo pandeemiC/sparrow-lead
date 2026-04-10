@@ -8,9 +8,14 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const sql = getDb();
-  const keywords =
-    await sql`SELECT * FROM keywords WHERE user_id = ${userId} ORDER BY created_at DESC`;
-
+  const keywords = await sql`
+    SELECT k.*, COUNT(m.id)::int AS mention_count
+    FROM keywords k
+    LEFT JOIN mentions m ON m.keyword_id = k.id
+    WHERE k.user_id = ${userId}
+    GROUP BY k.id
+    ORDER BY k.created_at DESC
+  `;
   return NextResponse.json(keywords);
 }
 
