@@ -10,25 +10,28 @@ import {
   Circle,
 } from "lucide-react";
 import { SiReddit, SiYcombinator } from "react-icons/si";
-import { useState } from "react";
-
-const stats = [
-  { label: "Total Signals", value: "0", icon: Radio },
-  { label: "Signals Today", value: "0", icon: TrendingUp },
-  { label: "Keywords Tracked", value: "0", icon: Tag },
-];
+import { Stats } from "@/types/index";
+import { useState, useEffect } from "react";
 
 const huntColumns = [
-  { label: "Hunting", value: 0 },
-  { label: "Interested", value: 0 },
-  { label: "Engaged", value: 0 },
-  { label: "Hunted", value: 0 },
+  { key: "hunting", label: "Hunting", value: 0 },
+  { key: "interested", label: "Interested", value: 0 },
+  { key: "engaged", label: "Engaged", value: 0 },
+  { key: "hunted", label: "Hunted", value: 0 },
 ];
 
 const sources = [
   { label: "Reddit", icon: SiReddit, active: true },
   { label: "Hacker News", icon: SiYcombinator, active: true },
 ];
+
+function timeAgo(dateStr: string): string {
+  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  if (diff < 60) return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
+}
 
 export default function DashboardPage() {
   const [scanning, setScanning] = useState(false);
