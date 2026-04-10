@@ -13,6 +13,7 @@ export async function GET(req: Request) {
   const intent = searchParams.get("intent") ?? "all";
   const type = searchParams.get("type") ?? "all";
   const sort = searchParams.get("sort") ?? "score";
+  const limit = parseInt(searchParams.get("limit") ?? "100");
 
   const sql = getDb();
 
@@ -49,6 +50,7 @@ export async function GET(req: Request) {
     CASE WHEN ${sort} = 'score' THEN m.ai_score END DESC NULLS LAST,
     CASE WHEN ${sort} = 'newest' THEN m.created_at END DESC,
     CASE WHEN ${sort} = 'oldest' THEN m.created_at END ASC
+  LIMIT ${limit}
   `;
 
   return NextResponse.json(mentions);
