@@ -75,7 +75,7 @@ export async function POST() {
           body: post.post_body,
         });
 
-        // if you want to use CLAUDE add ai_analysis and relevance_score onto the keywords
+        // its the same for CLAUDE
         const inserted = await sql`
         INSERT INTO mentions (keyword_id, platform, post_url, post_title, post_body, author, ai_score, ai_reason, ai_type, ai_scored_at) VALUES (${kw.id}, ${post.platform}, ${post.post_url}, ${post.post_title}, ${post.post_body}, ${post.author}, ${analysis.score}, ${analysis.reason}, ${analysis.type}, NOW()) RETURNING *
         `;

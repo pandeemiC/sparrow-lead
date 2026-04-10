@@ -10,6 +10,7 @@ import {
   Circle,
 } from "lucide-react";
 import { SiReddit, SiYcombinator } from "react-icons/si";
+import { useState } from "react";
 
 const stats = [
   { label: "Total Signals", value: "0", icon: Radio },
@@ -30,6 +31,13 @@ const sources = [
 ];
 
 export default function DashboardPage() {
+  const [scanning, setScanning] = useState(false);
+
+  async function scan() {
+    setScanning(true);
+    await fetch("/api/scan", { method: "POST" });
+    setScanning(false);
+  }
   return (
     <div className="p-5 h-full flex gap-4">
       <div className="flex flex-col flex-6 gap-4 min-h-0">
@@ -127,9 +135,13 @@ export default function DashboardPage() {
               ))}
             </div>
           </div>
-          <button className="flex items-center justify-center gap-2 w-full py-2.5 bg-sparrow-red hover:bg-sparrow-bright text-white text-sm font-semibold rounded-lg transition-colors cursor-pointer">
-            <ScanLine size={15} />
-            Scan Now
+          <button
+            onClick={scan}
+            disabled={scanning}
+            className="flex items-center justify-center gap-2 w-full py-2.5 bg-sparrow-red hover:bg-sparrow-bright text-white text-sm font-semibold rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ScanLine size={15} className={scanning ? "animate-spin" : ""} />
+            {scanning ? "Scanning..." : "Scan Now"}
           </button>
         </div>
       </div>
