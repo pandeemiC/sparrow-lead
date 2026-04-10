@@ -80,41 +80,14 @@ export default function DashboardPage() {
     loadStats();
   }
 
-  const statCards = [
-    {
-      label: "Total Signals",
-      icon: Radio,
-      value: stats?.totalSignals,
-      accent: "rgba(175,4,4,0.12)",
-      iconColor: "text-sparrow-red",
-      description: "mentions captured",
-    },
-    {
-      label: "Signals Today",
-      icon: TrendingUp,
-      value: stats?.signalsToday,
-      accent: "rgba(59,130,246,0.1)",
-      iconColor: "text-blue-400",
-      description: "in last 24h",
-    },
-    {
-      label: "Keywords",
-      icon: Tag,
-      value: stats?.keywordsTracked,
-      accent: "rgba(16,185,129,0.1)",
-      iconColor: "text-emerald-400",
-      description: "being tracked",
-    },
-  ];
-
   const totalHunted = stats
     ? Object.values(stats.huntCounts).reduce((a, b) => a + b, 0)
     : 0;
 
   return (
     <div className="p-5 h-full flex gap-4">
-      <div className="flex flex-col flex-6 gap-4 min-h-0">
-        <div className="flex-1 rounded-xl glass-red border border-white/5 p-5 flex flex-col min-h-0 basis-1/2 glow-b-right">
+      <div className="flex flex-col flex-6 gap-4 min-h-0 min-w-0">
+        <div className="flex-1 rounded-xl glass-red border border-white/5 p-5 flex flex-col min-h-0 glow-b-right">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <h2 className="text-sm font-semibold text-white">
@@ -237,45 +210,135 @@ export default function DashboardPage() {
           )}
         </div>
 
-        <div className="flex gap-4 basis-1/2">
-          {statCards.map(
-            ({ label, icon: Icon, value, accent, iconColor, description }) => (
-              <div
-                key={label}
-                className="flex-1 flex flex-col px-4 py-4 rounded-xl glass-red border border-white/5 gap-3"
-              >
-                <div className="flex items-center justify-between">
-                  <p className="text-[10px] text-white/40 uppercase tracking-widest">
-                    {label}
-                  </p>
-                  <div
-                    className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                    style={{ background: accent }}
-                  >
-                    <Icon size={13} className={iconColor} />
-                  </div>
-                </div>
-                <div>
-                  <p className="text-3xl font-bold text-white leading-none">
-                    {value !== undefined ? (
-                      value
-                    ) : (
-                      <span className="text-white/20 text-lg">—</span>
-                    )}
-                  </p>
-                  <p className="text-[10px] text-white/25 mt-1">
-                    {description}
-                  </p>
-                </div>
-                <div className="h-px bg-white/5" />
-                <p className="text-[10px] text-white/20">
-                  {label === "Total Signals" && "All time across all keywords"}
-                  {label === "Signals Today" && "Reset at midnight"}
-                  {label === "Keywords" && "Scanned on every run"}
-                </p>
+        <div className="flex gap-4 flex-1 min-h-0">
+          <div className="flex-1 flex flex-col px-4 py-4 rounded-xl glass-red border border-white/5 gap-3 min-h-0 min-w-0 overflow-hidden">
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] text-white/40 uppercase tracking-widest">Total Signals</p>
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(175,4,4,0.12)" }}>
+                <Radio size={13} className="text-sparrow-red" />
               </div>
-            ),
-          )}
+            </div>
+            <div>
+              <p className="text-3xl font-bold text-white leading-none">
+                {stats?.totalSignals ?? <span className="text-white/20 text-lg">—</span>}
+              </p>
+              <p className="text-[10px] text-white/25 mt-1">mentions captured</p>
+            </div>
+            <div className="h-px bg-white/5" />
+            <div className="flex flex-col gap-1.5 overflow-y-auto flex-1 min-h-0">
+              {stats?.recentSignals && stats.recentSignals.length > 0 ? (
+                stats.recentSignals.map((s) => (
+                  <a
+                    key={s.id}
+                    href={s.post_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/3 border-l-2 hover:bg-white/5 transition-colors ${
+                      s.ai_score !== null && s.ai_score >= 8 ? "border-l-red-600/50" :
+                      s.ai_score !== null && s.ai_score >= 5 ? "border-l-amber-600/50" :
+                      "border-l-white/10"
+                    }`}
+                  >
+                    {s.platform === "reddit"
+                      ? <FaRedditAlien size={9} className="text-orange-400 shrink-0" />
+                      : <FaYCombinator size={9} className="text-orange-300 shrink-0" />
+                    }
+                    <span className="text-[10px] text-white/50 truncate flex-1">{s.post_title}</span>
+                    {s.ai_score !== null && (
+                      <span className={`text-[9px] font-bold shrink-0 ${
+                        s.ai_score >= 8 ? "text-red-400" :
+                        s.ai_score >= 5 ? "text-amber-400" : "text-white/25"
+                      }`}>{s.ai_score}</span>
+                    )}
+                  </a>
+                ))
+              ) : (
+                <p className="text-[10px] text-white/20">No signals yet</p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex-1 flex flex-col px-4 py-4 rounded-xl glass-red border border-white/5 gap-3 min-h-0 min-w-0 overflow-hidden">
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] text-white/40 uppercase tracking-widest">Signals Today</p>
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(59,130,246,0.1)" }}>
+                <TrendingUp size={13} className="text-blue-400" />
+              </div>
+            </div>
+            <div>
+              <p className="text-3xl font-bold text-white leading-none">
+                {stats?.signalsToday ?? <span className="text-white/20 text-lg">—</span>}
+              </p>
+              <p className="text-[10px] text-white/25 mt-1">in last 24h</p>
+            </div>
+            <div className="h-px bg-white/5" />
+            <div className="flex flex-col gap-1.5 overflow-y-auto flex-1 min-h-0">
+              {stats?.topSignals && stats.topSignals.length > 0 ? (
+                stats.topSignals.map((s) => (
+                  <a
+                    key={s.id}
+                    href={s.post_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/3 border-l-2 hover:bg-white/5 transition-colors ${
+                      s.ai_score !== null && s.ai_score >= 8 ? "border-l-red-600/50" :
+                      s.ai_score !== null && s.ai_score >= 5 ? "border-l-amber-600/50" :
+                      "border-l-white/10"
+                    }`}
+                  >
+                    {s.platform === "reddit"
+                      ? <FaRedditAlien size={9} className="text-orange-400 shrink-0" />
+                      : <FaYCombinator size={9} className="text-orange-300 shrink-0" />
+                    }
+                    <span className="text-[10px] text-white/50 truncate flex-1">{s.post_title}</span>
+                    {s.ai_score !== null && (
+                      <span className={`text-[9px] font-bold shrink-0 ${
+                        s.ai_score >= 8 ? "text-red-400" :
+                        s.ai_score >= 5 ? "text-amber-400" : "text-white/25"
+                      }`}>{s.ai_score}</span>
+                    )}
+                  </a>
+                ))
+              ) : (
+                <p className="text-[10px] text-white/20">No signals today</p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex-1 flex flex-col px-4 py-4 rounded-xl glass-red border border-white/5 gap-3 min-h-0 min-w-0 overflow-hidden">
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] text-white/40 uppercase tracking-widest">Keywords</p>
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(16,185,129,0.1)" }}>
+                <Tag size={13} className="text-emerald-400" />
+              </div>
+            </div>
+            <div>
+              <p className="text-3xl font-bold text-white leading-none">
+                {stats?.keywordsTracked ?? <span className="text-white/20 text-lg">—</span>}
+              </p>
+              <p className="text-[10px] text-white/25 mt-1">being tracked</p>
+            </div>
+            <div className="h-px bg-white/5" />
+            <div className="flex flex-col gap-1.5 overflow-y-auto flex-1 min-h-0">
+              {stats?.keywords && stats.keywords.length > 0 ? (
+                stats.keywords.map((kw) => (
+                  <div
+                    key={kw.keyword}
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/3 border border-white/5"
+                  >
+                    {kw.platform === "reddit"
+                      ? <FaRedditAlien size={9} className="text-orange-400 shrink-0" />
+                      : <FaYCombinator size={9} className="text-orange-300 shrink-0" />
+                    }
+                    <span className="text-[10px] text-white/50 truncate flex-1">{kw.keyword}</span>
+                    <span className="text-[9px] text-white/25 shrink-0">{kw.mention_count} hits</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-[10px] text-white/20">No keywords yet</p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
