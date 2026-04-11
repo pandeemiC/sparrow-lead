@@ -9,6 +9,8 @@ import {
   Target,
   SlidersHorizontal,
   ChevronDown,
+  Copy,
+  Check,
 } from "lucide-react";
 import { FaRedditAlien, FaYCombinator } from "react-icons/fa6";
 import Fire from "@/public/animations/fire.json";
@@ -150,6 +152,71 @@ function RadioGroup<T extends string>({
   );
 }
 
+function ReplyModal({
+  reply,
+  loading,
+  onClose,
+}: {
+  reply: string;
+  loading: boolean;
+  onClose: () => void;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  function copyReply() {
+    navigator.clipboard.writeText(reply);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.7)" }}
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-md rounded-2xl border border-white/10 p-6 flex flex-col gap-5"
+        style={{ background: "#1a1a1a" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles size={14} className="text-sparrow-red" />
+            <span className="text-sm font-semibold text-white">
+              AI Suggested Reply
+            </span>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-white/30 hover:text-white/70 transition-colors"
+          >
+            <XCircle size={16} />
+          </button>
+        </div>
+
+        {loading ? (
+          <div className="flex flex-col items-center justify-center gap-3 py-8">
+            <Sparkles size={20} className="text-sparrow-red animate-pulse" />
+            <p className="text-sm text-white/40">Generating reply...</p>
+          </div>
+        ) : (
+          <>
+            <p className="text-sm text-white/70 leading-relaxed">{reply}</p>
+            <button
+              onClick={copyReply}
+              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold border border-white/10 bg-white/5 hover:bg-white/8 hover:text-white text-white/60 transition-colors"
+            >
+              {copied ? <Check size={13} /> : <Copy size={13} />}
+              {copied ? "Copied!" : "Copy Reply"}
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function SignalCard({ signal }: { signal: Signal }) {
   const [dismissed, setDismissed] = useState(false);
   const [hunting, setHunting] = useState(signal.status === "hunting");
@@ -254,7 +321,6 @@ function SignalCard({ signal }: { signal: Signal }) {
     </div>
   );
 }
-
 
 function toSignal(row: Record<string, unknown>): Signal {
   return {
