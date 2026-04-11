@@ -378,22 +378,52 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {totalHunted > 0 ? (
-            <a
-              href="/dashboard/hunt-board"
-              className="flex items-center justify-center gap-2 py-2 rounded-lg border border-white/8 text-xs text-white/30 hover:text-white/60 hover:border-white/15 transition-colors mt-auto"
-            >
-              Manage leads <ArrowUpRight size={11} />
-            </a>
+         {stats?.huntLeads && stats.huntLeads.length > 0 ? (
+            <div className="flex flex-col gap-1.5 flex-1 min-h-0 overflow-y-auto">
+              {stats.huntLeads.map((lead) => (
+                <a
+                  key={lead.id}
+                  href={lead.post_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/3 border-l-2 hover:bg-white/5 transition-colors ${
+                    lead.ai_score !== null && lead.ai_score >= 8 ? "border-l-red-600/50" :
+                    lead.ai_score !== null && lead.ai_score >= 5 ? "border-l-amber-600/50" :
+                    "border-l-white/10"
+                  }`}
+                >
+                  {lead.platform === "reddit"
+                    ? <FaRedditAlien size={9} className="text-orange-400 shrink-0" />
+                    : <FaYCombinator size={9} className="text-orange-300 shrink-0" />
+                  }
+                  <span className="text-[10px] text-white/50 truncate flex-1">{lead.post_title}</span>
+                  <span className={`text-[9px] font-bold shrink-0 ${
+                    lead.status === "interested" ? "text-blue-400" : "text-white/30"
+                  }`}>
+                    {lead.status === "interested" ? "Interested" : "Hunting"}
+                  </span>
+                  {lead.ai_score !== null && (
+                    <span className={`text-[9px] font-bold shrink-0 ${
+                      lead.ai_score >= 8 ? "text-red-400" :
+                      lead.ai_score >= 5 ? "text-amber-400" : "text-white/25"
+                    }`}>{lead.ai_score}</span>
+                  )}
+                </a>
+              ))}
+              <a
+                href="/dashboard/hunt-board"
+                className="flex items-center justify-center gap-2 py-2 rounded-lg border border-white/8 text-xs text-white/30 hover:text-white/60 hover:border-white/15 transition-colors mt-auto"
+              >
+                Manage leads <ArrowUpRight size={11} />
+              </a>
+            </div>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center gap-2">
               <div className="w-8 h-8 rounded-full bg-white/3 flex items-center justify-center">
                 <Target size={14} className="text-white/15" />
               </div>
               <p className="text-xs text-white/25">No leads yet</p>
-              <p className="text-[10px] text-white/15">
-                Add signals to the Hunt Board
-              </p>
+              <p className="text-[10px] text-white/15">Add signals to the Hunt Board</p>
             </div>
           )}
         </div>
