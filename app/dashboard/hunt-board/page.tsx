@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Sparkles,
   ChevronRight,
@@ -13,7 +13,8 @@ import { FaRedditAlien, FaYCombinator } from "react-icons/fa6";
 import Fire from "@/public/animations/fire.json";
 import Lottie from "lottie-react";
 import type { Lead, HuntStatus } from "@/types";
-import { MOCK_LEADS, HUNT_COLUMNS } from "@/lib/constants";
+import { HUNT_COLUMNS } from "@/lib/constants";
+import { timeAgo, extractSub } from "@/lib/utils";
 
 const COLUMN_ORDER: HuntStatus[] = [
   "hunting",
@@ -238,10 +239,40 @@ function KanbanColumn({
 }
 
 export default function HuntBoardPage() {
-  const [leads, setLeads] = useState<Lead[]>(MOCK_LEADS);
+  const [leads, setLeads] = useState<Lead[]>([]);
 
-  function move(id: string, status: HuntStatus) {
+  useEffect(() => {
+    async function load() {
+      const res = await fetch(
+        "/api/mentions?status=hunting,interested,engaged,hunted&sort=newest&limit=100",
+      );
+      const rows = await res.json();
+      setLeads(
+        rows.map((row: Record<string, unknown>) => ({
+          id: row.id as string,
+          title: (row.post_title as string) ?? "(no title)",
+          source: extractSub(row.platform as string, row.post_url as string),
+          platform: row.platform as Lead["platform"],
+          postUrl: row.post_url as string,
+          keyword: row.keyword as string,
+          timeAgo: timeAgo(row.created_at as string),
+          aiScore: row.ai_score as number | null,
+          aiReason: row.ai_reason as string | null,
+          status: row.status as HuntStatus,
+          notes: row.notes as string | null,
+        })),
+      );
+    }
+    load();
+  }, []);
+
+  async function move(id: string, status: HuntStatus) {
     setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, status } : l)));
+    await fetch(`/api/mentions/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
   }
 
   function updateNotes(id: string, notes: string) {

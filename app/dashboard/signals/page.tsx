@@ -15,6 +15,7 @@ import Fire from "@/public/animations/fire.json";
 import Lottie from "lottie-react";
 import type { Signal, SignalType, SignalFilters } from "@/types";
 import { SIGNAL_TYPE_LABELS, SIGNAL_TYPE_TAG_CLASS } from "@/lib/constants";
+import { timeAgo, extractSub } from "@/lib/utils";
 
 function scoreVariant(
   score: number | null,
@@ -154,6 +155,15 @@ function SignalCard({ signal }: { signal: Signal }) {
   const [hunting, setHunting] = useState(signal.status === "hunting");
   const variant = scoreVariant(signal.aiScore);
 
+  async function addToHuntBoard() {
+    setHunting(true);
+    await fetch(`/api/mentions/${signal.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "hunting" }),
+    });
+  }
+
   if (dismissed) return null;
 
   return (
@@ -206,7 +216,7 @@ function SignalCard({ signal }: { signal: Signal }) {
 
       <div className="flex items-center gap-2 flex-wrap">
         <button
-          onClick={() => setHunting(true)}
+          onClick={addToHuntBoard}
           disabled={hunting}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
             hunting
@@ -245,23 +255,6 @@ function SignalCard({ signal }: { signal: Signal }) {
   );
 }
 
-function timeAgo(dateStr: string): string {
-  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-  // sec
-  if (diff < 60) return `${diff}s ago`;
-  // mins
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  // hrs
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  // else days
-  return `${Math.floor(diff / 86400)}d ago`;
-}
-
-function extractSub(platform: string, postUrl: string): string {
-  if (platform !== "reddit") return "HN";
-  const match = postUrl.match(/reddit\.com\/(r\/[^/]+)/);
-  return match ? match[1] : "Reddit";
-}
 
 function toSignal(row: Record<string, unknown>): Signal {
   return {
@@ -311,7 +304,9 @@ export default function SignalsPage() {
     })();
   }, [filters]);
 
-  const hotCount = signals.filter((s) => s.aiScore !== null && s.aiScore >= 8).length;
+  const hotCount = signals.filter(
+    (s) => s.aiScore !== null && s.aiScore >= 8,
+  ).length;
 
   return (
     <div className="p-5 h-full flex gap-4 min-h-0">

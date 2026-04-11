@@ -15,6 +15,7 @@ import {
 import { SiReddit, SiYcombinator } from "react-icons/si";
 import { FaRedditAlien, FaYCombinator } from "react-icons/fa6";
 import type { Stats } from "@/types";
+import { timeAgo } from "@/lib/utils";
 
 const sources = [
   { label: "Reddit", icon: SiReddit, active: true },
@@ -48,13 +49,6 @@ const huntColumns = [
   },
 ] as const;
 
-function timeAgo(dateStr: string): string {
-  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-  if (diff < 60) return `${diff}s ago`;
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
-}
 
 export default function DashboardPage() {
   const [scanning, setScanning] = useState(false);
