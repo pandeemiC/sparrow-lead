@@ -220,6 +220,9 @@ function ReplyModal({
 function SignalCard({ signal }: { signal: Signal }) {
   const [dismissed, setDismissed] = useState(false);
   const [hunting, setHunting] = useState(signal.status === "hunting");
+  const [replyOpen, setReplyOpen] = useState(false);
+  const [reply, setReply] = useState("");
+  const [replyLoading, setReplyLoading] = useState(false);
   const variant = scoreVariant(signal.aiScore);
 
   async function addToHuntBoard() {
@@ -231,94 +234,120 @@ function SignalCard({ signal }: { signal: Signal }) {
     });
   }
 
+  async function getReply() {
+    setReplyOpen(true);
+    if (reply) return;
+    setReplyLoading(true);
+    const res = await fetch("/api/ai/reply", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mentionId: signal.id }),
+    });
+    const data = await res.json();
+    setReply(data.reply ?? "Could not generate a reply.");
+    setReplyLoading(false);
+  }
+
   if (dismissed) return null;
 
   return (
-    <div
-      className={`signal-card signal-card-${variant} rounded-xl p-5 flex flex-col gap-4`}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-2 flex-wrap">
-          <PlatformPill platform={signal.platform} source={signal.source} />
-          <span className="text-white/20 text-xs">·</span>
-          <span className="text-xs text-white/30">{signal.timeAgo}</span>
-        </div>
-        <span className="shrink-0 text-[10px] px-2 py-0.5 rounded-md border keyword-tag font-medium">
-          {signal.keyword}
-        </span>
-      </div>
-
-      <div>
-        <p className="text-sm font-semibold text-white leading-snug mb-1.5">
-          {signal.title}
-        </p>
-        <p className="text-sm text-white/40 leading-relaxed line-clamp-2">
-          {signal.body}
-        </p>
-      </div>
-
+    <>
+      {replyOpen && (
+        <ReplyModal
+          reply={reply}
+          loading={replyLoading}
+          onClose={() => setReplyOpen(false)}
+        />
+      )}
       <div
-        className={`rounded-lg border p-3.5 flex flex-col gap-2.5 ai-block-${variant === "unscored" ? "cold" : variant}`}
+        className={`signal-card signal-card-${variant} rounded-xl p-5 flex flex-col gap-4`}
       >
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 text-white/40">
-            <Sparkles size={12} className="text-sparrow-red" />
-            <span className="text-[10px] font-semibold uppercase tracking-widest">
-              AI Analysis
-            </span>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <PlatformPill platform={signal.platform} source={signal.source} />
+            <span className="text-white/20 text-xs">·</span>
+            <span className="text-xs text-white/30">{signal.timeAgo}</span>
           </div>
-          <ScoreBadge score={signal.aiScore} />
+          <span className="shrink-0 text-[10px] px-2 py-0.5 rounded-md border keyword-tag font-medium">
+            {signal.keyword}
+          </span>
         </div>
-        {signal.aiScore !== null ? (
-          <div className="flex items-start gap-2 flex-wrap">
-            <p className="text-xs text-white/55 leading-relaxed flex-1 min-w-0">
-              {signal.aiReason}
-            </p>
-            {signal.aiType && <TypeTag type={signal.aiType} />}
+
+        <div>
+          <p className="text-sm font-semibold text-white leading-snug mb-1.5">
+            {signal.title}
+          </p>
+          <p className="text-sm text-white/40 leading-relaxed line-clamp-2">
+            {signal.body}
+          </p>
+        </div>
+
+        <div
+          className={`rounded-lg border p-3.5 flex flex-col gap-2.5 ai-block-${variant === "unscored" ? "cold" : variant}`}
+        >
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 text-white/40">
+              <Sparkles size={12} className="text-sparrow-red" />
+              <span className="text-[10px] font-semibold uppercase tracking-widest">
+                AI Analysis
+              </span>
+            </div>
+            <ScoreBadge score={signal.aiScore} />
           </div>
-        ) : (
-          <p className="text-xs text-white/30 italic">Scoring this signal...</p>
-        )}
+          {signal.aiScore !== null ? (
+            <div className="flex items-start gap-2 flex-wrap">
+              <p className="text-xs text-white/55 leading-relaxed flex-1 min-w-0">
+                {signal.aiReason}
+              </p>
+              {signal.aiType && <TypeTag type={signal.aiType} />}
+            </div>
+          ) : (
+            <p className="text-xs text-white/30 italic">Scoring this signal...</p>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={addToHuntBoard}
+            disabled={hunting}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+              hunting
+                ? "bg-sparrow-red/20 text-sparrow-red border border-sparrow-red/30 cursor-default"
+                : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/8 hover:text-white hover:border-white/20"
+            }`}
+          >
+            <Target size={12} />
+            {hunting ? "In Hunt Board" : "+ Hunt Board"}
+          </button>
+
+          <button
+            onClick={getReply}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[rgba(175,4,4,0.15)] text-red-300 border border-red-500/20 hover:bg-[rgba(175,4,4,0.25)] transition-colors"
+          >
+            <Sparkles size={12} />
+            Get Reply
+          </button>
+
+          <a
+            href={signal.postUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/5 text-white/50 border border-white/10 hover:text-white hover:border-white/20 transition-colors"
+          >
+            <ExternalLink size={12} />
+            View
+          </a>
+
+          <button
+            onClick={() => setDismissed(true)}
+            className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white/25 hover:text-white/60 transition-colors"
+          >
+            <XCircle size={12} />
+            Dismiss
+          </button>
+        </div>
       </div>
-
-      <div className="flex items-center gap-2 flex-wrap">
-        <button
-          onClick={addToHuntBoard}
-          disabled={hunting}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-            hunting
-              ? "bg-sparrow-red/20 text-sparrow-red border border-sparrow-red/30 cursor-default"
-              : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/8 hover:text-white hover:border-white/20"
-          }`}
-        >
-          <Target size={12} />
-          {hunting ? "In Hunt Board" : "+ Hunt Board"}
-        </button>
-
-        <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[rgba(175,4,4,0.15)] text-red-300 border border-red-500/20 hover:bg-[rgba(175,4,4,0.25)] transition-colors">
-          <Sparkles size={12} />
-          Get Reply
-        </button>
-
-        <a
-          href={signal.postUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/5 text-white/50 border border-white/10 hover:text-white hover:border-white/20 transition-colors"
-        >
-          <ExternalLink size={12} />
-          View
-        </a>
-
-        <button
-          onClick={() => setDismissed(true)}
-          className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white/25 hover:text-white/60 transition-colors"
-        >
-          <XCircle size={12} />
-          Dismiss
-        </button>
-      </div>
-    </div>
+    </>
   );
 }
 
