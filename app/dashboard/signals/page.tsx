@@ -67,7 +67,7 @@ function ScoreBadge({ score }: { score: number | null }) {
 function TypeTag({ type }: { type: SignalType }) {
   return (
     <span
-      className={`inline-flex px-2 py-0.5 rounded text-[10px] font-medium border ${SIGNAL_TYPE_TAG_CLASS[type]}`}
+      className={`inline-flex px-2.5 py-1 rounded-md text-xs font-medium border ${SIGNAL_TYPE_TAG_CLASS[type]}`}
     >
       {SIGNAL_TYPE_LABELS[type]}
     </span>
@@ -141,8 +141,8 @@ function RadioGroup<T extends string>({
           onClick={() => onChange(opt.value)}
           className={`text-left text-sm px-2.5 py-1.5 rounded-lg transition-colors ${
             value === opt.value
-              ? "bg-sparrow-red/15 text-red-300 border border-red-500/20"
-              : "text-white/40 hover:text-white/70 hover:bg-white/5"
+              ? "bg-white/8 text-white border border-white/16"
+              : "text-white/35 hover:text-white/60 hover:bg-white/4"
           }`}
         >
           {opt.label}
@@ -177,12 +177,12 @@ function ReplyModal({
     >
       <div
         className="w-full max-w-md rounded-2xl border border-white/10 p-6 flex flex-col gap-5"
-        style={{ background: "#1a1a1a" }}
+        style={{ background: "#111111" }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Sparkles size={14} className="text-sparrow-red" />
+            <Sparkles size={14} className="text-white/50" />
             <span className="text-sm font-semibold text-white">
               AI Suggested Reply
             </span>
@@ -197,7 +197,7 @@ function ReplyModal({
 
         {loading ? (
           <div className="flex flex-col items-center justify-center gap-3 py-8">
-            <Sparkles size={20} className="text-sparrow-red animate-pulse" />
+            <Sparkles size={20} className="text-white/40 animate-pulse" />
             <p className="text-sm text-white/40">Generating reply...</p>
           </div>
         ) : (
@@ -277,9 +277,11 @@ function SignalCard({ signal }: { signal: Signal }) {
           <p className="text-sm font-semibold text-white leading-snug mb-1.5">
             {signal.title}
           </p>
-          <p className="text-sm text-white/40 leading-relaxed line-clamp-2">
-            {signal.body}
-          </p>
+          {signal.body && (
+            <p className="text-sm text-white/55 leading-relaxed line-clamp-2">
+              {signal.body}
+            </p>
+          )}
         </div>
 
         <div
@@ -287,7 +289,7 @@ function SignalCard({ signal }: { signal: Signal }) {
         >
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 text-white/40">
-              <Sparkles size={12} className="text-sparrow-red" />
+              <Sparkles size={12} className="text-white/50" />
               <span className="text-[10px] font-semibold uppercase tracking-widest">
                 AI Analysis
               </span>
@@ -312,7 +314,7 @@ function SignalCard({ signal }: { signal: Signal }) {
             disabled={hunting}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
               hunting
-                ? "bg-sparrow-red/20 text-sparrow-red border border-sparrow-red/30 cursor-default"
+                ? "bg-white/8 text-white border border-white/18 cursor-default"
                 : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/8 hover:text-white hover:border-white/20"
             }`}
           >
@@ -322,7 +324,7 @@ function SignalCard({ signal }: { signal: Signal }) {
 
           <button
             onClick={getReply}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[rgba(175,4,4,0.15)] text-red-300 border border-red-500/20 hover:bg-[rgba(175,4,4,0.25)] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/4 text-white/70 border border-white/10 hover:bg-white/7 hover:text-white hover:border-white/18 transition-colors"
           >
             <Sparkles size={12} />
             Get Reply
@@ -469,14 +471,14 @@ export default function SignalsPage() {
       <div className="flex-8 flex flex-col gap-4 min-h-0 min-w-0">
         <div className="rounded-xl glass-red border border-white/5 px-5 py-3.5 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <Radio size={14} className="text-sparrow-red" />
+            <Radio size={14} className="text-white/50" />
             <h2 className="text-sm font-semibold text-white">Signals Inbox</h2>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/40 font-semibold">
               {loading ? "—" : `${signals.length} signals`}
             </span>
           </div>
           {hotCount > 0 && (
-            <div className="flex items-center gap-1 text-red-300 text-sm uppercase font-semibold">
+            <div className="flex items-center gap-1 text-white/70 text-sm uppercase font-semibold">
               <Lottie
                 animationData={Fire}
                 loop

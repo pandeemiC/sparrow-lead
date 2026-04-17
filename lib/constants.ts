@@ -155,10 +155,10 @@ export const settingsItems = [
 
 export const HUNT_COLUMNS: { id: HuntStatus; label: string; color: string }[] =
   [
-    { id: "hunting", label: "Hunting (NEW)", color: "text-white/50" },
-    { id: "interested", label: "Interested", color: "text-blue-400" },
-    { id: "engaged", label: "Engaged", color: "text-amber-400" },
-    { id: "hunted", label: "Hunted", color: "text-emerald-400" },
+    { id: "hunting", label: "Hunting (NEW)", color: "text-white/40" },
+    { id: "interested", label: "Interested", color: "text-white/60" },
+    { id: "engaged", label: "Engaged", color: "text-white/80" },
+    { id: "hunted", label: "Hunted", color: "text-white" },
   ];
 
 export const MOCK_LEADS: Lead[] = [

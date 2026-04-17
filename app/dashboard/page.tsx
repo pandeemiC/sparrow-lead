@@ -23,30 +23,10 @@ const sources = [
 ];
 
 const huntColumns = [
-  {
-    key: "hunting",
-    label: "Hunting",
-    color: "text-white/50",
-    dot: "bg-white/20",
-  },
-  {
-    key: "interested",
-    label: "Interested",
-    color: "text-blue-400",
-    dot: "bg-blue-400",
-  },
-  {
-    key: "engaged",
-    label: "Engaged",
-    color: "text-amber-400",
-    dot: "bg-amber-400",
-  },
-  {
-    key: "hunted",
-    label: "Hunted",
-    color: "text-emerald-400",
-    dot: "bg-emerald-400",
-  },
+  { key: "hunting",    label: "Hunting",    color: "text-white/40", dot: "bg-white/20" },
+  { key: "interested", label: "Interested", color: "text-white/60", dot: "bg-white/35" },
+  { key: "engaged",    label: "Engaged",    color: "text-white/80", dot: "bg-white/55" },
+  { key: "hunted",     label: "Hunted",     color: "text-white",    dot: "bg-white/80" },
 ] as const;
 
 
@@ -149,9 +129,9 @@ export default function DashboardPage() {
               <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-white/3 border border-white/5">
                 <div
                   className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
-                  style={{ background: "rgba(175,4,4,0.15)" }}
+                  style={{ background: "rgba(255,255,255,0.04)" }}
                 >
-                  <Zap size={12} className="text-sparrow-red" />
+                  <Zap size={12} className="text-white/50" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-white/60">AI scoring active</p>
@@ -168,9 +148,9 @@ export default function DashboardPage() {
               <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-white/3 border border-white/5">
                 <div
                   className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
-                  style={{ background: "rgba(175,4,4,0.15)" }}
+                  style={{ background: "rgba(255,255,255,0.04)" }}
                 >
-                  <Zap size={12} className="text-sparrow-red" />
+                  <Zap size={12} className="text-white/50" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-white/60">AI input active</p>
@@ -208,8 +188,8 @@ export default function DashboardPage() {
           <div className="flex-1 flex flex-col px-4 py-4 rounded-xl glass-red border border-white/5 gap-3 min-h-0 min-w-0 overflow-hidden">
             <div className="flex items-center justify-between">
               <p className="text-[10px] text-white/40 uppercase tracking-widest">Total Signals</p>
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(175,4,4,0.12)" }}>
-                <Radio size={13} className="text-sparrow-red" />
+              <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0 bg-white/4 border border-white/6">
+                <Radio size={13} className="text-white/50" />
               </div>
             </div>
             <div>
@@ -228,7 +208,7 @@ export default function DashboardPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className={`flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/3 border-l-2 hover:bg-white/5 transition-colors ${
-                      s.ai_score !== null && s.ai_score >= 8 ? "border-l-red-600/50" :
+                      s.ai_score !== null && s.ai_score >= 8 ? "border-l-red-500" :
                       s.ai_score !== null && s.ai_score >= 5 ? "border-l-amber-600/50" :
                       "border-l-white/10"
                     }`}
@@ -255,8 +235,8 @@ export default function DashboardPage() {
           <div className="flex-1 flex flex-col px-4 py-4 rounded-xl glass-red border border-white/5 gap-3 min-h-0 min-w-0 overflow-hidden">
             <div className="flex items-center justify-between">
               <p className="text-[10px] text-white/40 uppercase tracking-widest">Signals Today</p>
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(59,130,246,0.1)" }}>
-                <TrendingUp size={13} className="text-blue-400" />
+              <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0 bg-white/4 border border-white/6">
+                <TrendingUp size={13} className="text-white/50" />
               </div>
             </div>
             <div>
@@ -275,7 +255,7 @@ export default function DashboardPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className={`flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/3 border-l-2 hover:bg-white/5 transition-colors ${
-                      s.ai_score !== null && s.ai_score >= 8 ? "border-l-red-600/50" :
+                      s.ai_score !== null && s.ai_score >= 8 ? "border-l-red-500" :
                       s.ai_score !== null && s.ai_score >= 5 ? "border-l-amber-600/50" :
                       "border-l-white/10"
                     }`}
@@ -302,8 +282,8 @@ export default function DashboardPage() {
           <div className="flex-1 flex flex-col px-4 py-4 rounded-xl glass-red border border-white/5 gap-3 min-h-0 min-w-0 overflow-hidden">
             <div className="flex items-center justify-between">
               <p className="text-[10px] text-white/40 uppercase tracking-widest">Keywords</p>
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(16,185,129,0.1)" }}>
-                <Tag size={13} className="text-emerald-400" />
+              <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0 bg-white/4 border border-white/6">
+                <Tag size={13} className="text-white/50" />
               </div>
             </div>
             <div>
@@ -381,7 +361,7 @@ export default function DashboardPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/3 border-l-2 hover:bg-white/5 transition-colors ${
-                    lead.ai_score !== null && lead.ai_score >= 8 ? "border-l-red-600/50" :
+                    lead.ai_score !== null && lead.ai_score >= 8 ? "border-l-red-500" :
                     lead.ai_score !== null && lead.ai_score >= 5 ? "border-l-amber-600/50" :
                     "border-l-white/10"
                   }`}
@@ -457,7 +437,7 @@ export default function DashboardPage() {
           <button
             onClick={scan}
             disabled={scanning}
-            className="flex items-center justify-center gap-2 w-full py-2.5 bg-sparrow-red hover:bg-sparrow-bright text-white text-sm font-semibold rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-md border border-white/10 bg-white/4 text-white text-sm font-medium hover:bg-white/7 hover:border-white/16 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <ScanLine size={15} className={scanning ? "animate-spin" : ""} />
             {scanning ? "Scanning..." : "Scan Now"}

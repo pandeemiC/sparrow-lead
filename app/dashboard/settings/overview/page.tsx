@@ -53,7 +53,7 @@ export default function SettingsOverview() {
                   className="rounded-full ring-1 ring-white/10 shrink-0"
                 />
               ) : (
-                <div className="w-14 h-14 rounded-full bg-sparrow-red/30 flex items-center justify-center text-white text-xl font-bold shrink-0">
+                <div className="w-14 h-14 rounded-full bg-white/8 flex items-center justify-center text-white text-xl font-medium shrink-0">
                   {name.charAt(0).toUpperCase()}
                 </div>
               )}
@@ -126,7 +126,7 @@ export default function SettingsOverview() {
                     cy="18"
                     r="15"
                     fill="none"
-                    stroke="rgba(175,4,4,0.5)"
+                    stroke="rgba(255,255,255,0.35)"
                     strokeWidth="2.5"
                     strokeDasharray="0 94"
                     strokeLinecap="round"
@@ -155,7 +155,7 @@ export default function SettingsOverview() {
                     cy="18"
                     r="15"
                     fill="none"
-                    stroke="rgba(175,4,4,0.5)"
+                    stroke="rgba(255,255,255,0.35)"
                     strokeWidth="2.5"
                     strokeDasharray="0 94"
                     strokeLinecap="round"

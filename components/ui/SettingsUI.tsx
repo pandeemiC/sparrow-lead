@@ -13,7 +13,7 @@ export function Toggle({
     <button
       onClick={() => onChange(!enabled)}
       className={`relative inline-flex h-5.5 w-9 shrink-0 cursor-pointer rounded-full border border-white/10 transition-colors duration-200 ${
-        enabled ? "bg-[rgba(175,4,4,0.7)]" : "bg-white/10"
+        enabled ? "bg-white/30" : "bg-white/8"
       }`}
     >
       <span
@@ -92,7 +92,7 @@ export function Select({
         </svg>
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 z-50 bg-[#1a1a1a] border border-white/10 rounded-lg overflow-hidden min-w-36 shadow-xl">
+        <div className="absolute right-0 top-full mt-1 z-50 bg-[#111111] border border-white/8 rounded-md overflow-hidden min-w-36 shadow-2xl">
           {options.map((opt) => (
             <button
               key={opt.value}

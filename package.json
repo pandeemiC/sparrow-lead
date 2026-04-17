@@ -13,6 +13,7 @@
     "@clerk/nextjs": "^7.0.6",
     "@neondatabase/serverless": "^1.0.2",
     "clsx": "^2.1.1",
+    "geist": "^1.7.0",
     "groq-sdk": "^1.1.2",
     "lottie-react": "^2.4.1",
     "lucide-react": "^1.0.0-rc.1",

@@ -48,7 +48,7 @@ function ScoreBadge({ score }: { score: number | null }) {
         <Lottie
           animationData={Fire}
           loop
-          style={{ width: 14, height: 14, marginBottom: "0.3rem" }}
+          style={{ width: 14, height: 14 }}
         />
         {score}/10
       </span>
@@ -112,12 +112,10 @@ function LeadCard({
         {lead.title}
       </p>
       {lead.aiReason && (
-        <div
-          className={`rounded-lg border p-2.5 ai-block-${variant === "unscored" ? "cold" : variant}`}
-        >
+        <div className="rounded-lg border p-2.5 ai-block-animated">
           <div className="flex items-center gap-1 mb-1">
-            <Sparkles size={10} className="text-sparrow-red" />
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
+            <Sparkles size={10} className="text-red-500" />
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-white">
               AI
             </span>
           </div>

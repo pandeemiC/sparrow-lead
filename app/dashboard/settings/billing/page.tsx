@@ -120,7 +120,7 @@ export default function SettingsBilling() {
       </div>
 
       {isPaid && (
-        <div className="rounded-xl glass-red border border-sparrow-bright/20 p-6 flex items-center justify-between gap-4">
+        <div className="rounded-xl glass-red border border-white/10 p-6 flex items-center justify-between gap-4">
           <div className="space-y-4">
             <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest">
               Danger Zone — Cancellation

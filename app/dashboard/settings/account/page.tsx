@@ -43,7 +43,7 @@ function SessionMenu({ onTerminate }: { onTerminate: () => void }) {
         <MoreHorizontal size={16} />
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 z-10 glass-red border border-white/10 rounded-lg overflow-hidden shadow-lg">
+        <div className="absolute right-0 top-full mt-1 z-10 bg-[#111111] border border-white/8 rounded-md overflow-hidden shadow-2xl">
           <button
             onClick={() => {
               onTerminate();
@@ -137,7 +137,7 @@ export default function SettingsAccount() {
         </div>
       </div>
 
-      <div className="rounded-xl glass-red border border-sparrow-bright/30 p-6">
+      <div className="rounded-xl glass-red border border-white/10 p-6">
         <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-6">
           Danger Zone
         </h2>

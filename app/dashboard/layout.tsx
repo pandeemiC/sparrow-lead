@@ -1,8 +1,7 @@
-import { Inter } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import { currentUser } from "@clerk/nextjs/server";
 import DashboardShell from "@/components/dashboard/DashboardShell";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export default async function DashboardLayout({
   children,
@@ -20,7 +19,7 @@ export default async function DashboardLayout({
   };
 
   return (
-    <div className={inter.className}>
+    <div className={`${GeistSans.className} ${GeistMono.variable}`}>
       <DashboardShell user={userData}>{children}</DashboardShell>
     </div>
   );

@@ -64,7 +64,7 @@ export default function KeywordManager() {
           onChange={(e) => setNewKeyword(e.target.value)}
           placeholder="Add a keyword..."
           value={newKeyword}
-          className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-sparrow-red/50 transition-colors"
+          className="w-full bg-white/2 border border-white/8 rounded-md px-3 py-2.5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20 transition-colors"
         />
         <div className="flex items-center gap-2">
           <div className="flex-1">
@@ -77,7 +77,7 @@ export default function KeywordManager() {
           <button
             type="submit"
             disabled={loading || !newKeyword.trim()}
-            className="flex items-center gap-2 bg-sparrow-red hover:bg-sparrow-bright text-white text-sm font-semibold px-4 py-1.5 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shrink-0"
+            className="flex items-center gap-2 bg-white/6 hover:bg-white/10 text-white text-sm font-medium px-4 py-2 rounded-md border border-white/10 hover:border-white/18 transition-all disabled:opacity-35 disabled:cursor-not-allowed cursor-pointer shrink-0"
           >
             <Plus size={15} />
             {loading ? "Adding..." : "Add"}
