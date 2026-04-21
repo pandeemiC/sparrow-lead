@@ -23,12 +23,26 @@ const sources = [
 ];
 
 const huntColumns = [
-  { key: "hunting",    label: "Hunting",    color: "text-white/40", dot: "bg-white/20" },
-  { key: "interested", label: "Interested", color: "text-white/60", dot: "bg-white/35" },
-  { key: "engaged",    label: "Engaged",    color: "text-white/80", dot: "bg-white/55" },
-  { key: "hunted",     label: "Hunted",     color: "text-white",    dot: "bg-white/80" },
+  {
+    key: "hunting",
+    label: "Hunting",
+    color: "text-white/40",
+    dot: "bg-white/20",
+  },
+  {
+    key: "interested",
+    label: "Interested",
+    color: "text-white/60",
+    dot: "bg-white/35",
+  },
+  {
+    key: "engaged",
+    label: "Engaged",
+    color: "text-white/80",
+    dot: "bg-white/55",
+  },
+  { key: "hunted", label: "Hunted", color: "text-white", dot: "bg-white/80" },
 ] as const;
-
 
 export default function DashboardPage() {
   const [scanning, setScanning] = useState(false);
@@ -83,7 +97,7 @@ export default function DashboardPage() {
 
           {stats && stats.totalSignals > 0 ? (
             <div className="flex-1 flex flex-col justify-center gap-3">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 glow-right">
                 <div className="flex-1 flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-white/3 border border-white/5">
                   <FaRedditAlien
                     size={13}
@@ -187,16 +201,22 @@ export default function DashboardPage() {
         <div className="flex gap-4 flex-1 min-h-0">
           <div className="flex-1 flex flex-col px-4 py-4 rounded-xl glass-red border border-white/5 gap-3 min-h-0 min-w-0 overflow-hidden">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] text-white/40 uppercase tracking-widest">Total Signals</p>
+              <p className="text-[10px] text-white/40 uppercase tracking-widest">
+                Total Signals
+              </p>
               <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0 bg-white/4 border border-white/6">
                 <Radio size={13} className="text-white/50" />
               </div>
             </div>
             <div>
               <p className="text-3xl font-bold text-white leading-none">
-                {stats?.totalSignals ?? <span className="text-white/20 text-lg">—</span>}
+                {stats?.totalSignals ?? (
+                  <span className="text-white/20 text-lg">—</span>
+                )}
               </p>
-              <p className="text-[10px] text-white/25 mt-1">mentions captured</p>
+              <p className="text-[10px] text-white/25 mt-1">
+                mentions captured
+              </p>
             </div>
             <div className="h-px bg-white/5" />
             <div className="flex flex-col gap-1.5 overflow-y-auto flex-1 min-h-0">
@@ -208,21 +228,39 @@ export default function DashboardPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className={`flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/3 border-l-2 hover:bg-white/5 transition-colors ${
-                      s.ai_score !== null && s.ai_score >= 8 ? "border-l-red-500" :
-                      s.ai_score !== null && s.ai_score >= 5 ? "border-l-amber-600/50" :
-                      "border-l-white/10"
+                      s.ai_score !== null && s.ai_score >= 8
+                        ? "border-l-red-500"
+                        : s.ai_score !== null && s.ai_score >= 5
+                          ? "border-l-amber-600/50"
+                          : "border-l-white/10"
                     }`}
                   >
-                    {s.platform === "reddit"
-                      ? <FaRedditAlien size={9} className="text-orange-400 shrink-0" />
-                      : <FaYCombinator size={9} className="text-orange-300 shrink-0" />
-                    }
-                    <span className="text-[10px] text-white/50 truncate flex-1">{s.post_title}</span>
+                    {s.platform === "reddit" ? (
+                      <FaRedditAlien
+                        size={9}
+                        className="text-orange-400 shrink-0"
+                      />
+                    ) : (
+                      <FaYCombinator
+                        size={9}
+                        className="text-orange-300 shrink-0"
+                      />
+                    )}
+                    <span className="text-[10px] text-white/50 truncate flex-1">
+                      {s.post_title}
+                    </span>
                     {s.ai_score !== null && (
-                      <span className={`text-[9px] font-bold shrink-0 ${
-                        s.ai_score >= 8 ? "text-red-400" :
-                        s.ai_score >= 5 ? "text-amber-400" : "text-white/25"
-                      }`}>{s.ai_score}</span>
+                      <span
+                        className={`text-[9px] font-bold shrink-0 ${
+                          s.ai_score >= 8
+                            ? "text-red-400"
+                            : s.ai_score >= 5
+                              ? "text-amber-400"
+                              : "text-white/25"
+                        }`}
+                      >
+                        {s.ai_score}
+                      </span>
                     )}
                   </a>
                 ))
@@ -234,14 +272,18 @@ export default function DashboardPage() {
 
           <div className="flex-1 flex flex-col px-4 py-4 rounded-xl glass-red border border-white/5 gap-3 min-h-0 min-w-0 overflow-hidden">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] text-white/40 uppercase tracking-widest">Signals Today</p>
+              <p className="text-[10px] text-white/40 uppercase tracking-widest">
+                Signals Today
+              </p>
               <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0 bg-white/4 border border-white/6">
                 <TrendingUp size={13} className="text-white/50" />
               </div>
             </div>
             <div>
               <p className="text-3xl font-bold text-white leading-none">
-                {stats?.signalsToday ?? <span className="text-white/20 text-lg">—</span>}
+                {stats?.signalsToday ?? (
+                  <span className="text-white/20 text-lg">—</span>
+                )}
               </p>
               <p className="text-[10px] text-white/25 mt-1">in last 24h</p>
             </div>
@@ -255,21 +297,39 @@ export default function DashboardPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className={`flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/3 border-l-2 hover:bg-white/5 transition-colors ${
-                      s.ai_score !== null && s.ai_score >= 8 ? "border-l-red-500" :
-                      s.ai_score !== null && s.ai_score >= 5 ? "border-l-amber-600/50" :
-                      "border-l-white/10"
+                      s.ai_score !== null && s.ai_score >= 8
+                        ? "border-l-red-500"
+                        : s.ai_score !== null && s.ai_score >= 5
+                          ? "border-l-amber-600/50"
+                          : "border-l-white/10"
                     }`}
                   >
-                    {s.platform === "reddit"
-                      ? <FaRedditAlien size={9} className="text-orange-400 shrink-0" />
-                      : <FaYCombinator size={9} className="text-orange-300 shrink-0" />
-                    }
-                    <span className="text-[10px] text-white/50 truncate flex-1">{s.post_title}</span>
+                    {s.platform === "reddit" ? (
+                      <FaRedditAlien
+                        size={9}
+                        className="text-orange-400 shrink-0"
+                      />
+                    ) : (
+                      <FaYCombinator
+                        size={9}
+                        className="text-orange-300 shrink-0"
+                      />
+                    )}
+                    <span className="text-[10px] text-white/50 truncate flex-1">
+                      {s.post_title}
+                    </span>
                     {s.ai_score !== null && (
-                      <span className={`text-[9px] font-bold shrink-0 ${
-                        s.ai_score >= 8 ? "text-red-400" :
-                        s.ai_score >= 5 ? "text-amber-400" : "text-white/25"
-                      }`}>{s.ai_score}</span>
+                      <span
+                        className={`text-[9px] font-bold shrink-0 ${
+                          s.ai_score >= 8
+                            ? "text-red-400"
+                            : s.ai_score >= 5
+                              ? "text-amber-400"
+                              : "text-white/25"
+                        }`}
+                      >
+                        {s.ai_score}
+                      </span>
                     )}
                   </a>
                 ))
@@ -281,14 +341,18 @@ export default function DashboardPage() {
 
           <div className="flex-1 flex flex-col px-4 py-4 rounded-xl glass-red border border-white/5 gap-3 min-h-0 min-w-0 overflow-hidden">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] text-white/40 uppercase tracking-widest">Keywords</p>
+              <p className="text-[10px] text-white/40 uppercase tracking-widest">
+                Keywords
+              </p>
               <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0 bg-white/4 border border-white/6">
                 <Tag size={13} className="text-white/50" />
               </div>
             </div>
             <div>
               <p className="text-3xl font-bold text-white leading-none">
-                {stats?.keywordsTracked ?? <span className="text-white/20 text-lg">—</span>}
+                {stats?.keywordsTracked ?? (
+                  <span className="text-white/20 text-lg">—</span>
+                )}
               </p>
               <p className="text-[10px] text-white/25 mt-1">being tracked</p>
             </div>
@@ -300,12 +364,23 @@ export default function DashboardPage() {
                     key={kw.keyword}
                     className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/3 border border-white/5"
                   >
-                    {kw.platform === "reddit"
-                      ? <FaRedditAlien size={9} className="text-orange-400 shrink-0" />
-                      : <FaYCombinator size={9} className="text-orange-300 shrink-0" />
-                    }
-                    <span className="text-[10px] text-white/50 truncate flex-1">{kw.keyword}</span>
-                    <span className="text-[9px] text-white/25 shrink-0">{kw.mention_count} hits</span>
+                    {kw.platform === "reddit" ? (
+                      <FaRedditAlien
+                        size={9}
+                        className="text-orange-400 shrink-0"
+                      />
+                    ) : (
+                      <FaYCombinator
+                        size={9}
+                        className="text-orange-300 shrink-0"
+                      />
+                    )}
+                    <span className="text-[10px] text-white/50 truncate flex-1">
+                      {kw.keyword}
+                    </span>
+                    <span className="text-[9px] text-white/25 shrink-0">
+                      {kw.mention_count} hits
+                    </span>
                   </div>
                 ))
               ) : (
@@ -352,7 +427,7 @@ export default function DashboardPage() {
             ))}
           </div>
 
-         {stats?.huntLeads && stats.huntLeads.length > 0 ? (
+          {stats?.huntLeads && stats.huntLeads.length > 0 ? (
             <div className="flex flex-col gap-1.5 flex-1 min-h-0 overflow-y-auto">
               {stats.huntLeads.map((lead) => (
                 <a
@@ -361,26 +436,48 @@ export default function DashboardPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/3 border-l-2 hover:bg-white/5 transition-colors ${
-                    lead.ai_score !== null && lead.ai_score >= 8 ? "border-l-red-500" :
-                    lead.ai_score !== null && lead.ai_score >= 5 ? "border-l-amber-600/50" :
-                    "border-l-white/10"
+                    lead.ai_score !== null && lead.ai_score >= 8
+                      ? "border-l-red-500"
+                      : lead.ai_score !== null && lead.ai_score >= 5
+                        ? "border-l-amber-600/50"
+                        : "border-l-white/10"
                   }`}
                 >
-                  {lead.platform === "reddit"
-                    ? <FaRedditAlien size={9} className="text-orange-400 shrink-0" />
-                    : <FaYCombinator size={9} className="text-orange-300 shrink-0" />
-                  }
-                  <span className="text-[10px] text-white/50 truncate flex-1">{lead.post_title}</span>
-                  <span className={`text-[9px] font-bold shrink-0 ${
-                    lead.status === "interested" ? "text-blue-400" : "text-white/30"
-                  }`}>
+                  {lead.platform === "reddit" ? (
+                    <FaRedditAlien
+                      size={9}
+                      className="text-orange-400 shrink-0"
+                    />
+                  ) : (
+                    <FaYCombinator
+                      size={9}
+                      className="text-orange-300 shrink-0"
+                    />
+                  )}
+                  <span className="text-[10px] text-white/50 truncate flex-1">
+                    {lead.post_title}
+                  </span>
+                  <span
+                    className={`text-[9px] font-bold shrink-0 ${
+                      lead.status === "interested"
+                        ? "text-blue-400"
+                        : "text-white/30"
+                    }`}
+                  >
                     {lead.status === "interested" ? "Interested" : "Hunting"}
                   </span>
                   {lead.ai_score !== null && (
-                    <span className={`text-[9px] font-bold shrink-0 ${
-                      lead.ai_score >= 8 ? "text-red-400" :
-                      lead.ai_score >= 5 ? "text-amber-400" : "text-white/25"
-                    }`}>{lead.ai_score}</span>
+                    <span
+                      className={`text-[9px] font-bold shrink-0 ${
+                        lead.ai_score >= 8
+                          ? "text-red-400"
+                          : lead.ai_score >= 5
+                            ? "text-amber-400"
+                            : "text-white/25"
+                      }`}
+                    >
+                      {lead.ai_score}
+                    </span>
                   )}
                 </a>
               ))}
@@ -397,7 +494,9 @@ export default function DashboardPage() {
                 <Target size={14} className="text-white/15" />
               </div>
               <p className="text-xs text-white/25">No leads yet</p>
-              <p className="text-[10px] text-white/15">Add signals to the Hunt Board</p>
+              <p className="text-[10px] text-white/15">
+                Add signals to the Hunt Board
+              </p>
             </div>
           )}
         </div>
