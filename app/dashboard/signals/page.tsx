@@ -18,10 +18,11 @@ import Lottie from "lottie-react";
 import type { Signal, SignalType, SignalFilters } from "@/types";
 import { SIGNAL_TYPE_LABELS, SIGNAL_TYPE_TAG_CLASS } from "@/lib/constants";
 import { timeAgo, extractSub } from "@/lib/utils";
+import { TopSpotlight } from "@/components/ui/Spotlights";
 
-function scoreVariant(
-  score: number | null,
-): "hot" | "warm" | "cold" | "unscored" {
+type Variant = "hot" | "warm" | "cold" | "unscored";
+
+function scoreVariant(score: number | null): Variant {
   if (score === null) return "unscored";
   if (score >= 8) return "hot";
   if (score >= 5) return "warm";
@@ -29,39 +30,30 @@ function scoreVariant(
 }
 
 function ScoreBadge({ score }: { score: number | null }) {
-  const variant = scoreVariant(score);
+  const v = scoreVariant(score);
 
-  if (variant === "unscored") {
+  if (v === "unscored") {
     return (
       <span className="animate-pulse inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border badge-cold">
         <span className="w-12 h-2 rounded bg-white/10" />
       </span>
     );
   }
-  if (variant === "hot") {
+
+  const base =
+    "inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border";
+  if (v === "hot")
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border badge-hot">
-        <Lottie
-          animationData={Fire}
-          loop
-          style={{ width: 16, height: 16, marginBottom: "0.3rem" }}
-        />
+      <span className={`${base} gap-1 badge-hot`}>
+        <Lottie animationData={Fire} loop style={{ width: 16, height: 16 }} />
         {score}/10 HOT
       </span>
     );
-  }
-  if (variant === "warm") {
+  if (v === "warm")
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border badge-warm">
-        {score}/10 WARM
-      </span>
+      <span className={`${base} gap-1.5 badge-warm`}>{score}/10 WARM</span>
     );
-  }
-  return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border badge-cold">
-      {score}/10 COLD
-    </span>
-  );
+  return <span className={`${base} gap-1.5 badge-cold`}>{score}/10 COLD</span>;
 }
 
 function TypeTag({ type }: { type: SignalType }) {
@@ -81,18 +73,17 @@ function PlatformPill({
   platform: Signal["platform"];
   source: string;
 }) {
-  if (platform === "reddit") {
+  const shared =
+    "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-xs font-medium";
+  if (platform === "reddit")
     return (
-      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-xs font-medium text-orange-400 platform-pill-reddit">
-        <FaRedditAlien size={11} />
-        {source}
+      <span className={`${shared} text-orange-400 platform-pill-reddit`}>
+        <FaRedditAlien size={11} /> {source}
       </span>
     );
-  }
   return (
-    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-xs font-medium text-orange-300 platform-pill-hn">
-      <FaYCombinator size={11} />
-      {source}
+    <span className={`${shared} text-orange-300 platform-pill-hn`}>
+      <FaYCombinator size={11} /> {source}
     </span>
   );
 }
@@ -259,9 +250,9 @@ function SignalCard({ signal }: { signal: Signal }) {
           onClose={() => setReplyOpen(false)}
         />
       )}
-      <div
-        className={`signal-card signal-card-${variant} rounded-xl p-5 flex flex-col gap-4`}
-      >
+      <div className="signal-card rounded-xl p-5 flex flex-col gap-4">
+        <TopSpotlight variant={variant} />
+
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2 flex-wrap">
             <PlatformPill platform={signal.platform} source={signal.source} />
@@ -292,11 +283,13 @@ function SignalCard({ signal }: { signal: Signal }) {
           )}
         </div>
 
-        <div className={`rounded-lg border p-3.5 flex flex-col gap-2.5 ai-block-${variant === "unscored" ? "cold" : variant} rgb-ai-border`}>
+        <div
+          className={`ai-snake rounded-lg border p-3.5 flex flex-col gap-2.5 ai-block-${variant === "unscored" ? "cold" : variant}`}
+        >
           <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5 text-white/40">
-              <Sparkles size={12} className="text-white/50" />
-              <span className="text-[10px] font-semibold uppercase tracking-widest">
+            <div className="flex items-center gap-1.5">
+              <Sparkles size={12} className="sparkle-rgb" />
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
                 AI Analysis
               </span>
             </div>
@@ -310,7 +303,9 @@ function SignalCard({ signal }: { signal: Signal }) {
               {signal.aiType && <TypeTag type={signal.aiType} />}
             </div>
           ) : (
-            <p className="text-xs text-white/30 italic">Scoring this signal...</p>
+            <p className="text-xs text-white/30 italic">
+              Scoring this signal...
+            </p>
           )}
         </div>
 
@@ -330,9 +325,9 @@ function SignalCard({ signal }: { signal: Signal }) {
 
           <button
             onClick={getReply}
-            className="btn-get-reply flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/4 text-white/70 border border-white/10 hover:bg-white/7 hover:text-white hover:border-white/18 transition-colors"
           >
-            <Sparkles size={12} className="icon-rgb" />
+            <Sparkles className="sparkle-rgb" size={12} />
             Get Reply
           </button>
 
@@ -383,13 +378,7 @@ export default function SignalsPage() {
     setFilters((f) => ({ ...f, [key]: val }));
 
   useEffect(() => {
-    const params = new URLSearchParams({
-      platform: filters.platform,
-      intent: filters.intent,
-      type: filters.type,
-      sort: filters.sort,
-    });
-
+    const params = new URLSearchParams(filters);
     (async () => {
       setLoading(true);
       const r = await fetch(`/api/mentions?${params}`);
@@ -410,7 +399,6 @@ export default function SignalsPage() {
           <h2 className="text-sm font-semibold text-white">Filters</h2>
           <SlidersHorizontal size={14} className="text-white/20" />
         </div>
-
         <div className="flex flex-col gap-4">
           <FilterSection label="Platform">
             <RadioGroup
@@ -423,7 +411,6 @@ export default function SignalsPage() {
               ]}
             />
           </FilterSection>
-
           <FilterSection label="Intent Score">
             <RadioGroup
               value={filters.intent}
@@ -436,7 +423,6 @@ export default function SignalsPage() {
               ]}
             />
           </FilterSection>
-
           <FilterSection label="Signal Type">
             <RadioGroup
               value={filters.type}
@@ -451,7 +437,6 @@ export default function SignalsPage() {
               ]}
             />
           </FilterSection>
-
           <FilterSection label="Sort By">
             <RadioGroup
               value={filters.sort}
@@ -476,13 +461,15 @@ export default function SignalsPage() {
             </span>
           </div>
           {hotCount > 0 && (
-            <div className="flex items-center gap-1 text-white/70 text-sm uppercase font-semibold">
+            <div className="flex items-center gap-1.5">
               <Lottie
                 animationData={Fire}
                 loop
-                style={{ width: 24, height: 24, marginBottom: "0.4rem" }}
+                style={{ width: 16, height: 16 }}
               />
-              {hotCount} hot lead{hotCount !== 1 ? "s" : ""}
+              <span className="text-[11px] font-medium tracking-wide text-white/50">
+                {hotCount} hot lead{hotCount !== 1 ? "s" : ""}
+              </span>
             </div>
           )}
         </div>
