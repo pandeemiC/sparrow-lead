@@ -97,7 +97,7 @@ export default function DashboardPage() {
 
           {stats && stats.totalSignals > 0 ? (
             <div className="flex-1 flex flex-col justify-center gap-3">
-              <div className="flex items-center gap-3 glow-right">
+              <div className="flex items-center gap-3">
                 <div className="flex-1 flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-white/3 border border-white/5">
                   <FaRedditAlien
                     size={13}

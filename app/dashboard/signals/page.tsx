@@ -268,9 +268,17 @@ function SignalCard({ signal }: { signal: Signal }) {
             <span className="text-white/20 text-xs">·</span>
             <span className="text-xs text-white/30">{signal.timeAgo}</span>
           </div>
-          <span className="shrink-0 text-[10px] px-2 py-0.5 rounded-md border keyword-tag font-medium">
-            {signal.keyword}
-          </span>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-[10px] px-2 py-0.5 rounded-md border keyword-tag font-medium">
+              {signal.keyword}
+            </span>
+            <button
+              onClick={() => setDismissed(true)}
+              className="text-white/20 hover:text-white/60 transition-colors"
+            >
+              <XCircle size={13} />
+            </button>
+          </div>
         </div>
 
         <div>
@@ -284,9 +292,7 @@ function SignalCard({ signal }: { signal: Signal }) {
           )}
         </div>
 
-        <div
-          className={`rounded-lg border p-3.5 flex flex-col gap-2.5 ai-block-${variant === "unscored" ? "cold" : variant}`}
-        >
+        <div className={`rounded-lg border p-3.5 flex flex-col gap-2.5 ai-block-${variant === "unscored" ? "cold" : variant} rgb-ai-border`}>
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 text-white/40">
               <Sparkles size={12} className="text-white/50" />
@@ -324,9 +330,9 @@ function SignalCard({ signal }: { signal: Signal }) {
 
           <button
             onClick={getReply}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/4 text-white/70 border border-white/10 hover:bg-white/7 hover:text-white hover:border-white/18 transition-colors"
+            className="btn-get-reply flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
           >
-            <Sparkles size={12} />
+            <Sparkles size={12} className="icon-rgb" />
             Get Reply
           </button>
 
@@ -339,14 +345,6 @@ function SignalCard({ signal }: { signal: Signal }) {
             <ExternalLink size={12} />
             View
           </a>
-
-          <button
-            onClick={() => setDismissed(true)}
-            className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white/25 hover:text-white/60 transition-colors"
-          >
-            <XCircle size={12} />
-            Dismiss
-          </button>
         </div>
       </div>
     </>
