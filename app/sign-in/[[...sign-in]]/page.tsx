@@ -201,18 +201,20 @@ export default function SignInPage() {
 
       <div className="relative z-10 flex w-full">
         <div className="hidden lg:flex lg:w-[50%] flex-col justify-between p-12">
-          <div className="flex items-center gap-2">
-            <Image
-              src="/sparrow-no-text-logo.png"
-              alt="Sparrow"
-              width={18}
-              height={18}
-              className="opacity-65"
-            />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
-              Sparrow
-            </span>
-          </div>
+          <Link href="/">
+            <div className="flex items-center gap-2">
+              <Image
+                src="/sparrow-no-text-logo.png"
+                alt="Sparrow"
+                width={18}
+                height={18}
+                className="opacity-65"
+              />
+              <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
+                Sparrow
+              </span>
+            </div>
+          </Link>
 
           <motion.div
             className="flex flex-col gap-5"
@@ -249,17 +251,19 @@ export default function SignInPage() {
                 className="relative flex justify-center mb-10"
                 style={{ height: 136 }}
               >
-                <Image
-                  src="/sparrow-no-text-logo.png"
-                  alt="Sparrow"
-                  width={200}
-                  height={200}
-                  className="relative top-0 left-1/2 -translate-x-1/2 opacity-90"
-                  style={{
-                    filter:
-                      "brightness(1) drop-shadow(0 0 18px rgba(210, 43, 43,0.6))",
-                  }}
-                />
+                <Link href="/">
+                  <Image
+                    src="/sparrow-no-text-logo.png"
+                    alt="Sparrow"
+                    width={200}
+                    height={200}
+                    className="relative top-0 left-1/2 -translate-x-1/2 opacity-90"
+                    style={{
+                      filter:
+                        "brightness(1) drop-shadow(0 0 18px rgba(210, 43, 43,0.6))",
+                    }}
+                  />
+                </Link>
                 <h1 className="absolute bottom-[-15] text-[20px] font-semibold uppercase tracking-[0.22em] text-white/35">
                   Sparrow
                 </h1>
