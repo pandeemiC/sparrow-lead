@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { SiDiscord, SiGithub, SiInstagram } from "react-icons/si";
-import { Settings, ChevronLeft } from "lucide-react";
+import { Settings, ChevronLeft, LogOut } from "lucide-react";
+import { useClerk } from "@clerk/nextjs";
 import sparrowLogo from "@/public/sparrow-no-text-logo.png";
 import { navItems } from "@/lib/constants";
 import { useState } from "react";
@@ -13,6 +14,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const isSettingsActive = pathname.startsWith("/dashboard/settings");
+  const { signOut } = useClerk();
 
   return (
     <div className="relative flex shrink-0 h-full">
@@ -84,9 +86,25 @@ export default function Sidebar() {
               </span>
             )}
           </Link>
+          <button
+            onClick={() => signOut({ redirectUrl: "/sign-in" })}
+            className={`w-full flex items-center py-2 rounded-md transition-all cursor-pointer mt-0.5 ${
+              collapsed ? "justify-center px-2" : "gap-3 px-3"
+            } text-white/40 hover:text-white/70 hover:bg-white/3 border border-transparent`}
+            title="Log out"
+          >
+            <LogOut size={17} className="shrink-0 text-red-500" />
+            {!collapsed && (
+              <span className="text-[13px] font-medium whitespace-nowrap">
+                Log out
+              </span>
+            )}
+          </button>
         </div>
 
-        <div className={`py-5 px-2 flex items-center justify-center gap-5 text-white/25 border-t border-white/6 ${collapsed ? "invisible" : ""}`}>
+        <div
+          className={`py-5 px-2 flex items-center justify-center gap-5 text-white/25 border-t border-white/6 ${collapsed ? "invisible" : ""}`}
+        >
           <a href="#" className="hover:text-white/60 transition-colors">
             <SiDiscord size={15} />
           </a>
