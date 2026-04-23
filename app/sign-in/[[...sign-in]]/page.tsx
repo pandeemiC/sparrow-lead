@@ -237,7 +237,7 @@ export default function SignInPage() {
           </motion.div>
         </div>
 
-        <div className="w-full lg:w-[50%] border-neutral-500/10 rounded-2xl mr-20 border bg-neutral-600/20  flex items-center justify-center p-6 lg:p-12">
+        <div className="w-full lg:w-[50%] my-10 border-neutral-500/10 rounded-2xl mr-20 border bg-neutral-600/20  flex items-center justify-center p-6 lg:p-12">
           <motion.div
             className="auth-glass w-full max-w-sm rounded-2xl p-8"
             initial={{ opacity: 0, y: 20 }}
@@ -245,16 +245,22 @@ export default function SignInPage() {
             transition={{ duration: 0.7, ease: "easeOut" }}
           >
             <div className="flex flex-col items-center mb-7">
-              <div className="relative flex justify-center" style={{ height: 136 }}>
+              <div
+                className="relative flex justify-center mb-10"
+                style={{ height: 136 }}
+              >
                 <Image
                   src="/sparrow-no-text-logo.png"
                   alt="Sparrow"
                   width={200}
                   height={200}
-                  className="absolute top-0 left-1/2 -translate-x-1/2 opacity-90"
-                  style={{ filter: "brightness(0) invert(1) drop-shadow(0 0 18px rgba(255,60,60,0.6))" }}
+                  className="relative top-0 left-1/2 -translate-x-1/2 opacity-90"
+                  style={{
+                    filter:
+                      "brightness(1) drop-shadow(0 0 18px rgba(210, 43, 43,0.6))",
+                  }}
                 />
-                <h1 className="absolute bottom-0 text-[13px] font-semibold uppercase tracking-[0.22em] text-white/35">
+                <h1 className="absolute bottom-[-15] text-[20px] font-semibold uppercase tracking-[0.22em] text-white/35">
                   Sparrow
                 </h1>
               </div>
@@ -286,9 +292,17 @@ export default function SignInPage() {
             </div>
 
             <div className="flex items-center gap-3 mb-5">
-              <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
-              <span className="text-[10px] text-white/25 uppercase tracking-wider">or</span>
-              <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
+              <div
+                className="flex-1 h-px"
+                style={{ background: "rgba(255,255,255,0.08)" }}
+              />
+              <span className="text-[10px] text-white/25 uppercase tracking-wider">
+                or
+              </span>
+              <div
+                className="flex-1 h-px"
+                style={{ background: "rgba(255,255,255,0.08)" }}
+              />
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -311,7 +325,10 @@ export default function SignInPage() {
                   <label className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
                     Password
                   </label>
-                  <button type="button" className="text-[10px] text-white/30 hover:text-white/60 transition-colors">
+                  <button
+                    type="button"
+                    className="text-[10px] text-white/30 hover:text-white/60 transition-colors"
+                  >
                     Forgot password?
                   </button>
                 </div>
@@ -351,7 +368,10 @@ export default function SignInPage() {
 
             <p className="text-center text-[11px] text-white/30 mt-5">
               Don&apos;t have an account?{" "}
-              <Link href="/sign-up" className="text-white/55 font-semibold hover:text-white transition-colors">
+              <Link
+                href="/sign-up"
+                className="text-white/55 font-semibold hover:text-white transition-colors"
+              >
                 Sign up
               </Link>
             </p>
