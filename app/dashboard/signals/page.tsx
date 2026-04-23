@@ -9,16 +9,25 @@ import {
   Target,
   SlidersHorizontal,
   ChevronDown,
+  Copy,
+  Check,
 } from "lucide-react";
 import { FaRedditAlien, FaYCombinator } from "react-icons/fa6";
 import Fire from "@/public/animations/fire.json";
 import Lottie from "lottie-react";
 import type { Signal, SignalType, SignalFilters } from "@/types";
 import { SIGNAL_TYPE_LABELS, SIGNAL_TYPE_TAG_CLASS } from "@/lib/constants";
+import { timeAgo, extractSub } from "@/lib/utils";
+import {
+  TopSpotlight,
+  BottomSpotlight,
+  LeftSpotlight,
+  RightSpotlight,
+} from "@/components/ui/Spotlights";
 
-function scoreVariant(
-  score: number | null,
-): "hot" | "warm" | "cold" | "unscored" {
+type Variant = "hot" | "warm" | "cold" | "unscored";
+
+function scoreVariant(score: number | null): Variant {
   if (score === null) return "unscored";
   if (score >= 8) return "hot";
   if (score >= 5) return "warm";
@@ -26,37 +35,48 @@ function scoreVariant(
 }
 
 function ScoreBadge({ score }: { score: number | null }) {
-  const variant = scoreVariant(score);
+  const v = scoreVariant(score);
 
-  if (variant === "unscored") {
+  if (v === "unscored") {
     return (
       <span className="animate-pulse inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border badge-cold">
         <span className="w-12 h-2 rounded bg-white/10" />
       </span>
     );
   }
-  if (variant === "hot") {
+
+  const base =
+    "relative overflow-hidden inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border";
+  if (v === "hot")
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border badge-hot">
-        <Lottie
-          animationData={Fire}
-          loop
-          style={{ width: 16, height: 16, marginBottom: "0.3rem" }}
-        />
-        {score}/10 HOT
+      <span className={`${base} gap-1 badge-hot`}>
+        <TopSpotlight variant="hot" />
+        <BottomSpotlight variant="hot" />
+        <LeftSpotlight variant="hot" />
+        <RightSpotlight variant="hot" />
+        <span className="relative z-10 flex items-center gap-1">
+          <Lottie animationData={Fire} loop style={{ width: 16, height: 16 }} />
+          {score}/10 HOT
+        </span>
       </span>
     );
-  }
-  if (variant === "warm") {
+  if (v === "warm")
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border badge-warm">
-        {score}/10 WARM
+      <span className={`${base} gap-1.5 badge-warm`}>
+        <TopSpotlight variant="warm" />
+        <BottomSpotlight variant="warm" />
+        <LeftSpotlight variant="warm" />
+        <RightSpotlight variant="warm" />
+        <span className="relative z-10">{score}/10 WARM</span>
       </span>
     );
-  }
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border badge-cold">
-      {score}/10 COLD
+    <span className={`${base} gap-1.5 badge-cold`}>
+      <TopSpotlight variant="cold" />
+      <BottomSpotlight variant="cold" />
+      <LeftSpotlight variant="cold" />
+      <RightSpotlight variant="cold" />
+      <span className="relative z-10">{score}/10 COLD</span>
     </span>
   );
 }
@@ -64,7 +84,7 @@ function ScoreBadge({ score }: { score: number | null }) {
 function TypeTag({ type }: { type: SignalType }) {
   return (
     <span
-      className={`inline-flex px-2 py-0.5 rounded text-[10px] font-medium border ${SIGNAL_TYPE_TAG_CLASS[type]}`}
+      className={`inline-flex px-2.5 py-1 rounded-md text-xs font-medium border ${SIGNAL_TYPE_TAG_CLASS[type]}`}
     >
       {SIGNAL_TYPE_LABELS[type]}
     </span>
@@ -78,18 +98,17 @@ function PlatformPill({
   platform: Signal["platform"];
   source: string;
 }) {
-  if (platform === "reddit") {
+  const shared =
+    "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-xs font-medium";
+  if (platform === "reddit")
     return (
-      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-xs font-medium text-orange-400 platform-pill-reddit">
-        <FaRedditAlien size={11} />
-        {source}
+      <span className={`${shared} text-orange-400 platform-pill-reddit`}>
+        <FaRedditAlien size={11} /> {source}
       </span>
     );
-  }
   return (
-    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-xs font-medium text-orange-300 platform-pill-hn">
-      <FaYCombinator size={11} />
-      {source}
+    <span className={`${shared} text-orange-300 platform-pill-hn`}>
+      <FaYCombinator size={11} /> {source}
     </span>
   );
 }
@@ -138,8 +157,8 @@ function RadioGroup<T extends string>({
           onClick={() => onChange(opt.value)}
           className={`text-left text-sm px-2.5 py-1.5 rounded-lg transition-colors ${
             value === opt.value
-              ? "bg-sparrow-red/15 text-red-300 border border-red-500/20"
-              : "text-white/40 hover:text-white/70 hover:bg-white/5"
+              ? "bg-white/8 text-white border border-white/16"
+              : "text-white/35 hover:text-white/60 hover:bg-white/4"
           }`}
         >
           {opt.label}
@@ -149,118 +168,207 @@ function RadioGroup<T extends string>({
   );
 }
 
-function SignalCard({ signal }: { signal: Signal }) {
-  const [dismissed, setDismissed] = useState(false);
-  const [hunting, setHunting] = useState(signal.status === "hunting");
-  const variant = scoreVariant(signal.aiScore);
+function ReplyModal({
+  reply,
+  loading,
+  onClose,
+}: {
+  reply: string;
+  loading: boolean;
+  onClose: () => void;
+}) {
+  const [copied, setCopied] = useState(false);
 
-  if (dismissed) return null;
+  function copyReply() {
+    navigator.clipboard.writeText(reply);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
 
   return (
     <div
-      className={`signal-card signal-card-${variant} rounded-xl p-5 flex flex-col gap-4`}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.7)" }}
+      onClick={onClose}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-2 flex-wrap">
-          <PlatformPill platform={signal.platform} source={signal.source} />
-          <span className="text-white/20 text-xs">·</span>
-          <span className="text-xs text-white/30">{signal.timeAgo}</span>
-        </div>
-        <span className="shrink-0 text-[10px] px-2 py-0.5 rounded-md border keyword-tag font-medium">
-          {signal.keyword}
-        </span>
-      </div>
-
-      <div>
-        <p className="text-sm font-semibold text-white leading-snug mb-1.5">
-          {signal.title}
-        </p>
-        <p className="text-sm text-white/40 leading-relaxed line-clamp-2">
-          {signal.body}
-        </p>
-      </div>
-
       <div
-        className={`rounded-lg border p-3.5 flex flex-col gap-2.5 ai-block-${variant === "unscored" ? "cold" : variant}`}
+        className="w-full max-w-md rounded-2xl border border-white/10 p-6 flex flex-col gap-5"
+        style={{ background: "#111111" }}
+        onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 text-white/40">
-            <Sparkles size={12} className="text-sparrow-red" />
-            <span className="text-[10px] font-semibold uppercase tracking-widest">
-              AI Analysis
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles size={14} className="text-white/50" />
+            <span className="text-sm font-semibold text-white">
+              AI Suggested Reply
             </span>
           </div>
-          <ScoreBadge score={signal.aiScore} />
+          <button
+            onClick={onClose}
+            className="text-white/30 hover:text-white/70 transition-colors"
+          >
+            <XCircle size={16} />
+          </button>
         </div>
-        {signal.aiScore !== null ? (
-          <div className="flex items-start gap-2 flex-wrap">
-            <p className="text-xs text-white/55 leading-relaxed flex-1 min-w-0">
-              {signal.aiReason}
-            </p>
-            {signal.aiType && <TypeTag type={signal.aiType} />}
+
+        {loading ? (
+          <div className="flex flex-col items-center justify-center gap-3 py-8">
+            <Sparkles size={20} className="text-white/40 animate-pulse" />
+            <p className="text-sm text-white/40">Generating reply...</p>
           </div>
         ) : (
-          <p className="text-xs text-white/30 italic">Scoring this signal...</p>
+          <>
+            <p className="text-sm text-white/70 leading-relaxed">{reply}</p>
+            <button
+              onClick={copyReply}
+              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold border border-white/10 bg-white/5 hover:bg-white/8 hover:text-white text-white/60 transition-colors"
+            >
+              {copied ? <Check size={13} /> : <Copy size={13} />}
+              {copied ? "Copied!" : "Copy Reply"}
+            </button>
+          </>
         )}
-      </div>
-
-      <div className="flex items-center gap-2 flex-wrap">
-        <button
-          onClick={() => setHunting(true)}
-          disabled={hunting}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-            hunting
-              ? "bg-sparrow-red/20 text-sparrow-red border border-sparrow-red/30 cursor-default"
-              : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/8 hover:text-white hover:border-white/20"
-          }`}
-        >
-          <Target size={12} />
-          {hunting ? "In Hunt Board" : "+ Hunt Board"}
-        </button>
-
-        <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[rgba(175,4,4,0.15)] text-red-300 border border-red-500/20 hover:bg-[rgba(175,4,4,0.25)] transition-colors">
-          <Sparkles size={12} />
-          Get Reply
-        </button>
-
-        <a
-          href={signal.postUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/5 text-white/50 border border-white/10 hover:text-white hover:border-white/20 transition-colors"
-        >
-          <ExternalLink size={12} />
-          View
-        </a>
-
-        <button
-          onClick={() => setDismissed(true)}
-          className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white/25 hover:text-white/60 transition-colors"
-        >
-          <XCircle size={12} />
-          Dismiss
-        </button>
       </div>
     </div>
   );
 }
 
-function timeAgo(dateStr: string): string {
-  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-  // sec
-  if (diff < 60) return `${diff}s ago`;
-  // mins
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  // hrs
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  // else days
-  return `${Math.floor(diff / 86400)}d ago`;
-}
+function SignalCard({ signal }: { signal: Signal }) {
+  const [dismissed, setDismissed] = useState(false);
+  const [hunting, setHunting] = useState(signal.status === "hunting");
+  const [replyOpen, setReplyOpen] = useState(false);
+  const [reply, setReply] = useState("");
+  const [replyLoading, setReplyLoading] = useState(false);
+  const variant = scoreVariant(signal.aiScore);
 
-function extractSub(platform: string, postUrl: string): string {
-  if (platform !== "reddit") return "HN";
-  const match = postUrl.match(/reddit\.com\/(r\/[^/]+)/);
-  return match ? match[1] : "Reddit";
+  async function addToHuntBoard() {
+    setHunting(true);
+    await fetch(`/api/mentions/${signal.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "hunting" }),
+    });
+  }
+
+  async function getReply() {
+    setReplyOpen(true);
+    if (reply) return;
+    setReplyLoading(true);
+    const res = await fetch("/api/ai/reply", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mentionId: signal.id }),
+    });
+    const data = await res.json();
+    setReply(data.reply ?? "Could not generate a reply.");
+    setReplyLoading(false);
+  }
+
+  if (dismissed) return null;
+
+  return (
+    <>
+      {replyOpen && (
+        <ReplyModal
+          reply={reply}
+          loading={replyLoading}
+          onClose={() => setReplyOpen(false)}
+        />
+      )}
+      <div className="signal-card rounded-xl p-5 flex flex-col gap-4">
+        <RightSpotlight variant={variant} />
+
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <PlatformPill platform={signal.platform} source={signal.source} />
+            <span className="text-white/20 text-xs">·</span>
+            <span className="text-xs text-white/30">{signal.timeAgo}</span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-[10px] px-2 py-0.5 rounded-md border keyword-tag font-medium">
+              {signal.keyword}
+            </span>
+            <button
+              onClick={() => setDismissed(true)}
+              className="text-white/20 hover:text-white/60 transition-colors"
+            >
+              <XCircle size={13} />
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <p className="text-sm font-semibold text-white leading-snug mb-1.5">
+            {signal.title}
+          </p>
+          {signal.body && (
+            <p className="text-sm text-white/55 leading-relaxed line-clamp-2">
+              {signal.body}
+            </p>
+          )}
+        </div>
+
+        <div
+          className={`ai-snake rounded-lg border p-3.5 flex flex-col gap-2.5 ai-block-${variant === "unscored" ? "cold" : variant}`}
+        >
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5">
+              <Sparkles size={12} className="sparkle-rgb" />
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
+                AI Analysis
+              </span>
+            </div>
+            <ScoreBadge score={signal.aiScore} />
+          </div>
+          {signal.aiScore !== null ? (
+            <div className="flex items-start gap-2 flex-wrap">
+              <p className="text-xs text-white/55 leading-relaxed flex-1 min-w-0">
+                {signal.aiReason}
+              </p>
+              {signal.aiType && <TypeTag type={signal.aiType} />}
+            </div>
+          ) : (
+            <p className="text-xs text-white/30 italic">
+              Scoring this signal...
+            </p>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={addToHuntBoard}
+            disabled={hunting}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+              hunting
+                ? "bg-white/8 text-white border border-white/18 cursor-default"
+                : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/8 hover:text-white hover:border-white/20"
+            }`}
+          >
+            <Target size={12} />
+            {hunting ? "In Hunt Board" : "+ Hunt Board"}
+          </button>
+
+          <button
+            onClick={getReply}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/4 text-white/70 border border-white/10 hover:bg-white/7 hover:text-white hover:border-white/18 transition-colors"
+          >
+            <Sparkles className="sparkle-rgb" size={12} />
+            Get Reply
+          </button>
+
+          <a
+            href={signal.postUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/5 text-white/50 border border-white/10 hover:text-white hover:border-white/20 transition-colors"
+          >
+            <ExternalLink size={12} />
+            View
+          </a>
+        </div>
+      </div>
+    </>
+  );
 }
 
 function toSignal(row: Record<string, unknown>): Signal {
@@ -295,13 +403,7 @@ export default function SignalsPage() {
     setFilters((f) => ({ ...f, [key]: val }));
 
   useEffect(() => {
-    const params = new URLSearchParams({
-      platform: filters.platform,
-      intent: filters.intent,
-      type: filters.type,
-      sort: filters.sort,
-    });
-
+    const params = new URLSearchParams(filters);
     (async () => {
       setLoading(true);
       const r = await fetch(`/api/mentions?${params}`);
@@ -311,7 +413,9 @@ export default function SignalsPage() {
     })();
   }, [filters]);
 
-  const hotCount = signals.filter((s) => s.aiScore !== null && s.aiScore >= 8).length;
+  const hotCount = signals.filter(
+    (s) => s.aiScore !== null && s.aiScore >= 8,
+  ).length;
 
   return (
     <div className="p-5 h-full flex gap-4 min-h-0">
@@ -320,7 +424,6 @@ export default function SignalsPage() {
           <h2 className="text-sm font-semibold text-white">Filters</h2>
           <SlidersHorizontal size={14} className="text-white/20" />
         </div>
-
         <div className="flex flex-col gap-4">
           <FilterSection label="Platform">
             <RadioGroup
@@ -333,7 +436,6 @@ export default function SignalsPage() {
               ]}
             />
           </FilterSection>
-
           <FilterSection label="Intent Score">
             <RadioGroup
               value={filters.intent}
@@ -346,7 +448,6 @@ export default function SignalsPage() {
               ]}
             />
           </FilterSection>
-
           <FilterSection label="Signal Type">
             <RadioGroup
               value={filters.type}
@@ -361,7 +462,6 @@ export default function SignalsPage() {
               ]}
             />
           </FilterSection>
-
           <FilterSection label="Sort By">
             <RadioGroup
               value={filters.sort}
@@ -379,20 +479,22 @@ export default function SignalsPage() {
       <div className="flex-8 flex flex-col gap-4 min-h-0 min-w-0">
         <div className="rounded-xl glass-red border border-white/5 px-5 py-3.5 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <Radio size={14} className="text-sparrow-red" />
+            <Radio size={14} className="text-white/50" />
             <h2 className="text-sm font-semibold text-white">Signals Inbox</h2>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/40 font-semibold">
               {loading ? "—" : `${signals.length} signals`}
             </span>
           </div>
           {hotCount > 0 && (
-            <div className="flex items-center gap-1 text-red-300 text-sm uppercase font-semibold">
+            <div className="flex items-center gap-1.5">
               <Lottie
                 animationData={Fire}
                 loop
-                style={{ width: 24, height: 24, marginBottom: "0.4rem" }}
+                style={{ width: 16, height: 16 }}
               />
-              {hotCount} hot lead{hotCount !== 1 ? "s" : ""}
+              <span className="text-[11px] font-medium tracking-wide text-white/50">
+                {hotCount} hot lead{hotCount !== 1 ? "s" : ""}
+              </span>
             </div>
           )}
         </div>

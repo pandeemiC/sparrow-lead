@@ -44,7 +44,7 @@ function UsageBar({
       </div>
       <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
         <div
-          className="h-full rounded-full bg-[rgba(175,4,4,0.6)] transition-all"
+          className="h-full rounded-full bg-white/40 transition-all"
           style={{ width: unlimited ? "0%" : `${pct}%` }}
         />
       </div>

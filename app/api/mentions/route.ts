@@ -13,6 +13,8 @@ export async function GET(req: Request) {
   const intent = searchParams.get("intent") ?? "all";
   const type = searchParams.get("type") ?? "all";
   const sort = searchParams.get("sort") ?? "score";
+  const limit = parseInt(searchParams.get("limit") ?? "100");
+  const status = searchParams.get("status") ?? "active";
 
   const sql = getDb();
 
@@ -36,7 +38,10 @@ export async function GET(req: Request) {
   FROM mentions m
   JOIN keywords k ON m.keyword_id = k.id
   WHERE k.user_id = ${userId}
-    AND m.status != 'dismissed'
+    AND (
+      (${status} = 'active' AND m.status != 'dismissed')
+      OR (${status} != 'active' AND m.status = ANY(string_to_array(${status}, ',')))
+    )
     AND (${platform} = 'all' OR m.platform = ${platform})
     AND (${type} = 'all' OR m.ai_type = ${type})
     AND (
@@ -49,6 +54,7 @@ export async function GET(req: Request) {
     CASE WHEN ${sort} = 'score' THEN m.ai_score END DESC NULLS LAST,
     CASE WHEN ${sort} = 'newest' THEN m.created_at END DESC,
     CASE WHEN ${sort} = 'oldest' THEN m.created_at END ASC
+  LIMIT ${limit}
   `;
 
   return NextResponse.json(mentions);

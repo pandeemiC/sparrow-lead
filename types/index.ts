@@ -20,9 +20,9 @@ export type Mention = {
 };
 
 export type AiAnalysis = {
-  relevance: number;
-  reasoning: string;
-  suggested_reply: string;
+  score: number;
+  reason: string;
+  type: string;
 };
 
 export type AnalyzePostInput = {
@@ -112,4 +112,47 @@ export type Lead = {
   aiReason: string | null;
   status: HuntStatus;
   notes: string | null;
+};
+
+export type SignalPreview = {
+  id: string;
+  platform: string;
+  post_title: string;
+  post_url: string;
+  ai_score: number | null;
+  created_at: string;
+  keyword: string;
+};
+
+export type KeywordStat = {
+  keyword: string;
+  platform: string;
+  mention_count: number;
+};
+
+export type HuntLeadPreview = {
+  id: string;
+  platform: string;
+  post_title: string;
+  post_url: string;
+  ai_score: number | null;
+  status: string;
+  keyword: string;
+};
+
+export type Stats = {
+  totalSignals: number;
+  signalsToday: number;
+  keywordsTracked: number;
+  lastScannedAt: string | null;
+  huntCounts: {
+    hunting: number;
+    interested: number;
+    engaged: number;
+    hunted: number;
+  };
+  recentSignals: SignalPreview[];
+  topSignals: SignalPreview[];
+  keywords: KeywordStat[];
+  huntLeads: HuntLeadPreview[];
 };

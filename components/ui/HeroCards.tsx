@@ -110,7 +110,7 @@ function SignalCard({
   };
 
   return (
-    <div className="signal-card transition-all duration-300 shrink-0">
+    <div className="signal-card transition-all duration-300 shrink-0 p-3">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           {icon}
@@ -156,8 +156,10 @@ function ScrollColumn({
     <div
       className="relative h-125 overflow-hidden"
       style={{
-        maskImage: "linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)",
-        WebkitMaskImage: "linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)",
+        maskImage:
+          "linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)",
+        WebkitMaskImage:
+          "linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)",
       }}
     >
       <motion.div

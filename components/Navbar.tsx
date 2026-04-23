@@ -17,7 +17,7 @@ export default function Navbar() {
 
   return (
     <div className="fixed top-5 left-0 right-0 overflow-x-hidden z-50">
-      <div className="flex items-center justify-between w-full max-w-6xl bg-neutral-700/20 mx-auto h-14 px-6 obsidian-glass rounded-full border border-white/10">
+      <div className="flex items-center justify-between w-full max-w-6xl bg-neutral-700/20 mx-auto h-14 px-6 rounded-full border border-white/10">
         <Link href="/" className="flex items-center">
           <Image
             src={sparrowLogo}

@@ -57,7 +57,7 @@ export default function MentionsList() {
         <button
           onClick={handleScan}
           disabled={scanning}
-          className="flex items-center gap-2 bg-sparrow-red hover:bg-sparrow-bright disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold px-5 py-2 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-white/6 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium px-5 py-2 rounded-md border border-white/10 hover:border-white/18 transition-all"
         >
           {scanning ? "Hunting..." : "Hunt Now"}
         </button>
@@ -83,7 +83,7 @@ export default function MentionsList() {
         <div className="space-y-3">
           {visibleMentions.map((mention) => (
             <div
-              className="bg-white/5 border border-white/10 hover:border-sparrow-red/30 rounded-lg px-4 py-3 transition-colors"
+              className="bg-white/2 border border-white/8 hover:border-white/14 rounded-md px-4 py-3 transition-colors"
               key={mention.id}
             >
               <div className="flex items-start justify-between gap-4">
@@ -142,7 +142,7 @@ export default function MentionsList() {
             <button
               key={p}
               onClick={() => setPage(p)}
-              className={`px-3 py-1.5 text-xs rounded-lg border transition-colors ${page === p ? "bg-sparrow-red border-sparrow-red text-white" : "bg-white/5 border-white/10 text-white/50 hover:text-white hover:border-white/30"}`}
+              className={`px-3 py-1.5 text-xs rounded-md border transition-colors ${page === p ? "bg-white/10 border-white/20 text-white" : "bg-white/3 border-white/8 text-white/40 hover:text-white hover:border-white/18"}`}
             >
               {p}
             </button>
