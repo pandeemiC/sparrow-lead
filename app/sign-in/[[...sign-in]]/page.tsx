@@ -1,131 +1,149 @@
 "use client";
 
-import { SignIn } from "@clerk/nextjs";
+import { useSignIn } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "motion/react";
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
+import { FaGithub } from "react-icons/fa";
 
-const clerkAppearance = {
-  variables: {
-    colorBackground: "transparent",
-    colorInputBackground: "rgba(255,255,255,0.04)",
-    colorInputText: "#ededed",
-    colorText: "#ededed",
-    colorTextSecondary: "rgba(255,255,255,0.35)",
-    colorPrimary: "#fffffff",
-    colorDanger: "#ff5555",
-    borderRadius: "0.5rem",
-    fontFamily: "var(--font-montserrat), sans-serif",
-    fontSize: "13px",
-  },
-  elements: {
-    // check clerk docs for elements
-    rootBox: "w-full",
-    card: "shadow-none bg-transparent p-0 gap-5",
-    cardBox: "shadow-none w-full",
-    headerTitle: "text-white text-xl font-semibold tracking-tight",
-    headerSubtitle: "text-white/35 text-xs",
-    socialButtonsBlockButton:
-      "border border-white/10 bg-white/4 text-white/60 hover:bg-white/8 hover:text-white hover:border-white/20 transition-all text-xs font-medium rounded-lg",
-    dividerLine: "bg-white/8",
-    dividerText: "text-white/25 text-[11px]",
-    formFieldLabel:
-      "text-white/45 text-[11px] font-medium uppercase tracking-wider mb-1",
-    formFieldInput:
-      "bg-white/4 border border-white/10 text-white placeholder:text-white/20 text-xs rounded-lg focus:border-white/25 focus:bg-white/6 transition-all outline-none",
-    formButtonPrimary:
-      "bg-white text-[#0a0a0a] text-xs font-semibold rounded-lg hover:bg-white/90 transition-colors mt-1",
-    footerActionText: "text-white/30 text-xs",
-    footerActionLink:
-      "text-white/70 hover:text-white text-xs font-medium transition-colors",
-    alert: "bg-red-500/8 border border-red-500/15 rounded-lg",
-    alertText: "text-red-400 text-xs",
-    formFieldErrorText: "text-red-400 text-[11px]",
-  },
-};
+const GRAIN_SVG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E")`;
 
-function SparrowRightPanel() {
+function GoogleIcon() {
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center p-12">
-      <div
-        className="absolute inset-0"
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 48 48"
+      width="15"
+      height="15"
+    >
+      <path
+        fill="#FFC107"
+        d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917"
+      />
+      <path
+        fill="#FF3D00"
+        d="m6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691"
+      />
+      <path
+        fill="#4CAF50"
+        d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.9 11.9 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44"
+      />
+      <path
+        fill="#1976D2"
+        d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917"
+      />
+    </svg>
+  );
+}
+
+function AnimatedBackground() {
+  return (
+    <div
+      className="absolute inset-0 overflow-hidden"
+      style={{ background: "#0a0202" }}
+    >
+      <motion.div
+        className="absolute rounded-full"
         style={{
-          background: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E") center / 200px 200px repeat, #080808`,
-          backgroundBlendMode: "soft-light, normal",
+          width: 750,
+          height: 750,
+          background:
+            "radial-gradient(ellipse at center, rgba(210,18,18,0.72) 0%, rgba(160,0,0,0.3) 45%, transparent 70%)",
+          filter: "blur(80px)",
+          top: "-15%",
+          left: "-10%",
+        }}
+        animate={{
+          x: [0, 60, -30, 40, 0],
+          y: [0, -60, 40, -20, 0],
+          scale: [1, 1.1, 0.92, 1.06, 1],
+        }}
+        transition={{ duration: 9, ease: "easeInOut", repeat: Infinity }}
+      />
+
+      <motion.div
+        className="absolute rounded-full"
+        style={{
+          width: 600,
+          height: 600,
+          background:
+            "radial-gradient(ellipse at center, rgba(170,8,8,0.6) 0%, rgba(110,0,0,0.22) 50%, transparent 72%)",
+          filter: "blur(70px)",
+          bottom: "-10%",
+          right: "-8%",
+        }}
+        animate={{
+          x: [0, -50, 30, -40, 0],
+          y: [0, 50, -35, 20, 0],
+          scale: [1, 0.9, 1.12, 0.96, 1],
+        }}
+        transition={{
+          duration: 11,
+          ease: "easeInOut",
+          repeat: Infinity,
+          delay: 1.5,
         }}
       />
 
       <motion.div
-        className="absolute rounded-full pointer-events-none"
+        className="absolute rounded-full"
         style={{
-          width: 480,
-          height: 480,
+          width: 450,
+          height: 450,
           background:
-            "radial-gradient(ellipse at center, rgba(175,4,4,0.13) 0%, rgba(140,0,0,0.06) 40%, transparent 70%)",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
+            "radial-gradient(ellipse at center, rgba(230,30,30,0.45) 0%, rgba(180,0,0,0.15) 55%, transparent 75%)",
+          filter: "blur(60px)",
+          top: "35%",
+          left: "30%",
         }}
-        animate={{ scale: [1, 1.06, 1], opacity: [0.7, 1, 0.7] }}
-        transition={{ duration: 7, ease: "easeInOut", repeat: Infinity }}
+        animate={{
+          x: [0, 40, -55, 20, 0],
+          y: [0, -40, 55, -15, 0],
+          scale: [1, 1.14, 0.88, 1.08, 1],
+        }}
+        transition={{
+          duration: 7,
+          ease: "easeInOut",
+          repeat: Infinity,
+          delay: 3,
+        }}
       />
 
-      <div className="relative z-10 flex flex-col items-center text-center gap-8">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-        >
-          <Image
-            src="/sparrow-no-text-logo.png"
-            alt="Sparrow"
-            width={72}
-            height={72}
-            className="opacity-90"
-            style={{
-              filter: "drop-shadow(0 0 24px rgba(220,30,30,0.35))",
-            }}
-          />
-        </motion.div>
-
-        <motion.div
-          className="flex flex-col items-center gap-3"
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.15, ease: "easeOut" }}
-        >
-          <h2 className="text-2xl font-semibold text-white/90 tracking-tight">
-            Find every signal
-          </h2>
-          <p className="text-sm text-white/30 leading-relaxed max-w-xs">
-            AI-powered social listener that surfaces any intent before your
-            competitors even notice.
-          </p>
-        </motion.div>
-
-        <motion.div
-          className="flex flex-col items-center gap-2"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.4 }}
-        >
-          {[
-            "Reddit threads monitored 24/7",
-            "Hacker News deal signals surfaced",
-            "AI-Scored leads, ready to reply",
-          ].map((item, i) => (
-            <div key={i} className="flex items-center gap-2.5">
-              <div className="w-1 h-1 rounded-full bg-sparrow-red opacity-70" />
-              <span className="text-[11px] text-white/25">{item}</span>
-            </div>
-          ))}
-        </motion.div>
-      </div>
+      <motion.div
+        className="absolute rounded-full"
+        style={{
+          width: 350,
+          height: 350,
+          background:
+            "radial-gradient(ellipse at center, rgba(255,40,40,0.35) 0%, rgba(200,0,0,0.1) 60%, transparent 78%)",
+          filter: "blur(50px)",
+          top: "60%",
+          left: "55%",
+        }}
+        animate={{
+          x: [0, -35, 45, -20, 0],
+          y: [0, 45, -30, 10, 0],
+          scale: [1, 1.08, 0.94, 1.04, 1],
+        }}
+        transition={{
+          duration: 6,
+          ease: "easeInOut",
+          repeat: Infinity,
+          delay: 4.5,
+        }}
+      />
 
       <div
-        className="absolute top-0 left-0 bottom-0 w-px"
+        className="absolute inset-0"
         style={{
-          background:
-            "linear-gradient(180deg, transparent, rgba(255,255,255,0.06) 20%, rgba(255,255,255,0.06) 80%, transparent)",
+          backgroundImage: GRAIN_SVG,
+          backgroundSize: "256px 256px",
+          backgroundRepeat: "repeat",
+          mixBlendMode: "overlay",
+          opacity: 0.55,
         }}
       />
     </div>
@@ -133,9 +151,213 @@ function SparrowRightPanel() {
 }
 
 export default function SignInPage() {
+  const { signIn } = useSignIn();
+  const router = useRouter();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    const { error: pwErr } = await signIn.password({
+      identifier: email,
+      password,
+    });
+    if (pwErr) {
+      setError(pwErr.message ?? "Invalid email or password.");
+      setLoading(false);
+      return;
+    }
+
+    const { error: finalErr } = await signIn.finalize({
+      navigate: ({ decorateUrl }) => router.push(decorateUrl("/dashboard")),
+    });
+    if (finalErr) {
+      setError(finalErr.message ?? "Something went wrong. Please try again.");
+    }
+    setLoading(false);
+  }
+
+  async function handleOAuth(strategy: "oauth_google" | "oauth_github") {
+    await signIn.sso({
+      strategy,
+      redirectUrl: `${window.location.origin}/sso-callback`,
+      redirectCallbackUrl: "/dashboard",
+    });
+  }
+
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <SignIn />
+    <div
+      className="fixed inset-0 z-50 flex"
+      style={{ fontFamily: "var(--font-montserrat), sans-serif" }}
+    >
+      <AnimatedBackground />
+
+      <div className="relative z-10 flex w-full">
+        <div className="hidden lg:flex lg:w-[50%] flex-col justify-between p-12">
+          <div className="flex items-center gap-2">
+            <Image
+              src="/sparrow-no-text-logo.png"
+              alt="Sparrow"
+              width={18}
+              height={18}
+              className="opacity-65"
+            />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
+              Sparrow
+            </span>
+          </div>
+
+          <motion.div
+            className="flex flex-col gap-5"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
+          >
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/30">
+              AI Social Listener
+            </p>
+            <h2 className="text-5xl font-semibold text-white/80 leading-[1.1] tracking-tight">
+              Every signal.
+              <br />
+              <span className="text-white/50 font-semibold">Before</span>
+              <br />
+              they do.
+            </h2>
+            <p className="text-sm text-white/30 leading-relaxed max-w-72">
+              Reddit threads, Hacker News posts — Sparrow surfaces buying intent
+              the moment it appears, so you can reach out first.
+            </p>
+          </motion.div>
+        </div>
+
+        <div className="w-full lg:w-[50%] border-neutral-500/10 rounded-2xl mr-20 border bg-neutral-600/20  flex items-center justify-center p-6 lg:p-12">
+          <motion.div
+            className="auth-glass w-full max-w-sm rounded-2xl p-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+          >
+            <div className="flex flex-col items-center mb-7">
+              <div className="relative flex justify-center" style={{ height: 136 }}>
+                <Image
+                  src="/sparrow-no-text-logo.png"
+                  alt="Sparrow"
+                  width={200}
+                  height={200}
+                  className="absolute top-0 left-1/2 -translate-x-1/2 opacity-90"
+                  style={{ filter: "brightness(0) invert(1) drop-shadow(0 0 18px rgba(255,60,60,0.6))" }}
+                />
+                <h1 className="absolute bottom-0 text-[13px] font-semibold uppercase tracking-[0.22em] text-white/35">
+                  Sparrow
+                </h1>
+              </div>
+              <h2 className="text-[21px] font-bold text-white tracking-tight mt-3">
+                Welcome back
+              </h2>
+              <p className="text-[11px] text-white/30 mt-1">
+                Sign in to continue to Sparrow
+              </p>
+            </div>
+
+            <div className="flex gap-2.5 mb-5">
+              <button
+                type="button"
+                onClick={() => handleOAuth("oauth_google")}
+                className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg auth-btn-secondary text-[12px] font-medium text-white/60 hover:text-white transition-colors"
+              >
+                <GoogleIcon />
+                Google
+              </button>
+              <button
+                type="button"
+                onClick={() => handleOAuth("oauth_github")}
+                className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg auth-btn-secondary text-[12px] font-medium text-white/60 hover:text-white transition-colors"
+              >
+                <FaGithub size={13} color="#ffffff" />
+                GitHub
+              </button>
+            </div>
+
+            <div className="flex items-center gap-3 mb-5">
+              <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
+              <span className="text-[10px] text-white/25 uppercase tracking-wider">or</span>
+              <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
+            </div>
+
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  required
+                  className="w-full h-10 px-3.5 rounded-lg auth-input text-[13px] text-white placeholder:text-white/20 focus:outline-none transition-colors"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
+                    Password
+                  </label>
+                  <button type="button" className="text-[10px] text-white/30 hover:text-white/60 transition-colors">
+                    Forgot password?
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    className="w-full h-10 px-3.5 pr-10 rounded-lg auth-input text-[13px] text-white placeholder:text-white/20 focus:outline-none transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/55 transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={13} /> : <Eye size={13} />}
+                  </button>
+                </div>
+              </div>
+
+              {error && (
+                <p className="text-[11px] text-red-400 bg-red-500/8 border border-red-500/15 rounded-lg px-3 py-2">
+                  {error}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full h-10 rounded-lg auth-btn-primary text-[13px] font-semibold transition-opacity disabled:opacity-50 disabled:cursor-not-allowed mt-0.5"
+              >
+                {loading ? "Signing in…" : "Sign in"}
+              </button>
+            </form>
+
+            <p className="text-center text-[11px] text-white/30 mt-5">
+              Don&apos;t have an account?{" "}
+              <Link href="/sign-up" className="text-white/55 font-semibold hover:text-white transition-colors">
+                Sign up
+              </Link>
+            </p>
+          </motion.div>
+        </div>
+      </div>
     </div>
   );
 }
