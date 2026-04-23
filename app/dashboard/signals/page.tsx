@@ -18,7 +18,12 @@ import Lottie from "lottie-react";
 import type { Signal, SignalType, SignalFilters } from "@/types";
 import { SIGNAL_TYPE_LABELS, SIGNAL_TYPE_TAG_CLASS } from "@/lib/constants";
 import { timeAgo, extractSub } from "@/lib/utils";
-import { TopSpotlight } from "@/components/ui/Spotlights";
+import {
+  TopSpotlight,
+  BottomSpotlight,
+  LeftSpotlight,
+  RightSpotlight,
+} from "@/components/ui/Spotlights";
 
 type Variant = "hot" | "warm" | "cold" | "unscored";
 
@@ -41,19 +46,39 @@ function ScoreBadge({ score }: { score: number | null }) {
   }
 
   const base =
-    "inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border";
+    "relative overflow-hidden inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border";
   if (v === "hot")
     return (
       <span className={`${base} gap-1 badge-hot`}>
-        <Lottie animationData={Fire} loop style={{ width: 16, height: 16 }} />
-        {score}/10 HOT
+        <TopSpotlight variant="hot" />
+        <BottomSpotlight variant="hot" />
+        <LeftSpotlight variant="hot" />
+        <RightSpotlight variant="hot" />
+        <span className="relative z-10 flex items-center gap-1">
+          <Lottie animationData={Fire} loop style={{ width: 16, height: 16 }} />
+          {score}/10 HOT
+        </span>
       </span>
     );
   if (v === "warm")
     return (
-      <span className={`${base} gap-1.5 badge-warm`}>{score}/10 WARM</span>
+      <span className={`${base} gap-1.5 badge-warm`}>
+        <TopSpotlight variant="warm" />
+        <BottomSpotlight variant="warm" />
+        <LeftSpotlight variant="warm" />
+        <RightSpotlight variant="warm" />
+        <span className="relative z-10">{score}/10 WARM</span>
+      </span>
     );
-  return <span className={`${base} gap-1.5 badge-cold`}>{score}/10 COLD</span>;
+  return (
+    <span className={`${base} gap-1.5 badge-cold`}>
+      <TopSpotlight variant="cold" />
+      <BottomSpotlight variant="cold" />
+      <LeftSpotlight variant="cold" />
+      <RightSpotlight variant="cold" />
+      <span className="relative z-10">{score}/10 COLD</span>
+    </span>
+  );
 }
 
 function TypeTag({ type }: { type: SignalType }) {
@@ -251,6 +276,7 @@ function SignalCard({ signal }: { signal: Signal }) {
         />
       )}
       <div className="signal-card rounded-xl p-5 flex flex-col gap-4">
+        <RightSpotlight variant={variant} />
         <TopSpotlight variant={variant} />
 
         <div className="flex items-start justify-between gap-3">

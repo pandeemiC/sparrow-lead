@@ -11,9 +11,17 @@ const COLORS: Record<Variant, { a: string; b: string; duration: number }> = {
   unscored: { a: "rgba(255,255,255,0.06)", b: "transparent",          duration: 5   },
 };
 
-function Spotlight({ variant, position }: { variant: Variant; position: "top" | "bottom" }) {
+type Position = "top" | "bottom" | "left" | "right";
+
+const GRADIENT: Record<Position, (a: string, b: string) => string> = {
+  top:    (a, b) => `radial-gradient(ellipse 75% 52% at 50% 0%,   ${a} 0%, ${b} 50%, transparent 80%)`,
+  bottom: (a, b) => `radial-gradient(ellipse 75% 52% at 50% 100%, ${a} 0%, ${b} 50%, transparent 80%)`,
+  left:   (a, b) => `radial-gradient(ellipse 52% 75% at 0%  50%,  ${a} 0%, ${b} 50%, transparent 80%)`,
+  right:  (a, b) => `radial-gradient(ellipse 52% 75% at 100% 50%, ${a} 0%, ${b} 50%, transparent 80%)`,
+};
+
+function Spotlight({ variant, position }: { variant: Variant; position: Position }) {
   const c = COLORS[variant];
-  const at = position === "bottom" ? "50% 100%" : "50% 0%";
   return (
     <motion.div
       aria-hidden
@@ -24,9 +32,7 @@ function Spotlight({ variant, position }: { variant: Variant; position: "top" | 
     >
       <div
         className="absolute inset-0 rounded-[inherit]"
-        style={{
-          background: `radial-gradient(ellipse 75% 52% at ${at}, ${c.a} 0%, ${c.b} 50%, transparent 80%)`,
-        }}
+        style={{ background: GRADIENT[position](c.a, c.b) }}
       />
     </motion.div>
   );
@@ -38,4 +44,12 @@ export function BottomSpotlight({ variant }: { variant: Variant }) {
 
 export function TopSpotlight({ variant }: { variant: Variant }) {
   return <Spotlight variant={variant} position="top" />;
+}
+
+export function LeftSpotlight({ variant }: { variant: Variant }) {
+  return <Spotlight variant={variant} position="left" />;
+}
+
+export function RightSpotlight({ variant }: { variant: Variant }) {
+  return <Spotlight variant={variant} position="right" />;
 }
