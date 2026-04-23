@@ -277,7 +277,6 @@ function SignalCard({ signal }: { signal: Signal }) {
       )}
       <div className="signal-card rounded-xl p-5 flex flex-col gap-4">
         <RightSpotlight variant={variant} />
-        <TopSpotlight variant={variant} />
 
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2 flex-wrap">

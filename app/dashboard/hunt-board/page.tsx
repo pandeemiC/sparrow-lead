@@ -15,6 +15,7 @@ import Lottie from "lottie-react";
 import type { Lead, HuntStatus } from "@/types";
 import { HUNT_COLUMNS } from "@/lib/constants";
 import { timeAgo, extractSub } from "@/lib/utils";
+import { TopSpotlight } from "@/components/ui/Spotlights";
 
 const COLUMN_ORDER: HuntStatus[] = [
   "hunting",
@@ -45,11 +46,7 @@ function ScoreBadge({ score }: { score: number | null }) {
   if (variant === "hot") {
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest border badge-hot">
-        <Lottie
-          animationData={Fire}
-          loop
-          style={{ width: 14, height: 14 }}
-        />
+        <Lottie animationData={Fire} loop style={{ width: 14, height: 14 }} />
         {score}/10
       </span>
     );
@@ -92,9 +89,8 @@ function LeadCard({
   const variant = scoreVariant(lead.aiScore);
 
   return (
-    <div
-      className={`signal-card signal-card-${variant} rounded-xl p-4 flex flex-col gap-3`}
-    >
+    <div className={`signal-card rounded-xl p-4 flex flex-col gap-3`}>
+      <TopSpotlight variant={variant === "unscored" ? "cold" : variant} />
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
           <PlatformIcon platform={lead.platform} />
@@ -112,9 +108,9 @@ function LeadCard({
         {lead.title}
       </p>
       {lead.aiReason && (
-        <div className="rounded-lg border p-2.5 ai-block-animated">
+        <div className="rounded-lg border p-2.5 ai-snake ai-block-cold">
           <div className="flex items-center gap-1 mb-1">
-            <Sparkles size={10} className="text-red-500" />
+            <Sparkles size={10} className="sparkle-rgb" />
             <span className="text-[10px] font-semibold uppercase tracking-widest text-white">
               AI
             </span>
