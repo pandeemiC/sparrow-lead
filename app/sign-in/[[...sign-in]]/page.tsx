@@ -72,8 +72,8 @@ function AnimatedBackground() {
           background:
             "radial-gradient(ellipse at center, rgba(170,8,8,0.6) 0%, rgba(110,0,0,0.22) 50%, transparent 72%)",
           filter: "blur(70px)",
-          bottom: "-10%",
-          right: "-8%",
+          bottom: "-15%",
+          right: "-20%",
         }}
         animate={{
           x: [0, -50, 30, -40, 0],
@@ -237,7 +237,7 @@ export default function SignInPage() {
           </motion.div>
         </div>
 
-        <div className="w-full lg:w-[50%] my-10 border-neutral-500/10 rounded-2xl mr-20 border bg-neutral-600/20  flex items-center justify-center p-6 lg:p-12">
+        <div className="w-full lg:w-[40%] my-10 border-neutral-500/10 rounded-2xl mr-25 border bg-neutral-600/20  flex items-center justify-center p-6 lg:p-12">
           <motion.div
             className="auth-glass w-full max-w-sm rounded-2xl p-8"
             initial={{ opacity: 0, y: 20 }}
@@ -276,7 +276,7 @@ export default function SignInPage() {
               <button
                 type="button"
                 onClick={() => handleOAuth("oauth_google")}
-                className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg auth-btn-secondary text-[12px] font-medium text-white/60 hover:text-white transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg auth-btn-secondary text-[12px] font-medium text-white/60 hover:text-white cursor-pointer transition-colors"
               >
                 <GoogleIcon />
                 Google
@@ -284,7 +284,7 @@ export default function SignInPage() {
               <button
                 type="button"
                 onClick={() => handleOAuth("oauth_github")}
-                className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg auth-btn-secondary text-[12px] font-medium text-white/60 hover:text-white transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg auth-btn-secondary text-[12px] font-medium text-white/60 hover:text-white cursor-pointer transition-colors"
               >
                 <FaGithub size={13} color="#ffffff" />
                 GitHub
@@ -360,7 +360,7 @@ export default function SignInPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-10 rounded-lg auth-btn-primary text-[13px] font-semibold transition-opacity disabled:opacity-50 disabled:cursor-not-allowed mt-0.5"
+                className="w-full h-10 rounded-lg auth-btn-primary cursor-pointer text-[13px] font-semibold transition-opacity disabled:opacity-50 disabled:cursor-not-allowed mt-0.5"
               >
                 {loading ? "Signing in…" : "Sign in"}
               </button>
