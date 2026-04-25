@@ -294,25 +294,49 @@ export default function SignUpPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: "easeOut" }}
           >
-            {step === "register" ? (
-              <>
-                <h2 className="text-[21px] font-bold text-white tracking-tight mt-3">
-                  Create your account
-                </h2>
-                <p className="text-[11px] text-white/30 mt-1">
-                  Start finding leads today
-                </p>
-              </>
-            ) : (
-              <>
-                <h2 className="text-[21px] font-bold text-white tracking-tight mt-3">
-                  Check your email
-                </h2>
-                <p className="text-[11px] text-white/30 mt-1 text-center">
-                  Code sent to <span className="text-white/50">{email}</span>
-                </p>
-              </>
-            )}
+            <div className="flex flex-col items-center mb-7">
+              <div
+                className="relative flex justify-center mb-10"
+                style={{ height: 136 }}
+              >
+                <Link href="/">
+                  <Image
+                    src="/sparrow-no-text-logo.png"
+                    alt="Sparrow"
+                    width={200}
+                    height={200}
+                    className="relative top-0 left-1/2 -translate-x-1/2 opacity-90"
+                    style={{
+                      filter:
+                        "brightness(1) drop-shadow(0 0 18px rgba(210, 43, 43,0.6))",
+                    }}
+                  />
+                </Link>
+                <h1 className="absolute bottom-[-15] text-[20px] font-semibold uppercase tracking-[0.22em] text-white/35">
+                  Sparrow
+                </h1>
+              </div>
+
+              {step === "register" ? (
+                <>
+                  <h2 className="text-[21px] font-bold text-white tracking-tight mt-3">
+                    Create your account
+                  </h2>
+                  <p className="text-[11px] text-white/30 mt-1">
+                    Start finding leads today
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-[21px] font-bold text-white tracking-tight mt-3">
+                    Check your email
+                  </h2>
+                  <p className="text-[11px] text-white/30 mt-1 text-center">
+                    Code sent to <span className="text-white/50">{email}</span>
+                  </p>
+                </>
+              )}
+            </div>
             {step === "register" && (
               <>
                 <div className="flex gap-2.5 mb-5">
