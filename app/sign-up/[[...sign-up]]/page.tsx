@@ -249,7 +249,44 @@ export default function SignUpPage() {
       <AnimatedBackground />
 
       <div className="relative z-10 flex w-full">
-        <div className="hidden lg:flex lg:w-[50%] flex-col justify-between p-12"></div>
+        <div className="hidden lg:flex lg:w-[50%] flex-col justify-between p-12">
+          <Link href="/">
+            <div className="flex items-center gap-2">
+              <Image
+                src="/sparrow-no-text-logo.png"
+                alt="Sparrow"
+                width={18}
+                height={18}
+                className="opacity-65"
+              />
+              <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
+                Sparrow
+              </span>
+            </div>
+          </Link>
+
+          <motion.div
+            className="flex flex-col gap-5"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
+          >
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/30">
+              AI Social Listener
+            </p>
+            <h2 className="text-5xl font-semibold text-white/80 leading-[1.1] tracking-tight">
+              Every signal.
+              <br />
+              <span className="text-white/50 font-semibold">Before</span>
+              <br />
+              they do.
+            </h2>
+            <p className="text-sm text-white/30 leading-relaxed max-w-72">
+              Reddit threads, Hacker News posts — Sparrow surfaces buying intent
+              the moment it appears, so you can reach out first.
+            </p>
+          </motion.div>
+        </div>
         <div className="w-full lg:w-[40%] my-10 border-neutral-500/10 rounded-2xl mr-25 border bg-neutral-600/20 flex items-center justify-center p-6 lg:p-12">
           <motion.div
             className="auth-glass w-full max-w-sm rounded-2xl p-8"
@@ -375,6 +412,12 @@ export default function SignUpPage() {
                   </div>
                 </div>
 
+                {error && (
+                  <p className="text-[11px] text-red-400 bg-red-500/8 border border-red-500/15 rounded-lg px-3 py-2">
+                    {error}
+                  </p>
+                )}
+
                 <button
                   type="submit"
                   disabled={loading}
@@ -400,6 +443,12 @@ export default function SignUpPage() {
                     className="w-full h-10 px-3.5 rounded-lg auth-input text-[13px] text-white placeholder:text-white/20 focus:outline-none transition-colors tracking-[0.3em]"
                   />
                 </div>
+
+                {error && (
+                  <p className="text-[11px] text-red-400 bg-red-500/8 border border-red-500/15 rounded-lg px-3 py-2">
+                    {error}
+                  </p>
+                )}
 
                 <button
                   type="submit"
