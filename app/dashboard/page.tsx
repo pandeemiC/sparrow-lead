@@ -391,8 +391,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="flex flex-col flex-4 gap-4 min-h-0">
-        <div className="flex-1 rounded-xl glass-red border border-white/5 p-5 flex flex-col min-h-0 glow-t-right">
+      <div className="flex flex-col flex-4 gap-4 min-h-0 min-w-0">
+        <div className="flex-1 rounded-xl glass-red border border-white/5 p-5 flex flex-col min-h-0 min-w-0 overflow-hidden glow-t-right">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <h2 className="text-sm font-semibold text-white">Hunt Board</h2>
