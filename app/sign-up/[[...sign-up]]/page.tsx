@@ -208,7 +208,7 @@ export default function SignUpPage() {
     setLoading(false);
   }
 
-  async function handleVerfiy(e: React.FormEvent<HTMLFormElement>) {
+  async function handleVerify(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -241,5 +241,202 @@ export default function SignUpPage() {
     });
   }
 
-  return;
+  return (
+    <div
+      className="fixed inset-0 z-50 flex"
+      style={{ fontFamily: "var(--font-montserrat), sans-serif" }}
+    >
+      <AnimatedBackground />
+
+      <div className="relative z-10 flex w-full">
+        <div className="hidden lg:flex lg:w-[50%] flex-col justify-between p-12"></div>
+        <div className="w-full lg:w-[40%] my-10 border-neutral-500/10 rounded-2xl mr-25 border bg-neutral-600/20 flex items-center justify-center p-6 lg:p-12">
+          <motion.div
+            className="auth-glass w-full max-w-sm rounded-2xl p-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+          >
+            {step === "register" ? (
+              <>
+                <h2 className="text-[21px] font-bold text-white tracking-tight mt-3">
+                  Create your account
+                </h2>
+                <p className="text-[11px] text-white/30 mt-1">
+                  Start finding leads today
+                </p>
+              </>
+            ) : (
+              <>
+                <h2 className="text-[21px] font-bold text-white tracking-tight mt-3">
+                  Check your email
+                </h2>
+                <p className="text-[11px] text-white/30 mt-1 text-center">
+                  Code sent to <span className="text-white/50">{email}</span>
+                </p>
+              </>
+            )}
+            {step === "register" && (
+              <>
+                <div className="flex gap-2.5 mb-5">
+                  <button
+                    type="button"
+                    onClick={() => handleOAuth("oauth_google")}
+                    className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg auth-btn-secondary text-[12px] font-medium text-white/60 hover:text-white cursor-pointer transition-colors"
+                  >
+                    <GoogleIcon />
+                    Google
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleOAuth("oauth_github")}
+                    className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg auth-btn-secondary text-[12px] font-medium text-white/60 hover:text-white cursor-pointer transition-colors"
+                  >
+                    <FaGithub size={13} color="#ffffff" />
+                    GitHub
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-3 mb-5">
+                  <div
+                    className="flex-1 h-px"
+                    style={{ background: "rgba(255,255,255,0.08)" }}
+                  />
+                  <span className="text-[10px] text-white/25 uppercase tracking-wider">
+                    or
+                  </span>
+                  <div
+                    className="flex-1 h-px"
+                    style={{ background: "rgba(255,255,255,0.08)" }}
+                  />
+                </div>
+              </>
+            )}
+
+            {step === "register" ? (
+              <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    required
+                    className="w-full h-10 px-3.5 rounded-lg auth-input text-[13px] text-white placeholder:text-white/20 focus:outline-none transition-colors"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      required
+                      className="w-full h-10 px-3.5 pr-10 rounded-lg auth-input text-[13px] text-white placeholder:text-white/20 focus:outline-none transition-colors"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/55 transition-colors"
+                    >
+                      {showPassword ? <EyeOff size={13} /> : <Eye size={13} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
+                    Confirm Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showConfirm ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="••••••••"
+                      required
+                      className="w-full h-10 px-3.5 pr-10 rounded-lg auth-input text-[13px] text-white placeholder:text-white/20 focus:outline-none transition-colors"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirm((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/55 transition-colors"
+                    >
+                      {showConfirm ? <EyeOff size={13} /> : <Eye size={13} />}
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-10 rounded-lg auth-btn-primary cursor-pointer text-[13px] font-semibold transition-opacity disabled:opacity-50 disabled:cursor-not-allowed mt-0.5"
+                >
+                  {loading ? "Creating account…" : "Create account"}
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleVerify} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
+                    Verification Code
+                  </label>
+                  <input
+                    type="text"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+                    placeholder="000000"
+                    maxLength={6}
+                    required
+                    autoFocus
+                    className="w-full h-10 px-3.5 rounded-lg auth-input text-[13px] text-white placeholder:text-white/20 focus:outline-none transition-colors tracking-[0.3em]"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-10 rounded-lg auth-btn-primary cursor-pointer text-[13px] font-semibold transition-opacity disabled:opacity-50 disabled:cursor-not-allowed mt-0.5"
+                >
+                  {loading ? "Verifying…" : "Verify email"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep("register");
+                    setError("");
+                    setCode("");
+                  }}
+                  className="text-center text-[11px] text-white/30 hover:text-white/55 transition-colors"
+                >
+                  Back to sign up
+                </button>
+              </form>
+            )}
+
+            {step === "register" && (
+              <p className="text-center text-[11px] text-white/30 mt-5">
+                Already have an account?{" "}
+                <Link
+                  href="/sign-in"
+                  className="text-white/55 font-semibold hover:text-white transition-colors"
+                >
+                  Sign in
+                </Link>
+              </p>
+            )}
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  );
 }
