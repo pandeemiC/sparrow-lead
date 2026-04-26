@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion } from "motion/react";
 import {
   Radio,
   Tag,
@@ -17,6 +18,8 @@ import { FaRedditAlien, FaYCombinator } from "react-icons/fa6";
 import type { Stats } from "@/types";
 import { timeAgo } from "@/lib/utils";
 
+const GRAIN_SVG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E")`;
+
 const sources = [
   { label: "Reddit", icon: SiReddit, active: true },
   { label: "Hacker News", icon: SiYcombinator, active: true },
@@ -26,23 +29,100 @@ const huntColumns = [
   {
     key: "hunting",
     label: "Hunting",
-    color: "text-white/40",
-    dot: "bg-white/20",
+    color: "text-slate-400",
+    dot: "bg-slate-400/40",
   },
   {
     key: "interested",
     label: "Interested",
-    color: "text-white/60",
-    dot: "bg-white/35",
+    color: "text-sky-400",
+    dot: "bg-sky-400/55",
   },
   {
     key: "engaged",
     label: "Engaged",
-    color: "text-white/80",
-    dot: "bg-white/55",
+    color: "text-amber-400",
+    dot: "bg-amber-400/55",
   },
-  { key: "hunted", label: "Hunted", color: "text-white", dot: "bg-white/80" },
+  {
+    key: "hunted",
+    label: "Hunted",
+    color: "text-emerald-400",
+    dot: "bg-emerald-400/60",
+  },
 ] as const;
+
+function scoreMeta(score: number | null) {
+  if (score === null) return { border: "rgba(255,255,255,0.06)", glow: "transparent", text: "text-white/20", bars: 0 };
+  if (score >= 8) return { border: "rgb(239,68,68)", glow: "rgba(239,68,68,0.18)", text: "text-red-400", bars: 3 };
+  if (score >= 5) return { border: "rgb(217,119,6)", glow: "rgba(217,119,6,0.14)", text: "text-amber-500", bars: 2 };
+  return { border: "rgba(255,255,255,0.10)", glow: "transparent", text: "text-white/25", bars: 1 };
+}
+
+function ScoreBars({ score }: { score: number | null }) {
+  const { bars, text } = scoreMeta(score);
+  return (
+    <div className="flex items-center gap-1 shrink-0">
+      <div className="flex items-end gap-px h-3">
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className="w-0.75 rounded-full"
+            style={{
+              height: i === 1 ? 6 : i === 2 ? 9 : 12,
+              background: i <= bars ? (i === 3 ? "rgb(239,68,68)" : i === 2 ? "rgb(217,119,6)" : "rgba(255,255,255,0.3)") : "rgba(255,255,255,0.06)",
+            }}
+          />
+        ))}
+      </div>
+      {score !== null && (
+        <span className={`text-[9px] font-bold tabular-nums ${text}`}>{score}</span>
+      )}
+    </div>
+  );
+}
+
+const STATUS_COLORS: Record<string, string> = {
+  hunting: "text-slate-400",
+  interested: "text-sky-400",
+  engaged: "text-amber-400",
+  hunted: "text-emerald-400",
+};
+
+function SignalPill({ s, status }: { s: { id: string | number; post_url: string; post_title: string; platform: string; ai_score: number | null }; status?: string }) {
+  const { border, glow } = scoreMeta(s.ai_score);
+  return (
+    <a
+      href={s.post_url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/4 transition-colors"
+      style={{
+        background: "rgba(255,255,255,0.025)",
+        borderLeft: `2px solid ${border}`,
+        boxShadow: `inset 3px 0 10px -5px ${glow}`,
+      }}
+    >
+      <div
+        className="w-4 h-4 rounded flex items-center justify-center shrink-0"
+        style={{ background: s.platform === "reddit" ? "rgba(255,100,0,0.12)" : "rgba(255,102,0,0.10)" }}
+      >
+        {s.platform === "reddit" ? (
+          <FaRedditAlien size={8} className="text-orange-400" />
+        ) : (
+          <FaYCombinator size={8} className="text-orange-300" />
+        )}
+      </div>
+      <span className="text-[10px] text-white/55 truncate flex-1 leading-none">{s.post_title}</span>
+      {status && (
+        <span className={`text-[9px] font-semibold shrink-0 capitalize ${STATUS_COLORS[status] ?? "text-white/30"}`}>
+          {status}
+        </span>
+      )}
+      <ScoreBars score={s.ai_score} />
+    </a>
+  );
+}
 
 export default function DashboardPage() {
   const [scanning, setScanning] = useState(false);
@@ -73,9 +153,65 @@ export default function DashboardPage() {
     : 0;
 
   return (
-    <div className="p-5 h-full flex gap-4">
-      <div className="flex flex-col flex-6 gap-4 min-h-0 min-w-0">
-        <div className="flex-1 rounded-xl glass-red border border-white/5 p-5 flex flex-col min-h-0 glow-b-right">
+    <div
+      className="relative p-5 h-full flex gap-4 overflow-hidden"
+      style={{ background: "#080204" }}
+    >
+      <motion.div
+        className="absolute rounded-full pointer-events-none"
+        style={{
+          width: 900,
+          height: 900,
+          background:
+            "radial-gradient(ellipse at center, rgba(175,10,10,0.16) 0%, rgba(130,0,0,0.06) 50%, transparent 72%)",
+          filter: "blur(100px)",
+          top: "-30%",
+          left: "-15%",
+        }}
+        animate={{ x: [0, 12, -8, 10, 0], y: [0, -10, 8, -4, 0] }}
+        transition={{ duration: 40, ease: "easeInOut", repeat: Infinity }}
+      />
+      <motion.div
+        className="absolute rounded-full pointer-events-none"
+        style={{
+          width: 700,
+          height: 700,
+          background:
+            "radial-gradient(ellipse at center, rgba(140,5,5,0.12) 0%, rgba(90,0,0,0.04) 55%, transparent 75%)",
+          filter: "blur(90px)",
+          bottom: "-25%",
+          right: "-10%",
+        }}
+        animate={{ x: [0, -10, 7, -8, 0], y: [0, 8, -7, 5, 0] }}
+        transition={{ duration: 35, ease: "easeInOut", repeat: Infinity, delay: 3 }}
+      />
+      <motion.div
+        className="absolute rounded-full pointer-events-none"
+        style={{
+          width: 500,
+          height: 500,
+          background:
+            "radial-gradient(ellipse at center, rgba(190,18,18,0.07) 0%, transparent 70%)",
+          filter: "blur(80px)",
+          top: "40%",
+          left: "45%",
+        }}
+        animate={{ x: [0, 8, -12, 6, 0], y: [0, -6, 10, -4, 0] }}
+        transition={{ duration: 45, ease: "easeInOut", repeat: Infinity, delay: 7 }}
+      />
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: GRAIN_SVG,
+          backgroundSize: "256px 256px",
+          backgroundRepeat: "repeat",
+          mixBlendMode: "overlay",
+          opacity: 0.35,
+        }}
+      />
+
+      <div className="relative z-10 flex flex-col flex-6 gap-4 min-h-0 min-w-0">
+        <div className="flex-1 rounded-xl dash-card-accent p-5 flex flex-col min-h-0">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <h2 className="text-sm font-semibold text-white">
@@ -99,59 +235,38 @@ export default function DashboardPage() {
             <div className="flex-1 flex flex-col justify-center gap-3">
               <div className="flex items-center gap-3">
                 <div className="flex-1 flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-white/3 border border-white/5">
-                  <FaRedditAlien
-                    size={13}
-                    className="text-orange-400 shrink-0"
-                  />
+                  <FaRedditAlien size={13} className="text-orange-400 shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-[10px] text-white/40 uppercase tracking-widest mb-1">
                       Reddit
                     </p>
                     <div className="h-1 rounded-full bg-white/5 overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-orange-500/40"
-                        style={{ width: "60%" }}
-                      />
+                      <div className="h-full rounded-full bg-orange-500/40" style={{ width: "60%" }} />
                     </div>
                   </div>
-                  <span className="text-xs font-semibold text-white/60 shrink-0">
-                    Active
-                  </span>
+                  <span className="text-xs font-semibold text-white/60 shrink-0">Active</span>
                 </div>
                 <div className="flex-1 flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-white/3 border border-white/5">
-                  <FaYCombinator
-                    size={13}
-                    className="text-orange-300 shrink-0"
-                  />
+                  <FaYCombinator size={13} className="text-orange-300 shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-[10px] text-white/40 uppercase tracking-widest mb-1">
                       Hacker News
                     </p>
                     <div className="h-1 rounded-full bg-white/5 overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-orange-400/30"
-                        style={{ width: "40%" }}
-                      />
+                      <div className="h-full rounded-full bg-orange-400/30" style={{ width: "40%" }} />
                     </div>
                   </div>
-                  <span className="text-xs font-semibold text-white/60 shrink-0">
-                    Active
-                  </span>
+                  <span className="text-xs font-semibold text-white/60 shrink-0">Active</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-white/3 border border-white/5">
-                <div
-                  className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
-                  style={{ background: "rgba(255,255,255,0.04)" }}
-                >
+                <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.04)" }}>
                   <Zap size={12} className="text-white/50" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-white/60">AI scoring active</p>
-                  <p className="text-[10px] text-white/25">
-                    Every new mention is scored on scan
-                  </p>
+                  <p className="text-[10px] text-white/25">Every new mention is scored on scan</p>
                 </div>
                 <div className="flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -160,17 +275,12 @@ export default function DashboardPage() {
               </div>
 
               <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-white/3 border border-white/5">
-                <div
-                  className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
-                  style={{ background: "rgba(255,255,255,0.04)" }}
-                >
+                <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.04)" }}>
                   <Zap size={12} className="text-white/50" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-white/60">AI input active</p>
-                  <p className="text-[10px] text-white/25">
-                    Signals receive AI input for relevance
-                  </p>
+                  <p className="text-[10px] text-white/25">Signals receive AI input for relevance</p>
                 </div>
                 <div className="flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -191,168 +301,68 @@ export default function DashboardPage() {
                 <Radio size={18} className="text-white/15" />
               </div>
               <p className="text-sm text-white/25">No signals yet</p>
-              <p className="text-xs text-white/15">
-                Run a scan to start listening
-              </p>
+              <p className="text-xs text-white/15">Run a scan to start listening</p>
             </div>
           )}
         </div>
 
         <div className="flex gap-4 flex-1 min-h-0">
-          <div className="flex-1 flex flex-col px-4 py-4 rounded-xl glass-red border border-white/5 gap-3 min-h-0 min-w-0 overflow-hidden">
+          <div className="flex-1 flex flex-col px-4 py-4 rounded-xl dash-card gap-3 min-h-0 min-w-0 overflow-hidden">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] text-white/40 uppercase tracking-widest">
-                Total Signals
-              </p>
+              <p className="text-[10px] text-white/40 uppercase tracking-widest">Total Signals</p>
               <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0 bg-white/4 border border-white/6">
                 <Radio size={13} className="text-white/50" />
               </div>
             </div>
             <div>
-              <p className="text-3xl font-bold text-white leading-none">
-                {stats?.totalSignals ?? (
-                  <span className="text-white/20 text-lg">—</span>
-                )}
+              <p className="text-3xl font-bold text-white leading-none stat-num-glow">
+                {stats?.totalSignals ?? <span className="text-white/20 text-lg">—</span>}
               </p>
-              <p className="text-[10px] text-white/25 mt-1">
-                mentions captured
-              </p>
+              <p className="text-[10px] text-white/25 mt-1">mentions captured</p>
             </div>
             <div className="h-px bg-white/5" />
             <div className="flex flex-col gap-1.5 overflow-y-auto flex-1 min-h-0">
               {stats?.recentSignals && stats.recentSignals.length > 0 ? (
-                stats.recentSignals.map((s) => (
-                  <a
-                    key={s.id}
-                    href={s.post_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/3 border-l-2 hover:bg-white/5 transition-colors ${
-                      s.ai_score !== null && s.ai_score >= 8
-                        ? "border-l-red-500"
-                        : s.ai_score !== null && s.ai_score >= 5
-                          ? "border-l-amber-600/50"
-                          : "border-l-white/10"
-                    }`}
-                  >
-                    {s.platform === "reddit" ? (
-                      <FaRedditAlien
-                        size={9}
-                        className="text-orange-400 shrink-0"
-                      />
-                    ) : (
-                      <FaYCombinator
-                        size={9}
-                        className="text-orange-300 shrink-0"
-                      />
-                    )}
-                    <span className="text-[10px] text-white/50 truncate flex-1">
-                      {s.post_title}
-                    </span>
-                    {s.ai_score !== null && (
-                      <span
-                        className={`text-[9px] font-bold shrink-0 ${
-                          s.ai_score >= 8
-                            ? "text-red-400"
-                            : s.ai_score >= 5
-                              ? "text-amber-400"
-                              : "text-white/25"
-                        }`}
-                      >
-                        {s.ai_score}
-                      </span>
-                    )}
-                  </a>
-                ))
+                stats.recentSignals.map((s) => <SignalPill key={s.id} s={s} />)
               ) : (
                 <p className="text-[10px] text-white/20">No signals yet</p>
               )}
             </div>
           </div>
 
-          <div className="flex-1 flex flex-col px-4 py-4 rounded-xl glass-red border border-white/5 gap-3 min-h-0 min-w-0 overflow-hidden">
+          <div className="flex-1 flex flex-col px-4 py-4 rounded-xl dash-card gap-3 min-h-0 min-w-0 overflow-hidden">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] text-white/40 uppercase tracking-widest">
-                Signals Today
-              </p>
+              <p className="text-[10px] text-white/40 uppercase tracking-widest">Signals Today</p>
               <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0 bg-white/4 border border-white/6">
                 <TrendingUp size={13} className="text-white/50" />
               </div>
             </div>
             <div>
-              <p className="text-3xl font-bold text-white leading-none">
-                {stats?.signalsToday ?? (
-                  <span className="text-white/20 text-lg">—</span>
-                )}
+              <p className="text-3xl font-bold text-white leading-none stat-num-glow">
+                {stats?.signalsToday ?? <span className="text-white/20 text-lg">—</span>}
               </p>
               <p className="text-[10px] text-white/25 mt-1">in last 24h</p>
             </div>
             <div className="h-px bg-white/5" />
             <div className="flex flex-col gap-1.5 overflow-y-auto flex-1 min-h-0">
               {stats?.topSignals && stats.topSignals.length > 0 ? (
-                stats.topSignals.map((s) => (
-                  <a
-                    key={s.id}
-                    href={s.post_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/3 border-l-2 hover:bg-white/5 transition-colors ${
-                      s.ai_score !== null && s.ai_score >= 8
-                        ? "border-l-red-500"
-                        : s.ai_score !== null && s.ai_score >= 5
-                          ? "border-l-amber-600/50"
-                          : "border-l-white/10"
-                    }`}
-                  >
-                    {s.platform === "reddit" ? (
-                      <FaRedditAlien
-                        size={9}
-                        className="text-orange-400 shrink-0"
-                      />
-                    ) : (
-                      <FaYCombinator
-                        size={9}
-                        className="text-orange-300 shrink-0"
-                      />
-                    )}
-                    <span className="text-[10px] text-white/50 truncate flex-1">
-                      {s.post_title}
-                    </span>
-                    {s.ai_score !== null && (
-                      <span
-                        className={`text-[9px] font-bold shrink-0 ${
-                          s.ai_score >= 8
-                            ? "text-red-400"
-                            : s.ai_score >= 5
-                              ? "text-amber-400"
-                              : "text-white/25"
-                        }`}
-                      >
-                        {s.ai_score}
-                      </span>
-                    )}
-                  </a>
-                ))
+                stats.topSignals.map((s) => <SignalPill key={s.id} s={s} />)
               ) : (
                 <p className="text-[10px] text-white/20">No signals today</p>
               )}
             </div>
           </div>
 
-          <div className="flex-1 flex flex-col px-4 py-4 rounded-xl glass-red border border-white/5 gap-3 min-h-0 min-w-0 overflow-hidden">
+          <div className="flex-1 flex flex-col px-4 py-4 rounded-xl dash-card gap-3 min-h-0 min-w-0 overflow-hidden">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] text-white/40 uppercase tracking-widest">
-                Keywords
-              </p>
+              <p className="text-[10px] text-white/40 uppercase tracking-widest">Keywords</p>
               <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0 bg-white/4 border border-white/6">
                 <Tag size={13} className="text-white/50" />
               </div>
             </div>
             <div>
-              <p className="text-3xl font-bold text-white leading-none">
-                {stats?.keywordsTracked ?? (
-                  <span className="text-white/20 text-lg">—</span>
-                )}
+              <p className="text-3xl font-bold text-white leading-none stat-num-glow">
+                {stats?.keywordsTracked ?? <span className="text-white/20 text-lg">—</span>}
               </p>
               <p className="text-[10px] text-white/25 mt-1">being tracked</p>
             </div>
@@ -365,22 +375,12 @@ export default function DashboardPage() {
                     className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/3 border border-white/5"
                   >
                     {kw.platform === "reddit" ? (
-                      <FaRedditAlien
-                        size={9}
-                        className="text-orange-400 shrink-0"
-                      />
+                      <FaRedditAlien size={9} className="text-orange-400 shrink-0" />
                     ) : (
-                      <FaYCombinator
-                        size={9}
-                        className="text-orange-300 shrink-0"
-                      />
+                      <FaYCombinator size={9} className="text-orange-300 shrink-0" />
                     )}
-                    <span className="text-[10px] text-white/50 truncate flex-1">
-                      {kw.keyword}
-                    </span>
-                    <span className="text-[9px] text-white/25 shrink-0">
-                      {kw.mention_count} hits
-                    </span>
+                    <span className="text-[10px] text-white/50 truncate flex-1">{kw.keyword}</span>
+                    <span className="text-[9px] text-white/25 shrink-0">{kw.mention_count} hits</span>
                   </div>
                 ))
               ) : (
@@ -391,8 +391,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="flex flex-col flex-4 gap-4 min-h-0 min-w-0">
-        <div className="flex-1 rounded-xl glass-red border border-white/5 p-5 flex flex-col min-h-0 min-w-0 overflow-hidden glow-t-right">
+      <div className="relative z-10 flex flex-col flex-4 gap-4 min-h-0 min-w-0">
+        <div className="flex-1 rounded-xl auth-panel p-5 flex flex-col min-h-0 min-w-0 overflow-hidden">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <h2 className="text-sm font-semibold text-white">Hunt Board</h2>
@@ -417,9 +417,7 @@ export default function DashboardPage() {
                 className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-white/3 border border-white/5"
               >
                 <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dot}`} />
-                <span className={`text-xs font-medium flex-1 ${color}`}>
-                  {label}
-                </span>
+                <span className={`text-xs font-medium flex-1 ${color}`}>{label}</span>
                 <span className="text-sm font-bold text-white">
                   {stats ? stats.huntCounts[key] : "—"}
                 </span>
@@ -430,56 +428,7 @@ export default function DashboardPage() {
           {stats?.huntLeads && stats.huntLeads.length > 0 ? (
             <div className="flex flex-col gap-1.5 flex-1 min-h-0 overflow-y-auto">
               {stats.huntLeads.map((lead) => (
-                <a
-                  key={lead.id}
-                  href={lead.post_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/3 border-l-2 hover:bg-white/5 transition-colors ${
-                    lead.ai_score !== null && lead.ai_score >= 8
-                      ? "border-l-red-500"
-                      : lead.ai_score !== null && lead.ai_score >= 5
-                        ? "border-l-amber-600/50"
-                        : "border-l-white/10"
-                  }`}
-                >
-                  {lead.platform === "reddit" ? (
-                    <FaRedditAlien
-                      size={9}
-                      className="text-orange-400 shrink-0"
-                    />
-                  ) : (
-                    <FaYCombinator
-                      size={9}
-                      className="text-orange-300 shrink-0"
-                    />
-                  )}
-                  <span className="text-[10px] text-white/50 truncate flex-1">
-                    {lead.post_title}
-                  </span>
-                  <span
-                    className={`text-[9px] font-bold shrink-0 ${
-                      lead.status === "interested"
-                        ? "text-blue-400"
-                        : "text-white/30"
-                    }`}
-                  >
-                    {lead.status === "interested" ? "Interested" : "Hunting"}
-                  </span>
-                  {lead.ai_score !== null && (
-                    <span
-                      className={`text-[9px] font-bold shrink-0 ${
-                        lead.ai_score >= 8
-                          ? "text-red-400"
-                          : lead.ai_score >= 5
-                            ? "text-amber-400"
-                            : "text-white/25"
-                      }`}
-                    >
-                      {lead.ai_score}
-                    </span>
-                  )}
-                </a>
+                <SignalPill key={lead.id} s={lead} status={lead.status} />
               ))}
               <a
                 href="/dashboard/hunt-board"
@@ -494,40 +443,29 @@ export default function DashboardPage() {
                 <Target size={14} className="text-white/15" />
               </div>
               <p className="text-xs text-white/25">No leads yet</p>
-              <p className="text-[10px] text-white/15">
-                Add signals to the Hunt Board
-              </p>
+              <p className="text-[10px] text-white/15">Add signals to the Hunt Board</p>
             </div>
           )}
         </div>
 
-        <div className="flex flex-col gap-4 px-5 py-4 rounded-xl glass-red border border-white/5">
+        <div className="flex flex-col gap-4 px-5 py-4 rounded-xl dash-card">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-white">Last Scanned</p>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <Clock size={11} className="text-white/20" />
                 <p className="text-xs text-white/25">
-                  {stats?.lastScannedAt
-                    ? timeAgo(stats.lastScannedAt)
-                    : "Never"}
+                  {stats?.lastScannedAt ? timeAgo(stats.lastScannedAt) : "Never"}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               {sources.map(({ label, icon: Icon, active }) => (
                 <div key={label} className="flex items-center gap-1.5">
-                  <Icon
-                    size={13}
-                    className={active ? "text-white/40" : "text-white/15"}
-                  />
+                  <Icon size={13} className={active ? "text-white/40" : "text-white/15"} />
                   <Circle
                     size={5}
-                    className={
-                      active
-                        ? "fill-green-400 text-green-400"
-                        : "fill-white/20 text-white/20"
-                    }
+                    className={active ? "fill-green-400 text-green-400" : "fill-white/20 text-white/20"}
                   />
                 </div>
               ))}
@@ -536,7 +474,23 @@ export default function DashboardPage() {
           <button
             onClick={scan}
             disabled={scanning}
-            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-md border border-white/10 bg-white/4 text-white text-sm font-medium hover:bg-white/7 hover:border-white/16 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-md text-white text-sm font-medium transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{
+              background: scanning
+                ? "rgba(255,255,255,0.06)"
+                : "rgba(255,255,255,0.08)",
+              border: "1px solid rgba(255,255,255,0.12)",
+            }}
+            onMouseEnter={(e) => {
+              if (!scanning) {
+                (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.12)";
+                (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.2)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.08)";
+              (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.12)";
+            }}
           >
             <ScanLine size={15} className={scanning ? "animate-spin" : ""} />
             {scanning ? "Scanning..." : "Scan Now"}

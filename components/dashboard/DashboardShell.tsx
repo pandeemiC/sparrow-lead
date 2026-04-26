@@ -19,7 +19,7 @@ export default function DashboardShell({
   user: UserData;
 }) {
   return (
-    <div className="flex h-screen bg-[#0a0a0a] overflow-hidden">
+    <div className="flex h-screen bg-[#080204] overflow-hidden">
       <Sidebar />
       <div className="flex flex-col flex-1 overflow-hidden">
         <header className="flex items-center h-14 shrink-0 px-6 gap-4 border-b border-white/6">
@@ -91,7 +91,7 @@ export default function DashboardShell({
           </Link>
         </header>
 
-        <main className="flex-1 bg-[#0a0a0a] overflow-y-auto">
+        <main className="flex-1 overflow-y-auto" style={{ background: "#080204" }}>
           {children}
         </main>
       </div>
