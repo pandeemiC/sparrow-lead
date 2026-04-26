@@ -29,8 +29,8 @@ const huntColumns = [
   {
     key: "hunting",
     label: "Hunting",
-    color: "text-slate-400",
-    dot: "bg-slate-400/40",
+    color: "text-red-400",
+    dot: "bg-red-400/50",
   },
   {
     key: "interested",
@@ -54,13 +54,13 @@ const huntColumns = [
 
 function scoreMeta(score: number | null) {
   if (score === null) return { border: "rgba(255,255,255,0.06)", glow: "transparent", text: "text-white/20", bars: 0 };
-  if (score >= 8) return { border: "rgb(239,68,68)", glow: "rgba(239,68,68,0.18)", text: "text-red-400", bars: 3 };
+  if (score >= 8) return { border: "rgb(239,68,68)", glow: "rgba(239,68,68,0.22)", text: "text-red-400", bars: 3 };
   if (score >= 5) return { border: "rgb(217,119,6)", glow: "rgba(217,119,6,0.14)", text: "text-amber-500", bars: 2 };
   return { border: "rgba(255,255,255,0.10)", glow: "transparent", text: "text-white/25", bars: 1 };
 }
 
 function ScoreBars({ score }: { score: number | null }) {
-  const { bars, text } = scoreMeta(score);
+  const { bars } = scoreMeta(score);
   return (
     <div className="flex items-center gap-1 shrink-0">
       <div className="flex items-end gap-px h-3">
@@ -70,20 +70,20 @@ function ScoreBars({ score }: { score: number | null }) {
             className="w-0.75 rounded-full"
             style={{
               height: i === 1 ? 6 : i === 2 ? 9 : 12,
-              background: i <= bars ? (i === 3 ? "rgb(239,68,68)" : i === 2 ? "rgb(217,119,6)" : "rgba(255,255,255,0.3)") : "rgba(255,255,255,0.06)",
+              background: i <= bars ? "rgb(239,68,68)" : "rgba(255,255,255,0.06)",
             }}
           />
         ))}
       </div>
       {score !== null && (
-        <span className={`text-[9px] font-bold tabular-nums ${text}`}>{score}</span>
+        <span className="text-[9px] font-bold tabular-nums text-red-400/80">{score}</span>
       )}
     </div>
   );
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  hunting: "text-slate-400",
+  hunting: "text-red-400",
   interested: "text-sky-400",
   engaged: "text-amber-400",
   hunted: "text-emerald-400",
