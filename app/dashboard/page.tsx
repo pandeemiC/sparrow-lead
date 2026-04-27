@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   Radio,
   Tag,
@@ -12,6 +12,8 @@ import {
   Circle,
   ArrowUpRight,
   Zap,
+  Check,
+  Loader,
 } from "lucide-react";
 import { SiReddit, SiYcombinator } from "react-icons/si";
 import { FaRedditAlien, FaYCombinator } from "react-icons/fa6";
@@ -19,6 +21,12 @@ import type { Stats } from "@/types";
 import { timeAgo } from "@/lib/utils";
 
 const GRAIN_SVG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E")`;
+
+const SCAN_STEPS = [
+  "Fetching keywords",
+  "Scanning Reddit & HackerNews",
+  "Running AI analysis",
+];
 
 const sources = [
   { label: "Reddit", icon: SiReddit, active: true },
@@ -173,6 +181,7 @@ function SignalPill({
 
 export default function DashboardPage() {
   const [scanning, setScanning] = useState(false);
+  const [scanPhase, setScanPhase] = useState<number | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
 
   async function loadStats() {
@@ -190,6 +199,7 @@ export default function DashboardPage() {
 
   async function scan() {
     setScanning(true);
+    setScanPhase(0);
     const prevTotal = stats?.totalSignals ?? 0;
 
     await fetch("/api/scan/trigger", { method: "POST" });
@@ -197,13 +207,19 @@ export default function DashboardPage() {
     let attempts = 0;
     const poll = setInterval(async () => {
       attempts++;
+      if (attempts === 1) setScanPhase(1);
+      if (attempts === 3) setScanPhase(2);
       const res = await fetch("/api/stats");
       const data = await res.json();
       setStats(data);
 
       if (data.totalSignals > prevTotal || attempts >= 15) {
         clearInterval(poll);
-        setScanning(false);
+        setScanPhase(3);
+        setTimeout(() => {
+          setScanning(false);
+          setScanPhase(null);
+        }, 1500);
       }
     }, 3000);
   }
@@ -632,8 +648,53 @@ export default function DashboardPage() {
             }}
           >
             <ScanLine size={15} className={scanning ? "animate-spin" : ""} />
-            {scanning ? "Scanning..." : "Scan Now"}
+            {scanning ? SCAN_STEPS[Math.min(scanPhase ?? 0, 2)] : "Scan Now"}
           </button>
+
+          <AnimatePresence>
+            {scanPhase !== null && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col gap-1.5 overflow-hidden pt-1"
+              >
+                {SCAN_STEPS.map((step, i) => {
+                  const done = scanPhase > i;
+                  const active = scanPhase === i;
+                  return (
+                    <motion.div
+                      key={step}
+                      initial={{ opacity: 0, x: -6 }}
+                      animate={{ opacity: scanPhase < i ? 0.2 : 1, x: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                      className="flex items-center gap-2"
+                    >
+                      {done ? (
+                        <Check
+                          size={11}
+                          className="text-emerald-400 shrink-0"
+                        />
+                      ) : active ? (
+                        <Loader
+                          size={11}
+                          className="text-red-400 animate-spin shrink-0"
+                        />
+                      ) : (
+                        <div className="w-2.75 h-2.75 rounded-full border border-white/15 shrink-0" />
+                      )}
+                      <span
+                        className={`text-[11px] ${done ? "text-emerald-400/60" : active ? "text-white/60" : "text-white/20"}`}
+                      >
+                        {step}
+                      </span>
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>
