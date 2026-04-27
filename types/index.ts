@@ -6,6 +6,10 @@ export type Keyword = {
   created_at: string;
 };
 
+export type Payload = {
+  userId?: string;
+};
+
 export type Mention = {
   id: string;
   keyword_id: string;
