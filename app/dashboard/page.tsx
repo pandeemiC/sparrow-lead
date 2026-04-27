@@ -190,9 +190,22 @@ export default function DashboardPage() {
 
   async function scan() {
     setScanning(true);
+    const prevTotal = stats?.totalSignals ?? 0;
+
     await fetch("/api/scan/trigger", { method: "POST" });
-    setScanning(false);
-    loadStats();
+
+    let attempts = 0;
+    const poll = setInterval(async () => {
+      attempts++;
+      const res = await fetch("/api/stats");
+      const data = await res.json();
+      setStats(data);
+
+      if (data.totalSignals > prevTotal || attempts >= 15) {
+        clearInterval(poll);
+        setScanning(false);
+      }
+    }, 3000);
   }
 
   const totalHunted = stats
