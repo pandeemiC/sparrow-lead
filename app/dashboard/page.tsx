@@ -66,6 +66,8 @@ function scoreMeta(score: number | null) {
       border: "rgba(255,255,255,0.06)",
       glow: "transparent",
       text: "text-white/20",
+      barColor: "rgba(255,255,255,0.06)",
+      scoreColor: "text-white/20",
       bars: 0,
     };
   if (score >= 8)
@@ -73,25 +75,31 @@ function scoreMeta(score: number | null) {
       border: "rgb(239,68,68)",
       glow: "rgba(239,68,68,0.22)",
       text: "text-red-400",
+      barColor: "rgb(239,68,68)",
+      scoreColor: "text-red-400/80",
       bars: 3,
     };
   if (score >= 5)
     return {
-      border: "rgb(217,119,6)",
-      glow: "rgba(217,119,6,0.14)",
-      text: "text-amber-500",
+      border: "rgb(249,115,22)",
+      glow: "rgba(249,115,22,0.14)",
+      text: "text-orange-400",
+      barColor: "rgb(249,115,22)",
+      scoreColor: "text-orange-400/80",
       bars: 2,
     };
   return {
-    border: "rgba(255,255,255,0.10)",
-    glow: "transparent",
-    text: "text-white/25",
+    border: "rgb(59,130,246)",
+    glow: "rgba(59,130,246,0.14)",
+    text: "text-blue-400",
+    barColor: "rgb(59,130,246)",
+    scoreColor: "text-blue-400/80",
     bars: 1,
   };
 }
 
 function ScoreBars({ score }: { score: number | null }) {
-  const { bars } = scoreMeta(score);
+  const { bars, barColor, scoreColor } = scoreMeta(score);
   return (
     <div className="flex items-center gap-1 shrink-0">
       <div className="flex items-end gap-px h-3">
@@ -101,14 +109,13 @@ function ScoreBars({ score }: { score: number | null }) {
             className="w-0.75 rounded-full"
             style={{
               height: i === 1 ? 6 : i === 2 ? 9 : 12,
-              background:
-                i <= bars ? "rgb(239,68,68)" : "rgba(255,255,255,0.06)",
+              background: i <= bars ? barColor : "rgba(255,255,255,0.06)",
             }}
           />
         ))}
       </div>
       {score !== null && (
-        <span className="text-[9px] font-bold tabular-nums text-red-400/80">
+        <span className={`text-[9px] font-bold tabular-nums ${scoreColor}`}>
           {score}
         </span>
       )}
