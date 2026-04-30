@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "motion/react";
 import sparrowLogo from "@/public/sparrow-no-text-logo.png";
 import { navItems } from "@/lib/constants";
 import { useState } from "react";
+import { useScanStore } from "@/store/scanStore";
 
 function NavItem({
   href,
@@ -18,6 +19,8 @@ function NavItem({
   active,
   collapsed,
   idx,
+  badge,
+  onNavigate,
 }: {
   href: string;
   label: string;
@@ -25,6 +28,8 @@ function NavItem({
   active: boolean;
   collapsed: boolean;
   idx: number;
+  badge?: number;
+  onNavigate?: () => void;
 }) {
   return (
     <motion.div
@@ -35,6 +40,7 @@ function NavItem({
       <Link
         href={href}
         title={collapsed ? label : undefined}
+        onClick={onNavigate}
         className="relative flex items-center rounded-md overflow-hidden transition-colors duration-150"
         style={{
           padding: collapsed ? "9px 0" : "9px 12px",
@@ -45,14 +51,17 @@ function NavItem({
         }}
         onMouseEnter={(e) => {
           if (!active) {
-            (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.028)";
-            (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.52)";
+            (e.currentTarget as HTMLElement).style.background =
+              "rgba(255,255,255,0.028)";
+            (e.currentTarget as HTMLElement).style.color =
+              "rgba(255,255,255,0.52)";
           }
         }}
         onMouseLeave={(e) => {
           if (!active) {
             (e.currentTarget as HTMLElement).style.background = "transparent";
-            (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.26)";
+            (e.currentTarget as HTMLElement).style.color =
+              "rgba(255,255,255,0.26)";
           }
         }}
       >
@@ -61,11 +70,19 @@ function NavItem({
             className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full"
             style={{
               background: "rgb(210,18,18)",
-              boxShadow: "0 0 10px rgba(210,18,18,0.65), 0 0 20px rgba(210,18,18,0.2)",
+              boxShadow:
+                "0 0 10px rgba(210,18,18,0.65), 0 0 20px rgba(210,18,18,0.2)",
             }}
           />
         )}
-        <Icon size={14} className="shrink-0" />
+        <div className="relative shrink-0">
+          <Icon size={14} />
+          {!!badge && badge > 0 && (
+            <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full flex items-center justify-center text-[8px] font-bold text-white leading-none">
+              {badge > 9 ? "9+" : badge}
+            </span>
+          )}
+        </div>
         <AnimatePresence>
           {!collapsed && (
             <motion.span
@@ -89,6 +106,7 @@ export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const isSettingsActive = pathname.startsWith("/dashboard/settings");
   const { signOut } = useClerk();
+  const { newSignalsCount, clearNewSignals } = useScanStore();
 
   return (
     <div className="relative flex shrink-0 h-full">
@@ -115,7 +133,8 @@ export default function Sidebar() {
                 style={{
                   width: "auto",
                   height: "auto",
-                  filter: "drop-shadow(0 0 7px rgba(210,18,18,0.6)) brightness(1.1)",
+                  filter:
+                    "drop-shadow(0 0 7px rgba(210,18,18,0.6)) brightness(1.1)",
                 }}
               />
             </div>
@@ -145,6 +164,8 @@ export default function Sidebar() {
               active={pathname === href}
               collapsed={collapsed}
               idx={idx}
+              badge={href === "/dashboard/signals" ? newSignalsCount : undefined}
+              onNavigate={href === "/dashboard/signals" ? clearNewSignals : undefined}
             />
           ))}
         </nav>
@@ -158,19 +179,27 @@ export default function Sidebar() {
               padding: collapsed ? "9px 0" : "9px 12px",
               justifyContent: collapsed ? "center" : undefined,
               gap: collapsed ? undefined : "10px",
-              background: isSettingsActive ? "rgba(210,18,18,0.07)" : "transparent",
-              color: isSettingsActive ? "rgba(255,255,255,0.88)" : "rgba(255,255,255,0.26)",
+              background: isSettingsActive
+                ? "rgba(210,18,18,0.07)"
+                : "transparent",
+              color: isSettingsActive
+                ? "rgba(255,255,255,0.88)"
+                : "rgba(255,255,255,0.26)",
             }}
             onMouseEnter={(e) => {
               if (!isSettingsActive) {
-                (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.028)";
-                (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.52)";
+                (e.currentTarget as HTMLElement).style.background =
+                  "rgba(255,255,255,0.028)";
+                (e.currentTarget as HTMLElement).style.color =
+                  "rgba(255,255,255,0.52)";
               }
             }}
             onMouseLeave={(e) => {
               if (!isSettingsActive) {
-                (e.currentTarget as HTMLElement).style.background = "transparent";
-                (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.26)";
+                (e.currentTarget as HTMLElement).style.background =
+                  "transparent";
+                (e.currentTarget as HTMLElement).style.color =
+                  "rgba(255,255,255,0.26)";
               }
             }}
           >
@@ -179,7 +208,8 @@ export default function Sidebar() {
                 className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full"
                 style={{
                   background: "rgb(210,18,18)",
-                  boxShadow: "0 0 10px rgba(210,18,18,0.65), 0 0 20px rgba(210,18,18,0.2)",
+                  boxShadow:
+                    "0 0 10px rgba(210,18,18,0.65), 0 0 20px rgba(210,18,18,0.2)",
                 }}
               />
             )}
@@ -210,12 +240,15 @@ export default function Sidebar() {
               color: "rgba(255,255,255,0.20)",
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "rgba(239,68,68,0.06)";
-              (e.currentTarget as HTMLElement).style.color = "rgba(239,68,68,0.65)";
+              (e.currentTarget as HTMLElement).style.background =
+                "rgba(239,68,68,0.06)";
+              (e.currentTarget as HTMLElement).style.color =
+                "rgba(239,68,68,0.65)";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.background = "transparent";
-              (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.20)";
+              (e.currentTarget as HTMLElement).style.color =
+                "rgba(255,255,255,0.20)";
             }}
           >
             <LogOut size={13} className="shrink-0" />
@@ -249,13 +282,22 @@ export default function Sidebar() {
                 transition={{ duration: 0.14 }}
                 className="flex items-center gap-4"
               >
-                <a href="#" className="text-white/14 hover:text-white/38 transition-colors">
+                <a
+                  href="#"
+                  className="text-white/14 hover:text-white/38 transition-colors"
+                >
                   <SiDiscord size={11} />
                 </a>
-                <a href="#" className="text-white/14 hover:text-white/38 transition-colors">
+                <a
+                  href="#"
+                  className="text-white/14 hover:text-white/38 transition-colors"
+                >
                   <SiInstagram size={11} />
                 </a>
-                <a href="#" className="text-white/14 hover:text-white/38 transition-colors">
+                <a
+                  href="#"
+                  className="text-white/14 hover:text-white/38 transition-colors"
+                >
                   <SiGithub size={11} />
                 </a>
               </motion.div>
@@ -288,14 +330,19 @@ export default function Sidebar() {
           borderRadius: "0 4px 4px 0",
         }}
         onMouseEnter={(e) => {
-          (e.currentTarget as HTMLElement).style.borderColor = "rgba(210,18,18,0.35)";
-          (e.currentTarget as HTMLElement).style.boxShadow = "2px 0 12px rgba(210,18,18,0.12)";
-          (e.currentTarget as HTMLElement).style.borderLeftColor = "transparent";
+          (e.currentTarget as HTMLElement).style.borderColor =
+            "rgba(210,18,18,0.35)";
+          (e.currentTarget as HTMLElement).style.boxShadow =
+            "2px 0 12px rgba(210,18,18,0.12)";
+          (e.currentTarget as HTMLElement).style.borderLeftColor =
+            "transparent";
         }}
         onMouseLeave={(e) => {
-          (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.08)";
+          (e.currentTarget as HTMLElement).style.borderColor =
+            "rgba(255,255,255,0.08)";
           (e.currentTarget as HTMLElement).style.boxShadow = "none";
-          (e.currentTarget as HTMLElement).style.borderLeftColor = "transparent";
+          (e.currentTarget as HTMLElement).style.borderLeftColor =
+            "transparent";
         }}
       >
         <motion.div
