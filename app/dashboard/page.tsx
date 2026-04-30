@@ -1,5 +1,6 @@
 "use client";
 
+import { useScanStore } from "@/store/scanStore";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -191,6 +192,8 @@ export default function DashboardPage() {
   const [scanPhase, setScanPhase] = useState<number | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
 
+  const setNewSignalsCount = useScanStore((s) => s.setNewSignalsCount);
+
   async function loadStats() {
     const r = await fetch("/api/stats");
     const data = await r.json();
@@ -222,6 +225,8 @@ export default function DashboardPage() {
 
       if (data.totalSignals > prevTotal || attempts >= 15) {
         clearInterval(poll);
+        const newCount = data.totalSignals - prevTotal;
+        if (newCount > 0) setNewSignalsCount(newCount);
         setScanPhase(3);
         setTimeout(() => {
           setScanning(false);

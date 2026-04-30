@@ -91,6 +91,7 @@ export type Signal = {
   postUrl: string;
   aiScore: number | null;
   aiReason: string | null;
+  createdAt: string;
   aiType: SignalType | null;
   status: "new" | "hunting" | "dismissed";
 };
