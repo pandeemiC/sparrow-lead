@@ -18,6 +18,7 @@ import Lottie from "lottie-react";
 import type { Signal, SignalType, SignalFilters } from "@/types";
 import { SIGNAL_TYPE_LABELS, SIGNAL_TYPE_TAG_CLASS } from "@/lib/constants";
 import { timeAgo, extractSub } from "@/lib/utils";
+import { useScanStore } from "@/store/scanStore";
 import {
   TopSpotlight,
   BottomSpotlight,
@@ -233,7 +234,7 @@ function ReplyModal({
   );
 }
 
-function SignalCard({ signal }: { signal: Signal }) {
+function SignalCard({ signal, isNew }: { signal: Signal; isNew?: boolean }) {
   const [dismissed, setDismissed] = useState(false);
   const [hunting, setHunting] = useState(signal.status === "hunting");
   const [replyOpen, setReplyOpen] = useState(false);
@@ -277,6 +278,11 @@ function SignalCard({ signal }: { signal: Signal }) {
       )}
       <div className="signal-card rounded-xl p-5 flex flex-col gap-4">
         <RightSpotlight variant={variant} />
+        {isNew && (
+          <span className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-red-500/15 text-red-400 border border-red-500/20">
+            New
+          </span>
+        )}
 
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2 flex-wrap">
@@ -384,6 +390,7 @@ function toSignal(row: Record<string, unknown>): Signal {
     postUrl: row.post_url as string,
     aiScore: row.ai_score as number | null,
     aiReason: row.ai_reason as string | null,
+    createdAt: row.created_at as string,
     aiType: row.ai_type as Signal["aiType"],
     status: (row.status as Signal["status"]) ?? "new",
   };
@@ -398,9 +405,21 @@ export default function SignalsPage() {
   });
   const [signals, setSignals] = useState<Signal[]>([]);
   const [loading, setLoading] = useState(true);
+  const clearNewSignals = useScanStore((s) => s.clearNewSignals);
+  const [lastVisitedAt] = useState<Date | null>(() => {
+    if (typeof window === "undefined") return null;
+    const prev = localStorage.getItem("signals_lastVisitedAt");
+    return prev ? new Date(prev) : null;
+  });
+  const [showNew, setShowNew] = useState(false);
 
   const set = <K extends keyof SignalFilters>(key: K, val: SignalFilters[K]) =>
     setFilters((f) => ({ ...f, [key]: val }));
+
+  useEffect(() => {
+    localStorage.setItem("signals_lastVisitedAt", new Date().toISOString());
+    clearNewSignals();
+  }, [clearNewSignals]);
 
   useEffect(() => {
     const params = new URLSearchParams(filters);
@@ -417,6 +436,11 @@ export default function SignalsPage() {
     (s) => s.aiScore !== null && s.aiScore >= 8,
   ).length;
 
+  const displayed =
+    showNew && lastVisitedAt
+      ? signals.filter((s) => new Date(s.createdAt) > lastVisitedAt)
+      : signals;
+
   return (
     <div className="p-5 h-full flex gap-4 min-h-0">
       <div className="w-70 rounded-xl glass-red border border-white/5 p-5 flex flex-col gap-4 min-h-0 overflow-y-auto shrink-0">
@@ -425,6 +449,18 @@ export default function SignalsPage() {
           <SlidersHorizontal size={14} className="text-white/20" />
         </div>
         <div className="flex flex-col gap-4">
+          <FilterSection label="New Signals">
+            <button
+              onClick={() => setShowNew((v) => !v)}
+              className={`text-left text-sm px-2.5 py-1.5 rounded-lg transition-colors w-full ${
+                showNew
+                  ? "bg-white/8 text-white border border-white/16"
+                  : "text-white/35 hover:text-white/60 hover:bg-white/4"
+              }`}
+            >
+              Show New Only
+            </button>
+          </FilterSection>
           <FilterSection label="Platform">
             <RadioGroup
               value={filters.platform}
@@ -521,7 +557,13 @@ export default function SignalsPage() {
             </div>
           ) : (
             signals.map((signal) => (
-              <SignalCard key={signal.id} signal={signal} />
+              <SignalCard
+                key={signal.id}
+                signal={signal}
+                isNew={
+                  !!lastVisitedAt && new Date(signal.createdAt) > lastVisitedAt
+                }
+              />
             ))
           )}
         </div>
