@@ -75,14 +75,7 @@ function NavItem({
             }}
           />
         )}
-        <div className="relative shrink-0">
-          <Icon size={14} />
-          {!!badge && badge > 0 && (
-            <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full flex items-center justify-center text-[8px] font-bold text-white leading-none">
-              {badge > 9 ? "9+" : badge}
-            </span>
-          )}
-        </div>
+        <Icon size={14} className="shrink-0" />
         <AnimatePresence>
           {!collapsed && (
             <motion.span
@@ -90,9 +83,22 @@ function NavItem({
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -4 }}
               transition={{ duration: 0.14 }}
-              className="text-[10px] font-semibold uppercase tracking-[0.16em] whitespace-nowrap overflow-hidden"
+              className="text-[10px] font-semibold uppercase tracking-[0.16em] whitespace-nowrap overflow-hidden flex-1"
             >
               {label}
+            </motion.span>
+          )}
+        </AnimatePresence>
+        <AnimatePresence>
+          {!collapsed && !!badge && badge > 0 && (
+            <motion.span
+              initial={{ opacity: 0, scale: 0.7 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.7 }}
+              transition={{ duration: 0.14 }}
+              className="min-w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-[8px] font-bold text-white px-1 shrink-0"
+            >
+              {badge > 9 ? "9+" : badge}
             </motion.span>
           )}
         </AnimatePresence>

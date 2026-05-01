@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   Radio,
   Sparkles,
@@ -240,6 +241,7 @@ function SignalCard({ signal, isNew }: { signal: Signal; isNew?: boolean }) {
   const [replyOpen, setReplyOpen] = useState(false);
   const [reply, setReply] = useState("");
   const [replyLoading, setReplyLoading] = useState(false);
+  const [showNewBadge, setShowNewBadge] = useState(isNew ?? false);
   const variant = scoreVariant(signal.aiScore);
 
   async function addToHuntBoard() {
@@ -276,13 +278,23 @@ function SignalCard({ signal, isNew }: { signal: Signal; isNew?: boolean }) {
           onClose={() => setReplyOpen(false)}
         />
       )}
-      <div className="signal-card rounded-xl p-5 flex flex-col gap-4">
+      <div
+        className="signal-card rounded-xl p-5 flex flex-col gap-4"
+        onMouseEnter={() => setShowNewBadge(false)}
+      >
         <RightSpotlight variant={variant} />
-        {isNew && (
-          <span className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-red-500/15 text-red-400 border border-red-500/20">
-            New
-          </span>
-        )}
+        <AnimatePresence>
+          {showNewBadge && (
+            <motion.span
+              initial={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+              className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-red-500/15 text-red-400 border border-red-500/20 self-start"
+            >
+              New
+            </motion.span>
+          )}
+        </AnimatePresence>
 
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2 flex-wrap">
@@ -543,7 +555,7 @@ export default function SignalsPage() {
               </div>
               <p className="text-sm text-white/25">Loading signals...</p>
             </div>
-          ) : signals.length === 0 ? (
+          ) : displayed.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center py-24">
               <div className="w-12 h-12 rounded-full bg-white/3 flex items-center justify-center">
                 <Radio size={20} className="text-white/15" />
@@ -556,7 +568,7 @@ export default function SignalsPage() {
               </p>
             </div>
           ) : (
-            signals.map((signal) => (
+            displayed.map((signal) => (
               <SignalCard
                 key={signal.id}
                 signal={signal}
