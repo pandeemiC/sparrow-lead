@@ -72,6 +72,14 @@ export type ScannedPost = {
 
 export type SignalPlatform = "reddit" | "hackernews";
 
+export type HotSignal = {
+  title: string;
+  score: number;
+  platform: "reddit" | "hackernews";
+  reason: string;
+  url: string;
+};
+
 export type SignalType =
   | "seeking_recommendation"
   | "pain_point"
