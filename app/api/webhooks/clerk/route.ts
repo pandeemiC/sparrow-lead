@@ -9,7 +9,7 @@ export async function POST(req: Request) {
 
   const headerPayload = await headers();
   const svixId = headerPayload.get("svix-id");
-  const svixTimestamp = headerPayload.get("svix-timestampo");
+  const svixTimestamp = headerPayload.get("svix-timestamp");
   const svixSignature = headerPayload.get("svix-signature");
 
   if (!svixId || !svixTimestamp || !svixSignature) {
@@ -26,7 +26,8 @@ export async function POST(req: Request) {
       "svix-timestamp": svixTimestamp,
       "svix-signature": svixSignature,
     }) as WebhookEvent;
-  } catch {
+  } catch (err) {
+    console.error("Webhook verification failed:", err);
     return new Response("Invalid signature", { status: 400 });
   }
 
