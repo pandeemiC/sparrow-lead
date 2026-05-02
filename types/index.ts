@@ -6,6 +6,10 @@ export type Keyword = {
   created_at: string;
 };
 
+export type Payload = {
+  userId?: string;
+};
+
 export type Mention = {
   id: string;
   keyword_id: string;
@@ -68,6 +72,14 @@ export type ScannedPost = {
 
 export type SignalPlatform = "reddit" | "hackernews";
 
+export type HotSignal = {
+  title: string;
+  score: number;
+  platform: "reddit" | "hackernews";
+  reason: string;
+  url: string;
+};
+
 export type SignalType =
   | "seeking_recommendation"
   | "pain_point"
@@ -87,6 +99,7 @@ export type Signal = {
   postUrl: string;
   aiScore: number | null;
   aiReason: string | null;
+  createdAt: string;
   aiType: SignalType | null;
   status: "new" | "hunting" | "dismissed";
 };

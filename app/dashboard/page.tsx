@@ -1,6 +1,8 @@
 "use client";
 
+import { useScanStore } from "@/store/scanStore";
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   Radio,
   Tag,
@@ -11,11 +13,21 @@ import {
   Circle,
   ArrowUpRight,
   Zap,
+  Check,
+  Loader,
 } from "lucide-react";
 import { SiReddit, SiYcombinator } from "react-icons/si";
 import { FaRedditAlien, FaYCombinator } from "react-icons/fa6";
 import type { Stats } from "@/types";
 import { timeAgo } from "@/lib/utils";
+
+const GRAIN_SVG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E")`;
+
+const SCAN_STEPS = [
+  "Fetching keywords",
+  "Scanning Reddit & HackerNews",
+  "Running AI analysis",
+];
 
 const sources = [
   { label: "Reddit", icon: SiReddit, active: true },
@@ -26,27 +38,161 @@ const huntColumns = [
   {
     key: "hunting",
     label: "Hunting",
-    color: "text-white/40",
-    dot: "bg-white/20",
+    color: "text-red-400",
+    dot: "bg-red-400/50",
   },
   {
     key: "interested",
     label: "Interested",
-    color: "text-white/60",
-    dot: "bg-white/35",
+    color: "text-sky-400",
+    dot: "bg-sky-400/55",
   },
   {
     key: "engaged",
     label: "Engaged",
-    color: "text-white/80",
-    dot: "bg-white/55",
+    color: "text-amber-400",
+    dot: "bg-amber-400/55",
   },
-  { key: "hunted", label: "Hunted", color: "text-white", dot: "bg-white/80" },
+  {
+    key: "hunted",
+    label: "Hunted",
+    color: "text-emerald-400",
+    dot: "bg-emerald-400/60",
+  },
 ] as const;
+
+function scoreMeta(score: number | null) {
+  if (score === null)
+    return {
+      border: "rgba(255,255,255,0.06)",
+      glow: "transparent",
+      text: "text-white/20",
+      barColor: "rgba(255,255,255,0.06)",
+      scoreColor: "text-white/20",
+      bars: 0,
+    };
+  if (score >= 8)
+    return {
+      border: "rgb(239,68,68)",
+      glow: "rgba(239,68,68,0.22)",
+      text: "text-red-400",
+      barColor: "rgb(239,68,68)",
+      scoreColor: "text-red-400/80",
+      bars: 3,
+    };
+  if (score >= 5)
+    return {
+      border: "rgb(249,115,22)",
+      glow: "rgba(249,115,22,0.14)",
+      text: "text-orange-400",
+      barColor: "rgb(249,115,22)",
+      scoreColor: "text-orange-400/80",
+      bars: 2,
+    };
+  return {
+    border: "rgb(59,130,246)",
+    glow: "rgba(59,130,246,0.14)",
+    text: "text-blue-400",
+    barColor: "rgb(59,130,246)",
+    scoreColor: "text-blue-400/80",
+    bars: 1,
+  };
+}
+
+function ScoreBars({ score }: { score: number | null }) {
+  const { bars, barColor, scoreColor } = scoreMeta(score);
+  return (
+    <div className="flex items-center gap-1 shrink-0">
+      <div className="flex items-end gap-px h-3">
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className="w-0.75 rounded-full"
+            style={{
+              height: i === 1 ? 6 : i === 2 ? 9 : 12,
+              background: i <= bars ? barColor : "rgba(255,255,255,0.06)",
+            }}
+          />
+        ))}
+      </div>
+      {score !== null && (
+        <span className={`text-[9px] font-bold tabular-nums ${scoreColor}`}>
+          {score}
+        </span>
+      )}
+    </div>
+  );
+}
+
+const STATUS_COLORS: Record<string, string> = {
+  hunting: "text-red-400",
+  interested: "text-sky-400",
+  engaged: "text-amber-400",
+  hunted: "text-emerald-400",
+};
+
+function SignalPill({
+  s,
+  status,
+}: {
+  s: {
+    id: string | number;
+    post_url: string;
+    post_title: string;
+    platform: string;
+    ai_score: number | null;
+  };
+  status?: string;
+}) {
+  const { border, glow } = scoreMeta(s.ai_score);
+  return (
+    <a
+      href={s.post_url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/4 transition-colors"
+      style={{
+        background: "rgba(255,255,255,0.025)",
+        borderLeft: `2px solid ${border}`,
+        boxShadow: `inset 3px 0 10px -5px ${glow}`,
+      }}
+    >
+      <div
+        className="w-4 h-4 rounded flex items-center justify-center shrink-0"
+        style={{
+          background:
+            s.platform === "reddit"
+              ? "rgba(255,100,0,0.12)"
+              : "rgba(255,102,0,0.10)",
+        }}
+      >
+        {s.platform === "reddit" ? (
+          <FaRedditAlien size={8} className="text-orange-400" />
+        ) : (
+          <FaYCombinator size={8} className="text-orange-300" />
+        )}
+      </div>
+      <span className="text-[10px] text-white/55 truncate flex-1 leading-none">
+        {s.post_title}
+      </span>
+      {status && (
+        <span
+          className={`text-[9px] font-semibold shrink-0 capitalize ${STATUS_COLORS[status] ?? "text-white/30"}`}
+        >
+          {status}
+        </span>
+      )}
+      <ScoreBars score={s.ai_score} />
+    </a>
+  );
+}
 
 export default function DashboardPage() {
   const [scanning, setScanning] = useState(false);
+  const [scanPhase, setScanPhase] = useState<number | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
+
+  const setNewSignalsCount = useScanStore((s) => s.setNewSignalsCount);
 
   async function loadStats() {
     const r = await fetch("/api/stats");
@@ -63,9 +209,31 @@ export default function DashboardPage() {
 
   async function scan() {
     setScanning(true);
-    await fetch("/api/scan", { method: "POST" });
-    setScanning(false);
-    loadStats();
+    setScanPhase(0);
+    const prevTotal = stats?.totalSignals ?? 0;
+
+    await fetch("/api/scan/trigger", { method: "POST" });
+
+    let attempts = 0;
+    const poll = setInterval(async () => {
+      attempts++;
+      if (attempts === 1) setScanPhase(1);
+      if (attempts === 3) setScanPhase(2);
+      const res = await fetch("/api/stats");
+      const data = await res.json();
+      setStats(data);
+
+      if (data.totalSignals > prevTotal || attempts >= 15) {
+        clearInterval(poll);
+        const newCount = data.totalSignals - prevTotal;
+        if (newCount > 0) setNewSignalsCount(newCount);
+        setScanPhase(3);
+        setTimeout(() => {
+          setScanning(false);
+          setScanPhase(null);
+        }, 1500);
+      }
+    }, 3000);
   }
 
   const totalHunted = stats
@@ -73,9 +241,75 @@ export default function DashboardPage() {
     : 0;
 
   return (
-    <div className="p-5 h-full flex gap-4">
-      <div className="flex flex-col flex-6 gap-4 min-h-0 min-w-0">
-        <div className="flex-1 rounded-xl glass-red border border-white/5 p-5 flex flex-col min-h-0 glow-b-right">
+    <div
+      className="relative p-5 h-full flex gap-4 overflow-hidden"
+      style={{ background: "#080204" }}
+    >
+      <motion.div
+        className="absolute rounded-full pointer-events-none"
+        style={{
+          width: 900,
+          height: 900,
+          background:
+            "radial-gradient(ellipse at center, rgba(175,10,10,0.16) 0%, rgba(130,0,0,0.06) 50%, transparent 72%)",
+          filter: "blur(100px)",
+          top: "-30%",
+          left: "-15%",
+        }}
+        animate={{ x: [0, 12, -8, 10, 0], y: [0, -10, 8, -4, 0] }}
+        transition={{ duration: 40, ease: "easeInOut", repeat: Infinity }}
+      />
+      <motion.div
+        className="absolute rounded-full pointer-events-none"
+        style={{
+          width: 700,
+          height: 700,
+          background:
+            "radial-gradient(ellipse at center, rgba(140,5,5,0.12) 0%, rgba(90,0,0,0.04) 55%, transparent 75%)",
+          filter: "blur(90px)",
+          bottom: "-25%",
+          right: "-10%",
+        }}
+        animate={{ x: [0, -10, 7, -8, 0], y: [0, 8, -7, 5, 0] }}
+        transition={{
+          duration: 35,
+          ease: "easeInOut",
+          repeat: Infinity,
+          delay: 3,
+        }}
+      />
+      <motion.div
+        className="absolute rounded-full pointer-events-none"
+        style={{
+          width: 500,
+          height: 500,
+          background:
+            "radial-gradient(ellipse at center, rgba(190,18,18,0.07) 0%, transparent 70%)",
+          filter: "blur(80px)",
+          top: "40%",
+          left: "45%",
+        }}
+        animate={{ x: [0, 8, -12, 6, 0], y: [0, -6, 10, -4, 0] }}
+        transition={{
+          duration: 45,
+          ease: "easeInOut",
+          repeat: Infinity,
+          delay: 7,
+        }}
+      />
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: GRAIN_SVG,
+          backgroundSize: "256px 256px",
+          backgroundRepeat: "repeat",
+          mixBlendMode: "overlay",
+          opacity: 0.35,
+        }}
+      />
+
+      <div className="relative z-10 flex flex-col flex-6 gap-4 min-h-0 min-w-0">
+        <div className="flex-1 rounded-xl dash-card-accent p-5 flex flex-col min-h-0">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <h2 className="text-sm font-semibold text-white">
@@ -199,7 +433,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex gap-4 flex-1 min-h-0">
-          <div className="flex-1 flex flex-col px-4 py-4 rounded-xl glass-red border border-white/5 gap-3 min-h-0 min-w-0 overflow-hidden">
+          <div className="flex-1 flex flex-col px-4 py-4 rounded-xl dash-card gap-3 min-h-0 min-w-0 overflow-hidden">
             <div className="flex items-center justify-between">
               <p className="text-[10px] text-white/40 uppercase tracking-widest">
                 Total Signals
@@ -209,7 +443,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div>
-              <p className="text-3xl font-bold text-white leading-none">
+              <p className="text-3xl font-bold text-white leading-none stat-num-glow">
                 {stats?.totalSignals ?? (
                   <span className="text-white/20 text-lg">—</span>
                 )}
@@ -221,56 +455,14 @@ export default function DashboardPage() {
             <div className="h-px bg-white/5" />
             <div className="flex flex-col gap-1.5 overflow-y-auto flex-1 min-h-0">
               {stats?.recentSignals && stats.recentSignals.length > 0 ? (
-                stats.recentSignals.map((s) => (
-                  <a
-                    key={s.id}
-                    href={s.post_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/3 border-l-2 hover:bg-white/5 transition-colors ${
-                      s.ai_score !== null && s.ai_score >= 8
-                        ? "border-l-red-500"
-                        : s.ai_score !== null && s.ai_score >= 5
-                          ? "border-l-amber-600/50"
-                          : "border-l-white/10"
-                    }`}
-                  >
-                    {s.platform === "reddit" ? (
-                      <FaRedditAlien
-                        size={9}
-                        className="text-orange-400 shrink-0"
-                      />
-                    ) : (
-                      <FaYCombinator
-                        size={9}
-                        className="text-orange-300 shrink-0"
-                      />
-                    )}
-                    <span className="text-[10px] text-white/50 truncate flex-1">
-                      {s.post_title}
-                    </span>
-                    {s.ai_score !== null && (
-                      <span
-                        className={`text-[9px] font-bold shrink-0 ${
-                          s.ai_score >= 8
-                            ? "text-red-400"
-                            : s.ai_score >= 5
-                              ? "text-amber-400"
-                              : "text-white/25"
-                        }`}
-                      >
-                        {s.ai_score}
-                      </span>
-                    )}
-                  </a>
-                ))
+                stats.recentSignals.map((s) => <SignalPill key={s.id} s={s} />)
               ) : (
                 <p className="text-[10px] text-white/20">No signals yet</p>
               )}
             </div>
           </div>
 
-          <div className="flex-1 flex flex-col px-4 py-4 rounded-xl glass-red border border-white/5 gap-3 min-h-0 min-w-0 overflow-hidden">
+          <div className="flex-1 flex flex-col px-4 py-4 rounded-xl dash-card gap-3 min-h-0 min-w-0 overflow-hidden">
             <div className="flex items-center justify-between">
               <p className="text-[10px] text-white/40 uppercase tracking-widest">
                 Signals Today
@@ -280,7 +472,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div>
-              <p className="text-3xl font-bold text-white leading-none">
+              <p className="text-3xl font-bold text-white leading-none stat-num-glow">
                 {stats?.signalsToday ?? (
                   <span className="text-white/20 text-lg">—</span>
                 )}
@@ -290,56 +482,14 @@ export default function DashboardPage() {
             <div className="h-px bg-white/5" />
             <div className="flex flex-col gap-1.5 overflow-y-auto flex-1 min-h-0">
               {stats?.topSignals && stats.topSignals.length > 0 ? (
-                stats.topSignals.map((s) => (
-                  <a
-                    key={s.id}
-                    href={s.post_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/3 border-l-2 hover:bg-white/5 transition-colors ${
-                      s.ai_score !== null && s.ai_score >= 8
-                        ? "border-l-red-500"
-                        : s.ai_score !== null && s.ai_score >= 5
-                          ? "border-l-amber-600/50"
-                          : "border-l-white/10"
-                    }`}
-                  >
-                    {s.platform === "reddit" ? (
-                      <FaRedditAlien
-                        size={9}
-                        className="text-orange-400 shrink-0"
-                      />
-                    ) : (
-                      <FaYCombinator
-                        size={9}
-                        className="text-orange-300 shrink-0"
-                      />
-                    )}
-                    <span className="text-[10px] text-white/50 truncate flex-1">
-                      {s.post_title}
-                    </span>
-                    {s.ai_score !== null && (
-                      <span
-                        className={`text-[9px] font-bold shrink-0 ${
-                          s.ai_score >= 8
-                            ? "text-red-400"
-                            : s.ai_score >= 5
-                              ? "text-amber-400"
-                              : "text-white/25"
-                        }`}
-                      >
-                        {s.ai_score}
-                      </span>
-                    )}
-                  </a>
-                ))
+                stats.topSignals.map((s) => <SignalPill key={s.id} s={s} />)
               ) : (
                 <p className="text-[10px] text-white/20">No signals today</p>
               )}
             </div>
           </div>
 
-          <div className="flex-1 flex flex-col px-4 py-4 rounded-xl glass-red border border-white/5 gap-3 min-h-0 min-w-0 overflow-hidden">
+          <div className="flex-1 flex flex-col px-4 py-4 rounded-xl dash-card gap-3 min-h-0 min-w-0 overflow-hidden">
             <div className="flex items-center justify-between">
               <p className="text-[10px] text-white/40 uppercase tracking-widest">
                 Keywords
@@ -349,7 +499,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div>
-              <p className="text-3xl font-bold text-white leading-none">
+              <p className="text-3xl font-bold text-white leading-none stat-num-glow">
                 {stats?.keywordsTracked ?? (
                   <span className="text-white/20 text-lg">—</span>
                 )}
@@ -391,8 +541,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="flex flex-col flex-4 gap-4 min-h-0">
-        <div className="flex-1 rounded-xl glass-red border border-white/5 p-5 flex flex-col min-h-0 glow-t-right">
+      <div className="relative z-10 flex flex-col flex-4 gap-4 min-h-0 min-w-0">
+        <div className="flex-1 rounded-xl auth-panel p-5 flex flex-col min-h-0 min-w-0 overflow-hidden">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <h2 className="text-sm font-semibold text-white">Hunt Board</h2>
@@ -430,56 +580,7 @@ export default function DashboardPage() {
           {stats?.huntLeads && stats.huntLeads.length > 0 ? (
             <div className="flex flex-col gap-1.5 flex-1 min-h-0 overflow-y-auto">
               {stats.huntLeads.map((lead) => (
-                <a
-                  key={lead.id}
-                  href={lead.post_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/3 border-l-2 hover:bg-white/5 transition-colors ${
-                    lead.ai_score !== null && lead.ai_score >= 8
-                      ? "border-l-red-500"
-                      : lead.ai_score !== null && lead.ai_score >= 5
-                        ? "border-l-amber-600/50"
-                        : "border-l-white/10"
-                  }`}
-                >
-                  {lead.platform === "reddit" ? (
-                    <FaRedditAlien
-                      size={9}
-                      className="text-orange-400 shrink-0"
-                    />
-                  ) : (
-                    <FaYCombinator
-                      size={9}
-                      className="text-orange-300 shrink-0"
-                    />
-                  )}
-                  <span className="text-[10px] text-white/50 truncate flex-1">
-                    {lead.post_title}
-                  </span>
-                  <span
-                    className={`text-[9px] font-bold shrink-0 ${
-                      lead.status === "interested"
-                        ? "text-blue-400"
-                        : "text-white/30"
-                    }`}
-                  >
-                    {lead.status === "interested" ? "Interested" : "Hunting"}
-                  </span>
-                  {lead.ai_score !== null && (
-                    <span
-                      className={`text-[9px] font-bold shrink-0 ${
-                        lead.ai_score >= 8
-                          ? "text-red-400"
-                          : lead.ai_score >= 5
-                            ? "text-amber-400"
-                            : "text-white/25"
-                      }`}
-                    >
-                      {lead.ai_score}
-                    </span>
-                  )}
-                </a>
+                <SignalPill key={lead.id} s={lead} status={lead.status} />
               ))}
               <a
                 href="/dashboard/hunt-board"
@@ -501,7 +602,7 @@ export default function DashboardPage() {
           )}
         </div>
 
-        <div className="flex flex-col gap-4 px-5 py-4 rounded-xl glass-red border border-white/5">
+        <div className="flex flex-col gap-4 px-5 py-4 rounded-xl dash-card">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-white">Last Scanned</p>
@@ -536,11 +637,76 @@ export default function DashboardPage() {
           <button
             onClick={scan}
             disabled={scanning}
-            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-md border border-white/10 bg-white/4 text-white text-sm font-medium hover:bg-white/7 hover:border-white/16 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-md text-white text-sm font-medium transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{
+              background: scanning
+                ? "rgba(255,255,255,0.06)"
+                : "rgba(255,255,255,0.08)",
+              border: "1px solid rgba(255,255,255,0.12)",
+            }}
+            onMouseEnter={(e) => {
+              if (!scanning) {
+                (e.currentTarget as HTMLButtonElement).style.background =
+                  "rgba(255,255,255,0.12)";
+                (e.currentTarget as HTMLButtonElement).style.borderColor =
+                  "rgba(255,255,255,0.2)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background =
+                "rgba(255,255,255,0.08)";
+              (e.currentTarget as HTMLButtonElement).style.borderColor =
+                "rgba(255,255,255,0.12)";
+            }}
           >
             <ScanLine size={15} className={scanning ? "animate-spin" : ""} />
-            {scanning ? "Scanning..." : "Scan Now"}
+            {scanning ? SCAN_STEPS[Math.min(scanPhase ?? 0, 2)] : "Scan Now"}
           </button>
+
+          <AnimatePresence>
+            {scanPhase !== null && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col gap-1.5 overflow-hidden pt-1"
+              >
+                {SCAN_STEPS.map((step, i) => {
+                  const done = scanPhase > i;
+                  const active = scanPhase === i;
+                  return (
+                    <motion.div
+                      key={step}
+                      initial={{ opacity: 0, x: -6 }}
+                      animate={{ opacity: scanPhase < i ? 0.2 : 1, x: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                      className="flex items-center gap-2"
+                    >
+                      {done ? (
+                        <Check
+                          size={11}
+                          className="text-emerald-400 shrink-0"
+                        />
+                      ) : active ? (
+                        <Loader
+                          size={11}
+                          className="text-red-400 animate-spin shrink-0"
+                        />
+                      ) : (
+                        <div className="w-2.75 h-2.75 rounded-full border border-white/15 shrink-0" />
+                      )}
+                      <span
+                        className={`text-[11px] ${done ? "text-emerald-400/60" : active ? "text-white/60" : "text-white/20"}`}
+                      >
+                        {step}
+                      </span>
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>

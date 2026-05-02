@@ -40,6 +40,7 @@ yarn-error.log*
 CLAUDE.md
 AGENTS.md
 .claude/
+memory/
 
 # project planning (local only)
 project.md
@@ -47,3 +48,5 @@ project.md
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+.trigger

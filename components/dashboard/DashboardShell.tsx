@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Bell, Search, Target } from "lucide-react";
 import Image from "next/image";
 import Sidebar from "./Sidebar";
+import { useUser } from "@clerk/nextjs";
+import { useEffect, useState } from "react";
 
 type UserData = {
   name: string;
@@ -19,7 +21,7 @@ export default function DashboardShell({
   user: UserData;
 }) {
   return (
-    <div className="flex h-screen bg-[#0a0a0a] overflow-hidden">
+    <div className="flex h-screen bg-[#080204] overflow-hidden">
       <Sidebar />
       <div className="flex flex-col flex-1 overflow-hidden">
         <header className="flex items-center h-14 shrink-0 px-6 gap-4 border-b border-white/6">
@@ -54,10 +56,15 @@ export default function DashboardShell({
                 <p className="text-[10px] font-medium text-white/30 uppercase tracking-widest">
                   Signals
                 </p>
-                <span className="text-[10px] text-white/20 tabular-nums">0 / 100</span>
+                <span className="text-[10px] text-white/20 tabular-nums">
+                  0 / 100
+                </span>
               </div>
               <div className="h-px rounded-full bg-white/6 overflow-hidden">
-                <div className="h-full rounded-full bg-white/20" style={{ width: "0%" }} />
+                <div
+                  className="h-full rounded-full bg-white/20"
+                  style={{ width: "0%" }}
+                />
               </div>
             </div>
             <div className="flex flex-col gap-1.5 px-3 py-1.5 rounded-md border border-white/6 bg-white/2 min-w-28">
@@ -65,10 +72,15 @@ export default function DashboardShell({
                 <p className="text-[10px] font-medium text-white/30 uppercase tracking-widest">
                   Keywords
                 </p>
-                <span className="text-[10px] text-white/20 tabular-nums">0 / 5</span>
+                <span className="text-[10px] text-white/20 tabular-nums">
+                  0 / 5
+                </span>
               </div>
               <div className="h-px rounded-full bg-white/6 overflow-hidden">
-                <div className="h-full rounded-full bg-white/20" style={{ width: "0%" }} />
+                <div
+                  className="h-full rounded-full bg-white/20"
+                  style={{ width: "0%" }}
+                />
               </div>
             </div>
           </div>
@@ -83,7 +95,7 @@ export default function DashboardShell({
             <span className="absolute top-1.5 right-1.5 w-1 h-1 bg-white/60 rounded-full" />
           </button>
           <Link
-            href="/dashboard/hunt"
+            href="/dashboard/hunt-board"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-white/10 bg-white/4 text-white text-sm font-medium hover:bg-white/7 hover:border-white/16 transition-all"
           >
             <Target size={13} />
@@ -91,7 +103,10 @@ export default function DashboardShell({
           </Link>
         </header>
 
-        <main className="flex-1 bg-[#0a0a0a] overflow-y-auto">
+        <main
+          className="flex-1 overflow-y-auto"
+          style={{ background: "#080204" }}
+        >
           {children}
         </main>
       </div>

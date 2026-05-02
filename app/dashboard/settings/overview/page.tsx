@@ -83,11 +83,8 @@ export default function SettingsOverview() {
                 <button
                   key={t.value}
                   onClick={() => setTheme(t.value)}
-                  className={`flex-1 py-3 cursor-pointer rounded-lg border text-sm font-medium transition-all ${
-                    theme === t.value
-                      ? "border-white/20 text-white bg-white/5"
-                      : "border-white/5 text-white/35 hover:border-white/10 hover:text-white/50"
-                  }`}
+                  className={`border-white/5 text-white/35 flex-1 py-3 cursor-not-allowed rounded-lg border text-sm font-medium transition-all 
+                  `}
                 >
                   {t.label}
                 </button>

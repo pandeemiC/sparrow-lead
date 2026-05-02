@@ -201,18 +201,20 @@ export default function SignInPage() {
 
       <div className="relative z-10 flex w-full">
         <div className="hidden lg:flex lg:w-[50%] flex-col justify-between p-12">
-          <div className="flex items-center gap-2">
-            <Image
-              src="/sparrow-no-text-logo.png"
-              alt="Sparrow"
-              width={18}
-              height={18}
-              className="opacity-65"
-            />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
-              Sparrow
-            </span>
-          </div>
+          <Link href="/">
+            <div className="flex items-center gap-2">
+              <Image
+                src="/sparrow-no-text-logo.png"
+                alt="Sparrow"
+                width={18}
+                height={18}
+                className="opacity-65"
+              />
+              <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
+                Sparrow
+              </span>
+            </div>
+          </Link>
 
           <motion.div
             className="flex flex-col gap-5"
@@ -237,29 +239,30 @@ export default function SignInPage() {
           </motion.div>
         </div>
 
-        <div className="w-full lg:w-[40%] my-10 border-neutral-500/10 rounded-2xl mr-25 border bg-neutral-600/20  flex items-center justify-center p-6 lg:p-12">
-          <motion.div
-            className="auth-glass w-full max-w-sm rounded-2xl p-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-          >
+        <motion.div
+          className="auth-glass w-full lg:w-[40%] my-10 mr-25 rounded-2xl p-8 lg:p-12"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+        >
             <div className="flex flex-col items-center mb-7">
               <div
                 className="relative flex justify-center mb-10"
                 style={{ height: 136 }}
               >
-                <Image
-                  src="/sparrow-no-text-logo.png"
-                  alt="Sparrow"
-                  width={200}
-                  height={200}
-                  className="relative top-0 left-1/2 -translate-x-1/2 opacity-90"
-                  style={{
-                    filter:
-                      "brightness(1) drop-shadow(0 0 18px rgba(210, 43, 43,0.6))",
-                  }}
-                />
+                <Link href="/">
+                  <Image
+                    src="/sparrow-no-text-logo.png"
+                    alt="Sparrow"
+                    width={200}
+                    height={200}
+                    className="relative top-0 left-1/2 -translate-x-1/2 opacity-90"
+                    style={{
+                      filter:
+                        "brightness(1) drop-shadow(0 0 18px rgba(210, 43, 43,0.6))",
+                    }}
+                  />
+                </Link>
                 <h1 className="absolute bottom-[-15] text-[20px] font-semibold uppercase tracking-[0.22em] text-white/35">
                   Sparrow
                 </h1>
@@ -376,7 +379,6 @@ export default function SignInPage() {
               </Link>
             </p>
           </motion.div>
-        </div>
       </div>
     </div>
   );
