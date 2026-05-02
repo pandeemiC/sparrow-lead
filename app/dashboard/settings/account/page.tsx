@@ -64,6 +64,11 @@ export default function SettingsAccount() {
   const { signOut } = useClerk();
   const [sessions, setSessions] = useState(mockSessions);
 
+  const [editingName, setEditingName] = useState(false);
+  const [draftFirst, setDraftFirst] = useState("");
+  const [draftLast, setDraftLast] = useState("");
+  const [saving, setSaving] = useState(false);
+
   if (!user) return null;
 
   const name = user.firstName
@@ -77,6 +82,24 @@ export default function SettingsAccount() {
     setSessions((prev) => prev.filter((s) => s.id !== id));
   }
 
+  function editName() {
+    if (!user) return;
+    setDraftFirst(user.firstName ?? "");
+    setDraftLast(user.lastName ?? "");
+    setEditingName(true);
+  }
+
+  async function saveDisplayName() {
+    if (!user) return;
+    setSaving(true);
+    await user.update({
+      firstName: draftFirst,
+      lastName: draftLast || undefined,
+    });
+    setSaving(false);
+    setEditingName(false);
+  }
+
   return (
     <div className="space-y-4">
       <div className="rounded-xl glass-red border border-white/5 p-6 glow-right">
@@ -84,12 +107,51 @@ export default function SettingsAccount() {
           Account
         </h2>
         <div className="space-y-5">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1.5">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1 space-y-1.5">
               <p className="text-sm font-medium text-white">Display Name</p>
-              <p className="text-sm text-white/35">{name}</p>
+
+              {editingName ? (
+                <div className="flex gap-2 pt-0.5">
+                  <input
+                    value={draftFirst}
+                    onChange={(e) => setDraftFirst(e.target.value)}
+                    placeholder="First name"
+                    className="bg-white/5 border border-white/10 rounded-md px-3 py-1.5 text-sm text-white placeholder-white/25 outline-none focus:border-white/20 w-32"
+                  />
+                  <input
+                    value={draftLast}
+                    onChange={(e) => setDraftLast(e.target.value)}
+                    placeholder="Last name"
+                    className="bg-white/5 border border-white/10 rounded-md px-3 py-1.5 text-sm text-white placeholder-white/25 outline-none focus:border-white/20 w-32"
+                  />
+                </div>
+              ) : (
+                <p className="text-sm text-white/35">{name}</p>
+              )}
             </div>
-            <button className="edit-btn">Edit</button>
+
+            {editingName ? (
+              <div className="flex gap-2 shrink-0">
+                <button
+                  onClick={() => setEditingName(false)}
+                  className="edit-btn"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveDisplayName}
+                  disabled={saving}
+                  className="edit-btn"
+                >
+                  {saving ? "Saving..." : "Save"}
+                </button>
+              </div>
+            ) : (
+              <button onClick={editName} className="edit-btn shrink-0">
+                Edit
+              </button>
+            )}
           </div>
           <div className="h-px bg-white/5" />
           <div className="flex items-center justify-between">
@@ -162,7 +224,7 @@ export default function SettingsAccount() {
           <button
             disabled={isPaidPlan}
             onClick={() => user.delete()}
-            className="text-sm px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all shrink-0 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+            className="text-sm cursor-pointer px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all shrink-0 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
           >
             Delete Account
           </button>
