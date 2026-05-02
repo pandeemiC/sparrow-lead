@@ -1,12 +1,14 @@
 import { task, logger } from "@trigger.dev/sdk/v3";
 import { getDb } from "@/lib/db";
 import { analyzePost } from "@/lib/analysis";
+import { sendDigestEmail } from "@/lib/email";
 import type {
   RedditResponse,
   HackerNewsResponse,
   ScannedPost,
   Keyword,
   Payload,
+  HotSignal,
 } from "@/types";
 
 async function searchReddit(keyword: string): Promise<ScannedPost[]> {
@@ -52,6 +54,8 @@ export const autoScanTask = task({
     for (const user of users) {
       const keywords =
         (await sql`SELECT * FROM keywords WHERE user_id = ${user.user_id}`) as Keyword[];
+      const hotSignals: HotSignal[] = [];
+
       for (const kw of keywords) {
         let posts: ScannedPost[] = [];
 
@@ -76,7 +80,32 @@ export const autoScanTask = task({
                     VALUES (${kw.id}, ${post.platform}, ${post.post_url}, ${post.post_title}, ${post.post_body}, ${post.author}, ${analysis.score}, ${analysis.reason}, ${analysis.type}, NOW())
           `;
 
+          if (analysis.score >= 7) {
+            hotSignals.push({
+              title: post.post_title,
+              score: analysis.score,
+              platform: post.platform as "reddit" | "hackernews",
+              reason: analysis.reason,
+              url: post.post_url,
+            });
+          }
+
           totalFound++;
+        }
+      }
+
+      if (!payload.userId && hotSignals.length > 0) {
+        const [userRow] =
+          await sql`SELECT email FROM users WHERE user_id = ${user.user_id}`;
+        if (userRow?.email) {
+          const topSignals = hotSignals
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 3);
+          await sendDigestEmail(userRow.email, topSignals);
+          logger.log("Digest email sent", {
+            userId: user.user_id,
+            hotSignals: topSignals.length,
+          });
         }
       }
 

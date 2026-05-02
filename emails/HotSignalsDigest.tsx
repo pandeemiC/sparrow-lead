@@ -79,7 +79,7 @@ export default function HotSignalsDigest({ signals }: Props) {
                       fontWeight: 700,
                       letterSpacing: "0.18em",
                       textTransform: "uppercase",
-                      marginLeft: 3,
+                      marginLeft: 5,
                     }}
                   >
                     Sparrow
@@ -153,10 +153,22 @@ export default function HotSignalsDigest({ signals }: Props) {
 
                 <Row>
                   <Column>
-                    <span style={{ color: "#dc2626", fontSize: 10, fontWeight: 700 }}>
+                    <span
+                      style={{
+                        color: "#dc2626",
+                        fontSize: 10,
+                        fontWeight: 700,
+                      }}
+                    >
                       {signal.score}/10
                     </span>
-                    <span style={{ color: "#333333", fontSize: 10, margin: "0 6px" }}>
+                    <span
+                      style={{
+                        color: "#333333",
+                        fontSize: 10,
+                        margin: "0 6px",
+                      }}
+                    >
                       ·
                     </span>
                     <span style={{ color: "#444444", fontSize: 10 }}>
@@ -192,7 +204,8 @@ export default function HotSignalsDigest({ signals }: Props) {
                 letterSpacing: "0.04em",
               }}
             >
-              Sparrow · You are receiving this because you have keyword alerts enabled.
+              Sparrow · You are receiving this because you have keyword alerts
+              enabled.
             </Text>
           </Section>
         </Container>
