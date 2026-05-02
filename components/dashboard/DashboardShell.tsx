@@ -83,7 +83,7 @@ export default function DashboardShell({
             <span className="absolute top-1.5 right-1.5 w-1 h-1 bg-white/60 rounded-full" />
           </button>
           <Link
-            href="/dashboard/hunt"
+            href="/dashboard/hunt-board"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-white/10 bg-white/4 text-white text-sm font-medium hover:bg-white/7 hover:border-white/16 transition-all"
           >
             <Target size={13} />

@@ -2,42 +2,8 @@ import { task, logger } from "@trigger.dev/sdk/v3";
 import { getDb } from "@/lib/db";
 import { analyzePost } from "@/lib/analysis";
 import { sendDigestEmail } from "@/lib/email";
-import type {
-  RedditResponse,
-  HackerNewsResponse,
-  ScannedPost,
-  Keyword,
-  Payload,
-  HotSignal,
-} from "@/types";
-
-async function searchReddit(keyword: string): Promise<ScannedPost[]> {
-  const url = `https://www.reddit.com/search.json?q=${encodeURIComponent(keyword)}&sort=new&limit=5`;
-  const res = await fetch(url, { headers: { "User-Agent": "Sparrow/1.0" } });
-  if (!res.ok) return [];
-  const data: RedditResponse = await res.json();
-  return data.data.children.map((child) => ({
-    platform: "reddit",
-    post_url: `https://reddit.com${child.data.permalink}`,
-    post_title: child.data.title,
-    post_body: child.data.selftext?.slice(0, 500) || "",
-    author: child.data.author,
-  }));
-}
-
-async function searchHackerNews(keyword: string): Promise<ScannedPost[]> {
-  const url = `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(keyword)}&tags=(story,comment)&hitsPerPage=5`;
-  const res = await fetch(url);
-  if (!res.ok) return [];
-  const data: HackerNewsResponse = await res.json();
-  return data.hits.map((hit) => ({
-    platform: "hackernews",
-    post_url: `https://news.ycombinator.com/item?id=${hit.objectID}`,
-    post_title: hit.title || hit.story_text?.slice(0, 80) || "(no title)",
-    post_body: hit.story_text?.slice(0, 500) || "",
-    author: hit.author,
-  }));
-}
+import { searchReddit, searchHackerNews } from "@/lib/search";
+import type { ScannedPost, Keyword, Payload, HotSignal } from "@/types";
 
 export const autoScanTask = task({
   id: "auto-scan",
