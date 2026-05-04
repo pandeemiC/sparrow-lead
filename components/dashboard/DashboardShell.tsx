@@ -23,6 +23,7 @@ export default function DashboardShell({
   return (
     <div className="flex h-screen bg-[#080204] overflow-hidden">
       <Sidebar />
+      {/* side */}
       <div className="flex flex-col flex-1 overflow-hidden">
         <header className="flex items-center h-14 shrink-0 px-6 gap-4 border-b border-white/6">
           {user.imageUrl ? (
