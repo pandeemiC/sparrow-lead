@@ -20,6 +20,29 @@ export default function DashboardShell({
   children: React.ReactNode;
   user: UserData;
 }) {
+  const { user: clerkUser } = useUser();
+
+  const [stats, setStats] = useState({ keywordsTracked: 0, totalSignals: 0 });
+
+  useEffect(() => {
+    fetch("/api/stats")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.keywordsTracked !== undefined) {
+          setStats({
+            keywordsTracked: data.keywordsTracked,
+            totalSignals: data.totalSignals,
+          });
+        }
+      });
+  }, []);
+
+  const displayName = clerkUser?.firstName
+    ? `${clerkUser.firstName} ${clerkUser.lastName ?? ""}`.trim()
+    : (clerkUser?.emailAddresses[0]?.emailAddress ?? user.name);
+
+  const keyPercent = Math.min((stats.keywordsTracked / 5) * 100, 100);
+  const sigPercent = Math.min((stats.totalSignals / 100) * 100, 100);
   return (
     <div className="flex h-screen bg-[#080204] overflow-hidden">
       <Sidebar />
@@ -41,7 +64,7 @@ export default function DashboardShell({
 
           <div className="min-w-0">
             <p className="text-sm font-medium text-white leading-tight truncate">
-              {user.name}
+              {displayName}
             </p>
             <p className="text-[11px] text-white/30 leading-tight truncate">
               {user.email}
@@ -57,13 +80,13 @@ export default function DashboardShell({
                   Signals
                 </p>
                 <span className="text-[10px] text-white/20 tabular-nums">
-                  0 / 100
+                  {stats.totalSignals} / 100
                 </span>
               </div>
               <div className="h-px rounded-full bg-white/6 overflow-hidden">
                 <div
                   className="h-full rounded-full bg-white/20"
-                  style={{ width: "0%" }}
+                  style={{ width: `${sigPercent}` }}
                 />
               </div>
             </div>
@@ -73,13 +96,13 @@ export default function DashboardShell({
                   Keywords
                 </p>
                 <span className="text-[10px] text-white/20 tabular-nums">
-                  0 / 5
+                  {stats.keywordsTracked} / 5
                 </span>
               </div>
               <div className="h-px rounded-full bg-white/6 overflow-hidden">
                 <div
                   className="h-full rounded-full bg-white/20"
-                  style={{ width: "0%" }}
+                  style={{ width: `${keyPercent}` }}
                 />
               </div>
             </div>
