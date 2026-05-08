@@ -49,6 +49,14 @@ export default function SettingsOverview() {
     a.provider.toLowerCase(),
   );
 
+  const C = 94;
+
+  const kwPerc = Math.min((used.keywords / limits.keywords) * 100, 100);
+  const sigPerc = Math.min((used.signals / limits.signals) * 100, 100);
+
+  const kwFill = (kwPerc / 100) * C;
+  const sigFill = (sigPerc / 100) * C;
+
   if (!user) return null;
 
   return (
@@ -115,9 +123,9 @@ export default function SettingsOverview() {
           </h2>
           <div className="flex items-start justify-between gap-3">
             <div className="space-y-1.5">
-              <p className="text-base font-semibold text-white">Free</p>
+              <p className="text-base font-semibold text-white">{plan}</p>
               <p className="text-sm text-white/35">
-                5 keywords · 100 signals/mo
+                {limits.keywords} keywords · {limits.signals} signals/mo
               </p>
             </div>
             <button className="edit-btn">Upgrade</button>
@@ -139,18 +147,20 @@ export default function SettingsOverview() {
                     cy="18"
                     r="15"
                     fill="none"
-                    stroke="rgba(255,255,255,0.35)"
+                    stroke="rgba(220, 38, 38, 0.8)"
                     strokeWidth="2.5"
-                    strokeDasharray="0 94"
+                    strokeDasharray={`${kwFill} ${C - kwFill}`}
                     strokeLinecap="round"
                   />
                 </svg>
                 <span className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-white">
-                  0%
+                  {Math.round(kwPerc)}%
                 </span>
               </div>
               <p className="text-sm text-white/40 text-center">Keywords</p>
-              <p className="text-xs text-white/25">0 / 5</p>
+              <p className="text-xs text-white/25">
+                {used.keywords} / {limits.keywords}
+              </p>
             </div>
             <div className="flex-1 flex flex-col items-center gap-3">
               <div className="relative w-28 h-28">
@@ -168,18 +178,20 @@ export default function SettingsOverview() {
                     cy="18"
                     r="15"
                     fill="none"
-                    stroke="rgba(255,255,255,0.35)"
+                    stroke="rgba(220, 38, 38, 0.8)"
                     strokeWidth="2.5"
-                    strokeDasharray="0 94"
+                    strokeDasharray={`${sigFill} ${C - sigFill}`}
                     strokeLinecap="round"
                   />
                 </svg>
                 <span className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-white">
-                  0%
+                  {Math.round(sigPerc)}%
                 </span>
               </div>
               <p className="text-sm text-white/40 text-center">Signals</p>
-              <p className="text-xs text-white/25">0 / 100</p>
+              <p className="text-xs text-white/25">
+                {used.signals} / {limits.signals}
+              </p>
             </div>
           </div>
         </div>
