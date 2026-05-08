@@ -23,4 +23,19 @@ export default function OnboardingPage() {
   const router = useRouter();
 
   const [step, setStep] = useState(1);
+  const [role, setRole] = useState("");
+  const [description, setDescription] = useState("");
+  const [listenerContext, setListenerContext] = useState("");
+
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit() {
+    setLoading(true);
+    await fetch("/api/onboarding", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ role, description, listenerContext }),
+    });
+    router.push("/dashboard");
+  }
 }
