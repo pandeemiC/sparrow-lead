@@ -3,7 +3,8 @@
 import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import { Shield } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { usePlan } from "@/components/dashboard/PlanContext";
 import { SiGoogle, SiGithub } from "react-icons/si";
 
 const themes = [
@@ -19,7 +20,22 @@ const providers = [
 
 export default function SettingsOverview() {
   const { user } = useUser();
+  const { plan, limits } = usePlan();
   const [theme, setTheme] = useState("dark");
+  const [used, setUsed] = useState({ keywords: 0, signals: 0 });
+
+  useEffect(() => {
+    fetch("/api/stats")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.keywordsTracked !== undefined) {
+          setUsed({
+            keywords: data.keywordsTracked,
+            signals: data.totalSignals,
+          });
+        }
+      });
+  }, []);
 
   const isOAuthUser = (user?.externalAccounts ?? []).length > 0;
   const provider = user?.externalAccounts?.[0]?.provider;

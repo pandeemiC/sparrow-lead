@@ -5,6 +5,7 @@ import { Bell, Search, Target } from "lucide-react";
 import Image from "next/image";
 import Sidebar from "./Sidebar";
 import { useUser } from "@clerk/nextjs";
+import { usePlan } from "./PlanContext";
 import { useEffect, useState } from "react";
 
 type UserData = {
@@ -21,6 +22,7 @@ export default function DashboardShell({
   user: UserData;
 }) {
   const { user: clerkUser } = useUser();
+  const { limits } = usePlan();
 
   const [stats, setStats] = useState({ keywordsTracked: 0, totalSignals: 0 });
 
@@ -41,8 +43,11 @@ export default function DashboardShell({
     ? `${clerkUser.firstName} ${clerkUser.lastName ?? ""}`.trim()
     : (clerkUser?.emailAddresses[0]?.emailAddress ?? user.name);
 
-  const keyPercent = Math.min((stats.keywordsTracked / 5) * 100, 100);
-  const sigPercent = Math.min((stats.totalSignals / 100) * 100, 100);
+  const keyPercent = Math.min(
+    (stats.keywordsTracked / limits.keywords) * 100,
+    100,
+  );
+  const sigPercent = Math.min((stats.totalSignals / limits.signals) * 100, 100);
   return (
     <div className="flex h-screen bg-[#080204] overflow-hidden">
       <Sidebar />
@@ -80,13 +85,13 @@ export default function DashboardShell({
                   Signals
                 </p>
                 <span className="text-[10px] text-white/20 tabular-nums">
-                  {stats.totalSignals} / 100
+                  {stats.totalSignals} / {limits.signals}
                 </span>
               </div>
               <div className="h-px rounded-full bg-white/6 overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-white/20"
-                  style={{ width: `${sigPercent}` }}
+                  className="h-full rounded-full bg-red-600/80"
+                  style={{ width: `${sigPercent}%` }}
                 />
               </div>
             </div>
@@ -96,13 +101,13 @@ export default function DashboardShell({
                   Keywords
                 </p>
                 <span className="text-[10px] text-white/20 tabular-nums">
-                  {stats.keywordsTracked} / 5
+                  {stats.keywordsTracked} / {limits.keywords}
                 </span>
               </div>
               <div className="h-px rounded-full bg-white/6 overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-white/20"
-                  style={{ width: `${keyPercent}` }}
+                  className="h-full rounded-full bg-red-600/80"
+                  style={{ width: `${keyPercent}%` }}
                 />
               </div>
             </div>

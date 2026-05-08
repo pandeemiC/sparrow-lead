@@ -1,21 +1,8 @@
 "use client";
 
 import { BarChart2 } from "lucide-react";
-
-const currentPlan = "free";
-
-const limits: Record<
-  string,
-  { keywords: number; signals: number; scans: number }
-> = {
-  free: { keywords: 5, signals: 100, scans: 30 },
-  pro: { keywords: 25, signals: 2000, scans: -1 },
-  growth: { keywords: -1, signals: 10000, scans: -1 },
-};
-
-const used = { keywords: 0, signals: 0, scans: 0 };
-const limit = limits[currentPlan];
-const resetDate = "Apr 30, 2026";
+import { usePlan } from "@/components/dashboard/PlanContext";
+import { useState, useEffect } from "react";
 
 function UsageBar({
   label,
@@ -44,7 +31,7 @@ function UsageBar({
       </div>
       <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
         <div
-          className="h-full rounded-full bg-white/40 transition-all"
+          className="h-full rounded-full bg-red-600/80 transition-all"
           style={{ width: unlimited ? "0%" : `${pct}%` }}
         />
       </div>
@@ -53,6 +40,25 @@ function UsageBar({
 }
 
 export default function SettingsUsage() {
+  const { plan, limits } = usePlan();
+  const [used, setUsed] = useState({ keywords: 0, signals: 0, scans: 0 });
+
+  useEffect(() => {
+    fetch("/api/stats")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.keywordsTracked !== undefined) {
+          setUsed({
+            keywords: data.keywordsTracked,
+            signals: data.totalSignals,
+            scans: 0,
+          });
+        }
+      });
+  }, []);
+
+  const resetDate = "May 31, 2026"; // remove after striep
+
   return (
     <div className="space-y-4">
       <div className="rounded-xl glass-red border border-white/5 p-6 glow-right flex items-center justify-between gap-4">
@@ -62,7 +68,7 @@ export default function SettingsUsage() {
           </div>
           <div className="space-y-1">
             <p className="text-base font-semibold text-white capitalize">
-              {currentPlan} plan
+              {plan} plan
             </p>
             <p className="text-sm text-white/35">Usage resets on {resetDate}</p>
           </div>
@@ -80,19 +86,19 @@ export default function SettingsUsage() {
           <UsageBar
             label="Keywords"
             used={used.keywords}
-            limit={limit.keywords}
+            limit={limits.keywords}
           />
           <div className="h-px bg-white/5" />
           <UsageBar
             label="Signals Scanned"
             used={used.signals}
-            limit={limit.signals}
+            limit={limits.signals}
           />
           <div className="h-px bg-white/5" />
           <UsageBar
             label="Scans Run"
             used={used.scans}
-            limit={limit.scans}
+            limit={limits.scans}
             unit="scans"
           />
         </div>
