@@ -8,8 +8,7 @@ import { motion } from "motion/react";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
-
-const GRAIN_SVG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E")`;
+import AnimatedBackground from "@/components/ui/AnimatedBackground";
 
 function GoogleIcon() {
   return (
@@ -39,116 +38,6 @@ function GoogleIcon() {
   );
 }
 
-function AnimatedBackground() {
-  return (
-    <div
-      className="absolute inset-0 overflow-hidden"
-      style={{ background: "#0a0202" }}
-    >
-      <motion.div
-        className="absolute rounded-full"
-        style={{
-          width: 750,
-          height: 750,
-          background:
-            "radial-gradient(ellipse at center, rgba(210,18,18,0.72) 0%, rgba(160,0,0,0.3) 45%, transparent 70%)",
-          filter: "blur(80px)",
-          top: "-15%",
-          left: "-10%",
-        }}
-        animate={{
-          x: [0, 60, -30, 40, 0],
-          y: [0, -60, 40, -20, 0],
-          scale: [1, 1.1, 0.92, 1.06, 1],
-        }}
-        transition={{ duration: 9, ease: "easeInOut", repeat: Infinity }}
-      />
-
-      <motion.div
-        className="absolute rounded-full"
-        style={{
-          width: 600,
-          height: 600,
-          background:
-            "radial-gradient(ellipse at center, rgba(170,8,8,0.6) 0%, rgba(110,0,0,0.22) 50%, transparent 72%)",
-          filter: "blur(70px)",
-          bottom: "-15%",
-          right: "-20%",
-        }}
-        animate={{
-          x: [0, -50, 30, -40, 0],
-          y: [0, 50, -35, 20, 0],
-          scale: [1, 0.9, 1.12, 0.96, 1],
-        }}
-        transition={{
-          duration: 11,
-          ease: "easeInOut",
-          repeat: Infinity,
-          delay: 1.5,
-        }}
-      />
-
-      <motion.div
-        className="absolute rounded-full"
-        style={{
-          width: 450,
-          height: 450,
-          background:
-            "radial-gradient(ellipse at center, rgba(230,30,30,0.45) 0%, rgba(180,0,0,0.15) 55%, transparent 75%)",
-          filter: "blur(60px)",
-          top: "35%",
-          left: "30%",
-        }}
-        animate={{
-          x: [0, 40, -55, 20, 0],
-          y: [0, -40, 55, -15, 0],
-          scale: [1, 1.14, 0.88, 1.08, 1],
-        }}
-        transition={{
-          duration: 7,
-          ease: "easeInOut",
-          repeat: Infinity,
-          delay: 3,
-        }}
-      />
-
-      <motion.div
-        className="absolute rounded-full"
-        style={{
-          width: 350,
-          height: 350,
-          background:
-            "radial-gradient(ellipse at center, rgba(255,40,40,0.35) 0%, rgba(200,0,0,0.1) 60%, transparent 78%)",
-          filter: "blur(50px)",
-          top: "60%",
-          left: "55%",
-        }}
-        animate={{
-          x: [0, -35, 45, -20, 0],
-          y: [0, 45, -30, 10, 0],
-          scale: [1, 1.08, 0.94, 1.04, 1],
-        }}
-        transition={{
-          duration: 6,
-          ease: "easeInOut",
-          repeat: Infinity,
-          delay: 4.5,
-        }}
-      />
-
-      <div
-        className="absolute inset-0"
-        style={{
-          backgroundImage: GRAIN_SVG,
-          backgroundSize: "256px 256px",
-          backgroundRepeat: "repeat",
-          mixBlendMode: "overlay",
-          opacity: 0.55,
-        }}
-      />
-    </div>
-  );
-}
 
 export default function SignInPage() {
   const { signIn } = useSignIn();

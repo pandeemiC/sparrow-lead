@@ -11,8 +11,9 @@ export default function Navbar() {
   const isAuthPage =
     pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
   const isCallbackPage = pathname.startsWith("/sso-callback");
+  const isOnboardingPage = pathname.startsWith("/onboarding");
 
-  if (isAuthPage || isDashboardPage || isCallbackPage) {
+  if (isAuthPage || isDashboardPage || isCallbackPage || isOnboardingPage) {
     return null;
   }
 
