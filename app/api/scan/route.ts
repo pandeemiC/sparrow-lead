@@ -13,6 +13,7 @@ export async function POST() {
   }
 
   const sql = getDb();
+  const [userRow] = await sql`SELECT listener_context FROM users WHERE user_id = ${userId}`;
   const keywords = await sql`SELECT * FROM keywords WHERE user_id = ${userId}`;
 
   if (keywords.length === 0) {
@@ -40,6 +41,7 @@ export async function POST() {
           keyword: kw.keyword,
           title: post.post_title,
           body: post.post_body,
+          listenerContext: userRow?.listener_context ?? undefined,
         });
 
         // its the same for CLAUDE

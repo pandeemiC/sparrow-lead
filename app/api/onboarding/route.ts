@@ -16,10 +16,11 @@ export async function POST(req: Request) {
   const sql = getDb();
 
   await sql`
-    INSERT INTO users (user_id, email, role, listener_context, onboarded_at)
-    VALUES (${userId}, ${email}, ${role}, ${listenerContext}, NOW())
+    INSERT INTO users (user_id, email, role, description, listener_context, onboarded_at)
+    VALUES (${userId}, ${email}, ${role}, ${description}, ${listenerContext}, NOW())
     ON CONFLICT (user_id) DO UPDATE SET
       role = ${role},
+      description = ${description},
       listener_context = ${listenerContext},
       onboarded_at = NOW()
   `;

@@ -7,6 +7,7 @@ export async function analyzePost({
   keyword,
   title,
   body,
+  listenerContext,
 }: AnalyzePostInput): Promise<{ score: number; reason: string; type: string }> {
   const completion = await groq.chat.completions.create({
     model: "llama-3.1-8b-instant",
@@ -17,6 +18,7 @@ export async function analyzePost({
         content: `You are analyzing social media posts for buyer intent.
         Post: "${title} - ${body?.slice(0, 500)}"
         Keyword tracked: "${keyword}"
+        ${listenerContext ? `User context: "${listenerContext}" - use this to judge the given information specifically in relevance to the user` : ""}
         Return JSON only, no other text: 
         {
           "score": <number 1-10 buyer intent>,

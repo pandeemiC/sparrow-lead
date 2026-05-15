@@ -33,6 +33,7 @@ export type AnalyzePostInput = {
   keyword: string;
   title: string;
   body: string;
+  listenerContext?: string;
 };
 
 export type RedditPost = {

@@ -18,6 +18,8 @@ export const autoScanTask = task({
     let totalFound = 0;
 
     for (const user of users) {
+      const [userRow] =
+        await sql`SELECT email, listener_context FROM users WHERE user_id = ${user.user_id}`;
       const keywords =
         (await sql`SELECT * FROM keywords WHERE user_id = ${user.user_id}`) as Keyword[];
       const hotSignals: HotSignal[] = [];
@@ -40,6 +42,7 @@ export const autoScanTask = task({
             keyword: kw.keyword,
             title: post.post_title,
             body: post.post_body,
+            listenerContext: userRow?.listener_context ?? undefined,
           });
 
           await sql`INSERT INTO mentions (keyword_id, platform, post_url, post_title, post_body, author, ai_score, ai_reason, ai_type, ai_scored_at)
@@ -61,8 +64,6 @@ export const autoScanTask = task({
       }
 
       if (!payload.userId && hotSignals.length > 0) {
-        const [userRow] =
-          await sql`SELECT email FROM users WHERE user_id = ${user.user_id}`;
         if (userRow?.email) {
           const topSignals = hotSignals
             .sort((a, b) => b.score - a.score)
