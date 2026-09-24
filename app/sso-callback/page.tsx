@@ -1,7 +1,6 @@
 "use client";
 
 import { useClerk, useAuth } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
@@ -11,19 +10,20 @@ const LETTERS = "SPARROW".split("");
 export default function SSOCallback() {
   const { handleRedirectCallback } = useClerk();
   const { isSignedIn, isLoaded } = useAuth();
-  const router = useRouter();
 
   useEffect(() => {
     handleRedirectCallback({}, async () => {
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
+    }).catch(() => {
+      window.location.href = "/sign-in";
     });
-  }, [handleRedirectCallback, router]);
+  }, [handleRedirectCallback]);
 
   useEffect(() => {
     if (isLoaded && isSignedIn) {
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
     }
-  }, [isLoaded, isSignedIn, router]);
+  }, [isLoaded, isSignedIn]);
 
   return (
     <div
