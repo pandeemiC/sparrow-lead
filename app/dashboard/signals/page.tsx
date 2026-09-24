@@ -279,7 +279,7 @@ function SignalCard({ signal, isNew }: { signal: Signal; isNew?: boolean }) {
         />
       )}
       <div
-        className="signal-card rounded-xl p-5 flex flex-col gap-4"
+        className="card text-xs rounded-xl p-5 flex flex-col gap-4"
         onMouseEnter={() => setShowNewBadge(false)}
       >
         <RightSpotlight variant={variant} />

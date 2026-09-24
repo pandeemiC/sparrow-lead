@@ -110,7 +110,7 @@ function SignalCard({
   };
 
   return (
-    <div className="signal-card transition-all duration-300 shrink-0 p-3">
+    <div className="card text-xs transition-all duration-300 shrink-0 p-3">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           {icon}

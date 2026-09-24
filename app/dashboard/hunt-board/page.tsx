@@ -89,7 +89,7 @@ function LeadCard({
   const variant = scoreVariant(lead.aiScore);
 
   return (
-    <div className={`signal-card rounded-xl p-4 flex flex-col gap-3`}>
+    <div className={`card text-xs rounded-xl p-4 flex flex-col gap-3`}>
       <TopSpotlight variant={variant === "unscored" ? "cold" : variant} />
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">

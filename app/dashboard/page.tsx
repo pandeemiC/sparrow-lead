@@ -21,8 +21,6 @@ import { FaRedditAlien, FaYCombinator } from "react-icons/fa6";
 import type { Stats } from "@/types";
 import { timeAgo } from "@/lib/utils";
 
-const GRAIN_SVG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E")`;
-
 const SCAN_STEPS = [
   "Fetching keywords",
   "Scanning Reddit & HackerNews",
@@ -242,74 +240,10 @@ export default function DashboardPage() {
 
   return (
     <div
-      className="relative p-5 h-full flex gap-4 overflow-hidden"
-      style={{ background: "#080204" }}
+      className="p-5 h-full flex gap-4 overflow-hidden"
     >
-      <motion.div
-        className="absolute rounded-full pointer-events-none"
-        style={{
-          width: 900,
-          height: 900,
-          background:
-            "radial-gradient(ellipse at center, rgba(175,10,10,0.16) 0%, rgba(130,0,0,0.06) 50%, transparent 72%)",
-          filter: "blur(100px)",
-          top: "-30%",
-          left: "-15%",
-        }}
-        animate={{ x: [0, 12, -8, 10, 0], y: [0, -10, 8, -4, 0] }}
-        transition={{ duration: 40, ease: "easeInOut", repeat: Infinity }}
-      />
-      <motion.div
-        className="absolute rounded-full pointer-events-none"
-        style={{
-          width: 700,
-          height: 700,
-          background:
-            "radial-gradient(ellipse at center, rgba(140,5,5,0.12) 0%, rgba(90,0,0,0.04) 55%, transparent 75%)",
-          filter: "blur(90px)",
-          bottom: "-25%",
-          right: "-10%",
-        }}
-        animate={{ x: [0, -10, 7, -8, 0], y: [0, 8, -7, 5, 0] }}
-        transition={{
-          duration: 35,
-          ease: "easeInOut",
-          repeat: Infinity,
-          delay: 3,
-        }}
-      />
-      <motion.div
-        className="absolute rounded-full pointer-events-none"
-        style={{
-          width: 500,
-          height: 500,
-          background:
-            "radial-gradient(ellipse at center, rgba(190,18,18,0.07) 0%, transparent 70%)",
-          filter: "blur(80px)",
-          top: "40%",
-          left: "45%",
-        }}
-        animate={{ x: [0, 8, -12, 6, 0], y: [0, -6, 10, -4, 0] }}
-        transition={{
-          duration: 45,
-          ease: "easeInOut",
-          repeat: Infinity,
-          delay: 7,
-        }}
-      />
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage: GRAIN_SVG,
-          backgroundSize: "256px 256px",
-          backgroundRepeat: "repeat",
-          mixBlendMode: "overlay",
-          opacity: 0.35,
-        }}
-      />
-
-      <div className="relative z-10 flex flex-col flex-6 gap-4 min-h-0 min-w-0">
-        <div className="flex-1 rounded-xl dash-card-accent p-5 flex flex-col min-h-0">
+      <div className="flex flex-col flex-6 gap-4 min-h-0 min-w-0">
+        <div className="flex-1 rounded-xl card p-5 flex flex-col min-h-0">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <h2 className="text-sm font-semibold text-white">
@@ -433,7 +367,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex gap-4 flex-1 min-h-0">
-          <div className="flex-1 flex flex-col px-4 py-4 rounded-xl dash-card gap-3 min-h-0 min-w-0 overflow-hidden">
+          <div className="flex-1 flex flex-col px-4 py-4 rounded-xl card gap-3 min-h-0 min-w-0 overflow-hidden">
             <div className="flex items-center justify-between">
               <p className="text-[10px] text-white/40 uppercase tracking-widest">
                 Total Signals
@@ -462,7 +396,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="flex-1 flex flex-col px-4 py-4 rounded-xl dash-card gap-3 min-h-0 min-w-0 overflow-hidden">
+          <div className="flex-1 flex flex-col px-4 py-4 rounded-xl card gap-3 min-h-0 min-w-0 overflow-hidden">
             <div className="flex items-center justify-between">
               <p className="text-[10px] text-white/40 uppercase tracking-widest">
                 Signals Today
@@ -489,7 +423,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="flex-1 flex flex-col px-4 py-4 rounded-xl dash-card gap-3 min-h-0 min-w-0 overflow-hidden">
+          <div className="flex-1 flex flex-col px-4 py-4 rounded-xl card gap-3 min-h-0 min-w-0 overflow-hidden">
             <div className="flex items-center justify-between">
               <p className="text-[10px] text-white/40 uppercase tracking-widest">
                 Keywords
@@ -541,7 +475,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="relative z-10 flex flex-col flex-4 gap-4 min-h-0 min-w-0">
+      <div className="flex flex-col flex-4 gap-4 min-h-0 min-w-0">
         <div className="flex-1 rounded-xl auth-panel p-5 flex flex-col min-h-0 min-w-0 overflow-hidden">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
@@ -602,7 +536,7 @@ export default function DashboardPage() {
           )}
         </div>
 
-        <div className="flex flex-col gap-4 px-5 py-4 rounded-xl dash-card">
+        <div className="flex flex-col gap-4 px-5 py-4 rounded-xl card">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-white">Last Scanned</p>

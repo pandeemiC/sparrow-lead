@@ -10,7 +10,7 @@ export async function analyzePost({
   listenerContext,
 }: AnalyzePostInput): Promise<{ score: number; reason: string; type: string }> {
   const completion = await groq.chat.completions.create({
-    model: "llama-3.1-8b-instant",
+    model: "openai/gpt-oss-120b",
     max_tokens: 200,
     messages: [
       {

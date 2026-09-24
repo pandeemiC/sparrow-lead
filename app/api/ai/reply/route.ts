@@ -34,9 +34,9 @@ export async function POST(req: Request) {
   if (mention.ai_suggested_reply) {
     return NextResponse.json({ reply: mention.ai_suggested_reply });
   }
-
+  // change it to gemini later
   const completion = await groq.chat.completions.create({
-    model: "llama-3.1-8b-instant",
+    model: "openai/gpt-oss-120b",
     max_tokens: 300,
     messages: [
       {
