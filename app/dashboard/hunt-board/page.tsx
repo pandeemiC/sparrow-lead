@@ -166,7 +166,7 @@ function LeadCard({
           {prev && (
             <button
               onClick={() => onMove(lead.id, prev)}
-              className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold text-white/30 hover:text-white/60 border border-white/8 hover:border-white/20 transition-colors"
+              className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold text-white/30 hover:text-white/60 border border-white/8 hover:border-white/20 transition-colors cursor-pointer"
             >
               <ChevronLeft size={10} /> Back
             </button>
@@ -174,7 +174,7 @@ function LeadCard({
           {next && (
             <button
               onClick={() => onMove(lead.id, next)}
-              className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold bg-white/5 text-white/60 border border-white/10 hover:bg-white/8 hover:text-white hover:border-white/20 transition-colors"
+              className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold bg-white/5 text-white/60 border border-white/10 hover:bg-white/8 hover:text-white hover:border-white/20 transition-colors cursor-pointer"
             >
               {nextLabel} <ChevronRight size={10} />
             </button>

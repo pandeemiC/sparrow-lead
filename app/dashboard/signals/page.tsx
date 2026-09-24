@@ -127,7 +127,7 @@ function FilterSection({
     <div className="border-b border-white/5 pb-4 last:border-0 last:pb-0">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center justify-between w-full mb-3"
+        className="flex items-center justify-between w-full mb-3 cursor-pointer"
       >
         <span className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">
           {label}
@@ -157,7 +157,7 @@ function RadioGroup<T extends string>({
         <button
           key={opt.value}
           onClick={() => onChange(opt.value)}
-          className={`text-left text-sm px-2.5 py-1.5 rounded-lg transition-colors ${
+          className={`text-left text-sm px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer ${
             value === opt.value
               ? "bg-white/8 text-white border border-white/16"
               : "text-white/35 hover:text-white/60 hover:bg-white/4"
@@ -358,17 +358,17 @@ function SignalCard({ signal, isNew }: { signal: Signal; isNew?: boolean }) {
             disabled={hunting}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
               hunting
-                ? "bg-white/8 text-white border border-white/18 cursor-default"
-                : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/8 hover:text-white hover:border-white/20"
+                ? "bg-red-500/10 text-white border border-red-500/50 cursor-default"
+                : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/8 hover:text-white hover:border-white/20 cursor-pointer"
             }`}
           >
-            <Target size={12} />
+            <Target size={12} className={hunting ? "text-red-400" : ""} />
             {hunting ? "In Hunt Board" : "+ Hunt Board"}
           </button>
 
           <button
             onClick={getReply}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/4 text-white/70 border border-white/10 hover:bg-white/7 hover:text-white hover:border-white/18 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/4 text-white/70 border border-white/10 hover:bg-white/7 hover:text-white hover:border-white/18 transition-colors cursor-pointer"
           >
             <Sparkles className="sparkle-rgb" size={12} />
             Get Reply
@@ -464,7 +464,7 @@ export default function SignalsPage() {
           <FilterSection label="New Signals">
             <button
               onClick={() => setShowNew((v) => !v)}
-              className={`text-left text-sm px-2.5 py-1.5 rounded-lg transition-colors w-full ${
+              className={`text-left text-sm px-2.5 py-1.5 rounded-lg transition-colors w-full cursor-pointer ${
                 showNew
                   ? "bg-white/8 text-white border border-white/16"
                   : "text-white/35 hover:text-white/60 hover:bg-white/4"
