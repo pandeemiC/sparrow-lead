@@ -34,12 +34,18 @@ export default function OnboardingPage() {
 
   async function handleSubmit() {
     setLoading(true);
-    await fetch("/api/onboarding", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ role, description, listenerContext }),
-    });
-    router.push("/dashboard");
+    try {
+      const res = await fetch("/api/onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role, description, listenerContext }),
+      });
+      if (!res.ok) throw new Error("Onboarding failed");
+      window.location.href = "/dashboard";
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+    }
   }
 
   return (
