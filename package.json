@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
-    "@clerk/nextjs": "^7.0.6",
+    "@clerk/nextjs": "^7.9.5",
+    "@google/genai": "^2.24.0",
     "@neondatabase/serverless": "^1.0.2",
     "@react-email/components": "^1.0.12",
     "@trigger.dev/sdk": "4.6.4",

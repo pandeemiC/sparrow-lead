@@ -1,11 +1,11 @@
 "use client";
 
-import { useSignIn } from "@clerk/nextjs";
+import { useSignIn, useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
 import AnimatedBackground from "@/components/ui/AnimatedBackground";
@@ -41,7 +41,14 @@ function GoogleIcon() {
 
 export default function SignInPage() {
   const { signIn } = useSignIn();
+  const { isSignedIn, isLoaded } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      window.location.href = "/dashboard";
+    }
+  }, [isLoaded, isSignedIn]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
