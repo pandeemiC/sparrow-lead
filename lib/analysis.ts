@@ -1,7 +1,5 @@
-import { GoogleGenAI } from "@google/genai";
+import { generateContent } from "./gemini";
 import type { AnalyzePostInput } from "@/types";
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function analyzePost({
   keyword,
@@ -9,7 +7,7 @@ export async function analyzePost({
   body,
   listenerContext,
 }: AnalyzePostInput): Promise<{ score: number; reason: string; type: string }> {
-  const response = await ai.models.generateContent({
+  const response = await generateContent({
     model: "gemini-3.1-flash-lite",
     contents: `You are analyzing social media posts for buyer intent.
     Post: "${title} - ${body?.slice(0, 500)}"
