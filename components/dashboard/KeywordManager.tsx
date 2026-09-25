@@ -4,15 +4,11 @@ import { useState, useEffect } from "react";
 import { IoClose } from "react-icons/io5";
 import { Tag, Plus } from "lucide-react";
 import { FaRedditAlien, FaYCombinator } from "react-icons/fa6";
-import { Select } from "@/components/ui/SettingsUI";
 import { Keyword } from "@/types";
 
 const PLATFORMS = [
   { label: "Reddit", value: "reddit" },
   { label: "Hacker News", value: "hackernews" },
-  { label: "Twitter", value: "twitter" },
-  { label: "LinkedIn", value: "linkedin" },
-  { label: "YouTube", value: "youtube" },
 ];
 
 const platformIcon: Record<string, React.ReactNode> = {
@@ -23,7 +19,7 @@ const platformIcon: Record<string, React.ReactNode> = {
 export default function KeywordManager() {
   const [keywords, setKeywords] = useState<Keyword[]>([]);
   const [newKeyword, setNewKeyword] = useState("");
-  const [platform, setPlatform] = useState("reddit");
+  const [platforms, setPlatforms] = useState<string[]>(["reddit"]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -32,6 +28,12 @@ export default function KeywordManager() {
       .then(setKeywords);
   }, []);
 
+  function togglePlatform(value: string) {
+    setPlatforms((prev) =>
+      prev.includes(value) ? prev.filter((p) => p !== value) : [...prev, value],
+    );
+  }
+
   async function addKeyword(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!newKeyword.trim()) return;
@@ -39,11 +41,12 @@ export default function KeywordManager() {
     const res = await fetch("/api/keywords", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ keyword: newKeyword, platform }),
+      body: JSON.stringify({ keyword: newKeyword, platforms }),
     });
     const created = await res.json();
     setKeywords((prev) => [created, ...prev]);
     setNewKeyword("");
+    setPlatforms(["reddit"]);
     setLoading(false);
   }
 
@@ -67,16 +70,29 @@ export default function KeywordManager() {
           className="w-full bg-white/2 border border-white/8 rounded-md px-3 py-2.5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20 transition-colors"
         />
         <div className="flex items-center gap-2">
-          <div className="flex-1">
-            <Select
-              value={platform}
-              onChange={setPlatform}
-              options={PLATFORMS}
-            />
+          <div className="flex items-center gap-2 flex-1">
+            {PLATFORMS.map((p) => {
+              const active = platforms.includes(p.value);
+              return (
+                <button
+                  key={p.value}
+                  type="button"
+                  onClick={() => togglePlatform(p.value)}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-md border text-sm font-medium transition-all cursor-pointer ${
+                    active
+                      ? "bg-red-500/10 border-red-500/50 text-white"
+                      : "bg-white/2 border-white/8 text-white/40 hover:text-white/70 hover:border-white/15"
+                  }`}
+                >
+                  {platformIcon[p.value]}
+                  {p.label}
+                </button>
+              );
+            })}
           </div>
           <button
             type="submit"
-            disabled={loading || !newKeyword.trim()}
+            disabled={loading || !newKeyword.trim() || platforms.length === 0}
             className="flex items-center gap-2 bg-white/6 hover:bg-white/10 text-white text-sm font-medium px-4 py-2 rounded-md border border-white/10 hover:border-white/18 transition-all disabled:opacity-35 disabled:cursor-not-allowed cursor-pointer shrink-0"
           >
             <Plus size={15} />
@@ -100,7 +116,9 @@ export default function KeywordManager() {
             <Tag size={18} className="text-white/15" />
           </div>
           <p className="text-sm text-white/25">No keywords yet</p>
-          <p className="text-xs text-white/15">Add one above to start tracking</p>
+          <p className="text-xs text-white/15">
+            Add one above to start tracking
+          </p>
         </div>
       ) : (
         <div className="flex flex-col gap-2 overflow-y-auto">
@@ -110,10 +128,14 @@ export default function KeywordManager() {
               className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-white/3 border border-white/5 hover:border-white/10 transition-colors group"
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <span className="shrink-0">
-                  {platformIcon[k.platform] ?? (
-                    <Tag size={12} className="text-white/20" />
-                  )}
+                <span className="flex items-center gap-1.5 shrink-0">
+                  {(k.platforms ?? []).map((p) => (
+                    <span key={p}>
+                      {platformIcon[p] ?? (
+                        <Tag size={12} className="text-white/20" />
+                      )}
+                    </span>
+                  ))}
                 </span>
                 <span className="text-sm text-white truncate">{k.keyword}</span>
               </div>

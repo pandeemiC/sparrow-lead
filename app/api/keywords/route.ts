@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 
   const sql = getDb();
   const result = await sql`
-  INSERT INTO keywords (user_id, keyword, platform)
+  INSERT INTO keywords (user_id, keyword, platforms)
   VALUES (${userId}, ${keyword}, ${platforms})
   RETURNING *
   `;
