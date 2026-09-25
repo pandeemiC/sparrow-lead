@@ -2,7 +2,7 @@ export type Keyword = {
   id: string;
   user_id: string;
   keyword: string;
-  platform: string;
+  platforms: string[];
   created_at: string;
 };
 

@@ -25,10 +25,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { keyword, platform } = await req.json();
-  if (!keyword || !platform) {
+  const { keyword, platforms } = await req.json();
+  if (!keyword || !platforms || platforms.length === 0) {
     return NextResponse.json(
-      { error: "Keyword and platform are required" },
+      { error: "Keyword and at least one platform are required" },
       { status: 400 },
     );
   }

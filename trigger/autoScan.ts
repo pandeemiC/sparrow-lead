@@ -25,12 +25,13 @@ export const autoScanTask = task({
       const hotSignals: HotSignal[] = [];
 
       for (const kw of keywords) {
-        let posts: ScannedPost[] = [];
-
-        if (kw.platform === "reddit") {
-          posts = await searchReddit(kw.keyword);
-        } else if (kw.platform === "hackernews") {
-          posts = await searchHackerNews(kw.keyword);
+        const posts: ScannedPost[] = [];
+        // two if statements for the scan to run independently (change from else if)
+        if (kw.platforms.includes("reddit")) {
+          posts.push(...(await searchReddit(kw.keyword)));
+        }
+        if (kw.platforms.includes("hackernews")) {
+          posts.push(...(await searchHackerNews(kw.keyword)));
         }
 
         for (const post of posts) {
