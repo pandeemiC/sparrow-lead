@@ -1,15 +1,51 @@
 "use client";
 
-import { Tag } from "lucide-react";
+import { useState } from "react";
+import { ScanLine } from "lucide-react";
 import KeywordManager from "@/components/dashboard/KeywordManager";
+import { useScanStore } from "@/store/scanStore";
 
 export default function KeywordsPage() {
+  const setNewSignalsCount = useScanStore((s) => s.setNewSignalsCount);
+  const [scanning, setScanning] = useState(false);
+
+  async function scan() {
+    if (scanning) return;
+    setScanning(true);
+
+    const baseRes = await fetch("/api/stats");
+    const baseData = await baseRes.json();
+    const prevTotal = baseData?.totalSignals ?? 0;
+
+    await fetch("/api/scan/trigger", { method: "POST" });
+
+    let attempts = 0;
+    const poll = setInterval(async () => {
+      attempts++;
+      const res = await fetch("/api/stats");
+      const data = await res.json();
+      if (data.totalSignals > prevTotal || attempts >= 15) {
+        clearInterval(poll);
+        const newCount = data.totalSignals - prevTotal;
+        if (newCount > 0) setNewSignalsCount(newCount);
+        setScanning(false);
+      }
+    }, 3000);
+  }
+
   return (
     <div className="p-5 h-full flex gap-4 min-h-0">
       <div className="flex-1 rounded-xl glass-red border border-white/5 p-5 flex flex-col min-h-0">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-sm font-semibold text-white">Keywords</h2>
-          <Tag size={14} className="text-white/20" />
+          <button
+            onClick={scan}
+            disabled={scanning}
+            className="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg bg-sparrow-red hover:bg-sparrow-bright text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          >
+            <ScanLine size={14} className={scanning ? "animate-spin" : ""} />
+            {scanning ? "Scanning…" : "Scan Now"}
+          </button>
         </div>
         <KeywordManager />
       </div>
