@@ -12,15 +12,25 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  const { status } = await req.json();
+  const { status, notes } = await req.json();
   const sql = getDb();
 
-  await sql`
+  if (status !== undefined) {
+    await sql`
+      UPDATE mentions
+      SET status = ${status}
+      WHERE id = ${id}
+        AND keyword_id IN (SELECT id FROM keywords WHERE user_id = ${userId})
+    `;
+  }
+
+  if (notes !== undefined) {
+    await sql`
     UPDATE mentions
-    SET status = ${status}
+    SET notes = ${notes}
     WHERE id = ${id}
-      AND keyword_id IN (SELECT id FROM keywords WHERE user_id = ${userId})
-  `;
+      AND keyword_id IN (SELECT id FROM keywords WHERE user_id = ${userId})`;
+  }
 
   return NextResponse.json({ success: true });
 }

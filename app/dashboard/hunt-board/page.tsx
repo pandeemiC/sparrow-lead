@@ -269,8 +269,13 @@ export default function HuntBoardPage() {
     });
   }
 
-  function updateNotes(id: string, notes: string) {
+  async function updateNotes(id: string, notes: string) {
     setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, notes } : l)));
+    await fetch(`/api/mentions/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ notes }),
+    });
   }
   return (
     <div className="p-5 h-full flex gap-4 min-h-0">
