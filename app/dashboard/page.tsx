@@ -448,17 +448,23 @@ export default function DashboardPage() {
                     key={kw.keyword}
                     className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/3 border border-white/5"
                   >
-                    {kw.platform === "reddit" ? (
-                      <FaRedditAlien
-                        size={9}
-                        className="text-orange-400 shrink-0"
-                      />
-                    ) : (
-                      <FaYCombinator
-                        size={9}
-                        className="text-orange-300 shrink-0"
-                      />
-                    )}
+                    <span className="flex items-center gap-1 shrink-0">
+                      {(kw.platforms ?? []).map((p) =>
+                        p === "reddit" ? (
+                          <FaRedditAlien
+                            key={p}
+                            size={9}
+                            className="text-orange-400"
+                          />
+                        ) : (
+                          <FaYCombinator
+                            key={p}
+                            size={9}
+                            className="text-orange-300"
+                          />
+                        ),
+                      )}
+                    </span>
                     <span className="text-[10px] text-white/50 truncate flex-1">
                       {kw.keyword}
                     </span>

@@ -60,7 +60,7 @@ export async function GET() {
   `;
 
   const keywords = await sql`
-    SELECT k.keyword, k.platform, COUNT(m.id)::int AS mention_count
+    SELECT k.keyword, k.platforms, COUNT(m.id)::int AS mention_count
     FROM keywords k
     LEFT JOIN mentions m ON m.keyword_id = k.id
     WHERE k.user_id = ${userId}

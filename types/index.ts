@@ -140,7 +140,7 @@ export type SignalPreview = {
 
 export type KeywordStat = {
   keyword: string;
-  platform: string;
+  platforms: string[];
   mention_count: number;
 };
 
