@@ -16,6 +16,8 @@ import type { Lead, HuntStatus } from "@/types";
 import { HUNT_COLUMNS } from "@/lib/constants";
 import { timeAgo, extractSub } from "@/lib/utils";
 import { TopSpotlight } from "@/components/ui/Spotlights";
+import { apiFetch } from "@/lib/apiFetch";
+import { useToastStore } from "@/store/toastStore";
 
 const COLUMN_ORDER: HuntStatus[] = [
   "hunting",
@@ -234,49 +236,70 @@ function KanbanColumn({
 
 export default function HuntBoardPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
+  const toast = useToastStore((s) => s.show);
 
   useEffect(() => {
     async function load() {
-      const res = await fetch(
-        "/api/mentions?status=hunting,interested,engaged,hunted&sort=newest&limit=100",
-      );
-      const rows = await res.json();
-      setLeads(
-        rows.map((row: Record<string, unknown>) => ({
-          id: row.id as string,
-          title: (row.post_title as string) ?? "(no title)",
-          source: extractSub(row.platform as string, row.post_url as string),
-          platform: row.platform as Lead["platform"],
-          postUrl: row.post_url as string,
-          keyword: row.keyword as string,
-          timeAgo: timeAgo(row.created_at as string),
-          aiScore: row.ai_score as number | null,
-          aiReason: row.ai_reason as string | null,
-          status: row.status as HuntStatus,
-          notes: row.notes as string | null,
-        })),
-      );
+      try {
+        const rows = await apiFetch<Record<string, unknown>[]>(
+          "/api/mentions?status=hunting,interested,engaged,hunted&sort=newest&limit=100",
+        );
+        setLeads(
+          rows.map((row: Record<string, unknown>) => ({
+            id: row.id as string,
+            title: (row.post_title as string) ?? "(no title)",
+            source: extractSub(row.platform as string, row.post_url as string),
+            platform: row.platform as Lead["platform"],
+            postUrl: row.post_url as string,
+            keyword: row.keyword as string,
+            timeAgo: timeAgo(row.created_at as string),
+            aiScore: row.ai_score as number | null,
+            aiReason: row.ai_reason as string | null,
+            status: row.status as HuntStatus,
+            notes: row.notes as string | null,
+          })),
+        );
+      } catch (err) {
+        toast(err instanceof Error ? err.message : "Couldn't load your leads");
+      }
     }
     load();
-  }, []);
+  }, [toast]);
 
   async function move(id: string, status: HuntStatus) {
+    const prevStatus = leads.find((l) => l.id === id)?.status;
     setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, status } : l)));
-    await fetch(`/api/mentions/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
-    });
+    try {
+      await apiFetch(`/api/mentions/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status }),
+      });
+    } catch (err) {
+      if (prevStatus) {
+        setLeads((prev) =>
+          prev.map((l) => (l.id === id ? { ...l, status: prevStatus } : l)),
+        );
+      }
+      toast(err instanceof Error ? err.message : "Couldn't move lead");
+    }
   }
 
   async function updateNotes(id: string, notes: string) {
+    const prevNotes = leads.find((l) => l.id === id)?.notes ?? null;
     setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, notes } : l)));
-    await fetch(`/api/mentions/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ notes }),
-    });
+    try {
+      await apiFetch(`/api/mentions/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ notes }),
+      });
+    } catch (err) {
+      setLeads((prev) =>
+        prev.map((l) => (l.id === id ? { ...l, notes: prevNotes } : l)),
+      );
+      toast(err instanceof Error ? err.message : "Couldn't save note");
+    }
   }
+
   return (
     <div className="p-5 h-full flex gap-4 min-h-0">
       {HUNT_COLUMNS.map((col) => (

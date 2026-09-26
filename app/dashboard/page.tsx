@@ -1,6 +1,8 @@
 "use client";
 
 import { useScanStore } from "@/store/scanStore";
+import { apiFetch } from "@/lib/apiFetch";
+import { useToastStore } from "@/store/toastStore";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -191,45 +193,58 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null);
 
   const setNewSignalsCount = useScanStore((s) => s.setNewSignalsCount);
-
-  async function loadStats() {
-    const r = await fetch("/api/stats");
-    const data = await r.json();
-    setStats(data);
-  }
+  const toast = useToastStore((s) => s.show);
 
   useEffect(() => {
     async function load() {
-      await loadStats();
+      try {
+        setStats(await apiFetch<Stats>("/api/stats"));
+      } catch (err) {
+        toast(err instanceof Error ? err.message : "Couldn't load your stats");
+      }
     }
     load();
-  }, []);
+  }, [toast]);
+
+  function endScan() {
+    setScanning(false);
+    setScanPhase(null);
+  }
 
   async function scan() {
+    if (scanning) return;
     setScanning(true);
     setScanPhase(0);
     const prevTotal = stats?.totalSignals ?? 0;
 
-    await fetch("/api/scan/trigger", { method: "POST" });
+    try {
+      await apiFetch("/api/scan/trigger", { method: "POST" });
+    } catch (err) {
+      endScan();
+      toast(err instanceof Error ? err.message : "Couldn't start the scan");
+      return;
+    }
 
     let attempts = 0;
     const poll = setInterval(async () => {
       attempts++;
       if (attempts === 1) setScanPhase(1);
       if (attempts === 3) setScanPhase(2);
-      const res = await fetch("/api/stats");
-      const data = await res.json();
-      setStats(data);
+      try {
+        const data = await apiFetch<Stats>("/api/stats");
+        setStats(data);
 
-      if (data.totalSignals > prevTotal || attempts >= 15) {
+        if (data.totalSignals > prevTotal || attempts >= 15) {
+          clearInterval(poll);
+          const newCount = data.totalSignals - prevTotal;
+          if (newCount > 0) setNewSignalsCount(newCount);
+          setScanPhase(3);
+          setTimeout(endScan, 1500);
+        }
+      } catch {
         clearInterval(poll);
-        const newCount = data.totalSignals - prevTotal;
-        if (newCount > 0) setNewSignalsCount(newCount);
-        setScanPhase(3);
-        setTimeout(() => {
-          setScanning(false);
-          setScanPhase(null);
-        }, 1500);
+        endScan();
+        toast("Lost track of the scan. Check Signals in a minute.");
       }
     }, 3000);
   }

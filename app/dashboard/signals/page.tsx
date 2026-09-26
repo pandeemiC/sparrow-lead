@@ -20,6 +20,8 @@ import type { Signal, SignalType, SignalFilters } from "@/types";
 import { SIGNAL_TYPE_LABELS, SIGNAL_TYPE_TAG_CLASS } from "@/lib/constants";
 import { timeAgo, extractSub } from "@/lib/utils";
 import { useScanStore } from "@/store/scanStore";
+import { apiFetch } from "@/lib/apiFetch";
+import { useToastStore } from "@/store/toastStore";
 import {
   TopSpotlight,
   BottomSpotlight,
@@ -243,28 +245,37 @@ function SignalCard({ signal, isNew }: { signal: Signal; isNew?: boolean }) {
   const [replyLoading, setReplyLoading] = useState(false);
   const [showNewBadge, setShowNewBadge] = useState(isNew ?? false);
   const variant = scoreVariant(signal.aiScore);
+  const toast = useToastStore((s) => s.show);
 
   async function addToHuntBoard() {
     setHunting(true);
-    await fetch(`/api/mentions/${signal.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "hunting" }),
-    });
+    try {
+      await apiFetch(`/api/mentions/${signal.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: "hunting" }),
+      });
+    } catch (err) {
+      setHunting(false);
+      toast(err instanceof Error ? err.message : "Couldn't add to Hunt Board");
+    }
   }
 
   async function getReply() {
     setReplyOpen(true);
     if (reply) return;
     setReplyLoading(true);
-    const res = await fetch("/api/ai/reply", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mentionId: signal.id }),
-    });
-    const data = await res.json();
-    setReply(data.reply ?? "Could not generate a reply.");
-    setReplyLoading(false);
+    try {
+      const data = await apiFetch<{ reply?: string }>("/api/ai/reply", {
+        method: "POST",
+        body: JSON.stringify({ mentionId: signal.id }),
+      });
+      setReply(data.reply ?? "Could not generate a reply.");
+    } catch (err) {
+      setReplyOpen(false);
+      toast(err instanceof Error ? err.message : "Couldn't generate a reply");
+    } finally {
+      setReplyLoading(false);
+    }
   }
 
   if (dismissed) return null;
@@ -418,6 +429,7 @@ export default function SignalsPage() {
   const [signals, setSignals] = useState<Signal[]>([]);
   const [loading, setLoading] = useState(true);
   const clearNewSignals = useScanStore((s) => s.clearNewSignals);
+  const toast = useToastStore((s) => s.show);
   const [lastVisitedAt] = useState<Date | null>(() => {
     if (typeof window === "undefined") return null;
     const prev = localStorage.getItem("signals_lastVisitedAt");
@@ -435,14 +447,26 @@ export default function SignalsPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(filters);
+    let cancelled = false;
     (async () => {
       setLoading(true);
-      const r = await fetch(`/api/mentions?${params}`);
-      const rows = await r.json();
-      setSignals(rows.map(toSignal));
-      setLoading(false);
+      try {
+        const rows = await apiFetch<Record<string, unknown>[]>(
+          `/api/mentions?${params}`,
+        );
+        if (!cancelled) setSignals(rows.map(toSignal));
+      } catch (err) {
+        if (!cancelled) {
+          toast(err instanceof Error ? err.message : "Couldn't load signals");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     })();
-  }, [filters]);
+    return () => {
+      cancelled = true;
+    };
+  }, [filters, toast]);
 
   const hotCount = signals.filter(
     (s) => s.aiScore !== null && s.aiScore >= 8,

@@ -1,15 +1,15 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { getDb } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { handler } from "@/lib/api";
 import { cookies } from "next/headers";
 
-export async function POST(req: Request) {
+export const POST = handler(async (req: Request) => {
   const { userId } = await auth();
   if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { role, description, listenerContext } = await req.json();
-  // if user row doesnt exist create one
   const clerkUser = await currentUser();
   const email = clerkUser?.emailAddresses[0]?.emailAddress ?? "";
 
@@ -34,4 +34,4 @@ export async function POST(req: Request) {
   });
 
   return NextResponse.json({ ok: true });
-}
+});

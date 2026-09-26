@@ -1,8 +1,9 @@
 import { auth } from "@clerk/nextjs/server";
 import { getDb } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { handler } from "@/lib/api";
 
-export async function GET(req: Request) {
+export const GET = handler(async (req: Request) => {
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -13,7 +14,7 @@ export async function GET(req: Request) {
   const intent = searchParams.get("intent") ?? "all";
   const type = searchParams.get("type") ?? "all";
   const sort = searchParams.get("sort") ?? "score";
-  const limit = parseInt(searchParams.get("limit") ?? "100");
+  const limit = Math.min(Math.max(Number(searchParams.get("limit")) || 100, 1), 500);
   const status = searchParams.get("status") ?? "active";
 
   const sql = getDb();
@@ -58,4 +59,4 @@ export async function GET(req: Request) {
   `;
 
   return NextResponse.json(mentions);
-}
+});

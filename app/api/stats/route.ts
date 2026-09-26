@@ -1,8 +1,9 @@
 import { auth } from "@clerk/nextjs/server";
 import { getDb } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { handler } from "@/lib/api";
 
-export async function GET() {
+export const GET = handler(async () => {
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -89,4 +90,4 @@ export async function GET() {
     keywords,
     huntLeads,
   });
-}
+});
