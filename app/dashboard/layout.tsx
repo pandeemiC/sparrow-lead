@@ -5,6 +5,7 @@ import DashboardShell from "@/components/dashboard/DashboardShell";
 import { getDb } from "@/lib/db";
 import { PlanProvider } from "@/components/dashboard/PlanContext";
 import type { Plan } from "@/lib/plans";
+import Toaster from "@/components/ui/Toaster";
 
 export default async function DashboardLayout({
   children,
@@ -31,6 +32,7 @@ export default async function DashboardLayout({
     <div className={`${GeistSans.className} ${GeistMono.variable}`}>
       <PlanProvider plan={plan}>
         <DashboardShell user={userData}>{children}</DashboardShell>
+        <Toaster />
       </PlanProvider>
     </div>
   );
