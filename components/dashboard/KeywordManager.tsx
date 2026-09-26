@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { IoClose } from "react-icons/io5";
-import { Tag, Plus } from "lucide-react";
+import { Tag, Plus, ChevronDown, RotateCcw } from "lucide-react";
 import { FaRedditAlien, FaYCombinator } from "react-icons/fa6";
 import { Keyword } from "@/types";
 
@@ -11,6 +11,8 @@ const PLATFORMS = [
   { label: "Hacker News", value: "hackernews" },
 ];
 
+const MAX = 5;
+
 const platformIcon: Record<string, React.ReactNode> = {
   reddit: <FaRedditAlien className="text-orange-500" size={12} />,
   hackernews: <FaYCombinator className="text-orange-400" size={12} />,
@@ -18,6 +20,8 @@ const platformIcon: Record<string, React.ReactNode> = {
 
 export default function KeywordManager() {
   const [keywords, setKeywords] = useState<Keyword[]>([]);
+  const [archived, setArchived] = useState<Keyword[]>([]);
+  const [showArchived, setShowArchived] = useState(false);
   const [newKeyword, setNewKeyword] = useState("");
   const [platforms, setPlatforms] = useState<string[]>(["reddit"]);
   const [loading, setLoading] = useState(false);
@@ -26,7 +30,12 @@ export default function KeywordManager() {
     fetch("/api/keywords")
       .then((r) => r.json())
       .then(setKeywords);
+    fetch("/api/keywords?archived=true")
+      .then((r) => r.json())
+      .then(setArchived);
   }, []);
+
+  const atLimit = keywords.length >= MAX;
 
   function togglePlatform(value: string) {
     setPlatforms((prev) =>
@@ -50,13 +59,25 @@ export default function KeywordManager() {
     setLoading(false);
   }
 
-  async function archiveKeyword(id: string) {
+  async function archiveKeyword(k: Keyword) {
     await fetch("/api/keywords", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
+      body: JSON.stringify({ id: k.id }),
     });
-    setKeywords((prev) => prev.filter((k) => k.id !== id));
+    setKeywords((prev) => prev.filter((x) => x.id !== k.id));
+    setArchived((prev) => [k, ...prev]);
+  }
+
+  async function restoreKeyword(k: Keyword) {
+    if (atLimit) return;
+    await fetch("/api/keywords", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: k.id, active: true }),
+    });
+    setArchived((prev) => prev.filter((x) => x.id !== k.id));
+    setKeywords((prev) => [k, ...prev]);
   }
 
   return (
@@ -103,50 +124,113 @@ export default function KeywordManager() {
 
       <div className="h-px bg-white/5" />
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between shrink-0">
         <p className="text-xs font-semibold text-white/40 uppercase tracking-widest">
           Tracked Keywords
         </p>
-        <span className="text-xs text-white/25">{keywords.length} / 5</span>
+        <span className="text-xs text-white/25">
+          {keywords.length} / {MAX}
+        </span>
       </div>
 
-      {keywords.length === 0 ? (
-        <div className="flex-1 flex flex-col items-center justify-center gap-2">
-          <div className="w-10 h-10 rounded-full bg-white/3 flex items-center justify-center">
-            <Tag size={18} className="text-white/15" />
-          </div>
-          <p className="text-sm text-white/25">No keywords yet</p>
-          <p className="text-xs text-white/15">
-            Add one above to start tracking
-          </p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-2 overflow-y-auto">
-          {keywords.map((k) => (
-            <div
-              key={k.id}
-              className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-white/3 border border-white/5 hover:border-white/10 transition-colors group"
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <span className="flex items-center gap-1.5 shrink-0">
-                  {(k.platforms ?? []).map((p) => (
-                    <span key={p}>
-                      {platformIcon[p] ?? (
-                        <Tag size={12} className="text-white/20" />
-                      )}
-                    </span>
-                  ))}
-                </span>
-                <span className="text-sm text-white truncate">{k.keyword}</span>
-              </div>
-              <button
-                onClick={() => archiveKeyword(k.id)}
-                className="text-white/20 hover:text-red-400 transition-colors shrink-0 opacity-0 group-hover:opacity-100"
-              >
-                <IoClose size={15} />
-              </button>
+      <div className="flex-1 min-h-0 flex flex-col overflow-y-auto">
+        {keywords.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center gap-2">
+            <div className="w-10 h-10 rounded-full bg-white/3 flex items-center justify-center">
+              <Tag size={18} className="text-white/15" />
             </div>
-          ))}
+            <p className="text-sm text-white/25">No keywords yet</p>
+            <p className="text-xs text-white/15">
+              Add one above to start tracking
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {keywords.map((k) => (
+              <div
+                key={k.id}
+                className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-white/3 border border-white/5 hover:border-white/10 transition-colors group"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="flex items-center gap-1.5 shrink-0">
+                    {(k.platforms ?? []).map((p) => (
+                      <span key={p}>
+                        {platformIcon[p] ?? (
+                          <Tag size={12} className="text-white/20" />
+                        )}
+                      </span>
+                    ))}
+                  </span>
+                  <span className="text-sm text-white truncate">
+                    {k.keyword}
+                  </span>
+                </div>
+                <button
+                  onClick={() => archiveKeyword(k)}
+                  title="Archive (keeps signals)"
+                  className="text-white/20 hover:text-red-400 transition-colors shrink-0 opacity-0 group-hover:opacity-100 cursor-pointer"
+                >
+                  <IoClose size={15} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {archived.length > 0 && (
+        <div className="shrink-0 border-t border-white/5 pt-4">
+          <button
+            onClick={() => setShowArchived((v) => !v)}
+            className="flex items-center justify-between w-full text-xs font-semibold text-white/40 uppercase tracking-widest hover:text-white/60 transition-colors cursor-pointer"
+          >
+            <span>Archived · {archived.length}</span>
+            <ChevronDown
+              size={13}
+              className={`transition-transform ${showArchived ? "" : "-rotate-90"}`}
+            />
+          </button>
+          {showArchived && (
+            <div className="flex flex-col gap-2 mt-3">
+              <p className="text-xs text-white/25">
+                Archived keywords stop scanning but keep their signals.
+              </p>
+              {archived.map((k) => (
+                <div
+                  key={k.id}
+                  className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/2 border border-white/5"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="flex items-center gap-1.5 shrink-0 opacity-50">
+                      {(k.platforms ?? []).map((p) => (
+                        <span key={p}>
+                          {platformIcon[p] ?? (
+                            <Tag size={12} className="text-white/20" />
+                          )}
+                        </span>
+                      ))}
+                    </span>
+                    <span className="text-sm text-white/45 truncate">
+                      {k.keyword}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => restoreKeyword(k)}
+                    disabled={atLimit}
+                    title={
+                      atLimit
+                        ? `Archive one first — ${MAX}/${MAX} tracked`
+                        : "Restore"
+                    }
+                    className="flex items-center gap-1.5 text-xs text-white/40 hover:text-emerald-400 transition-colors shrink-0 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    <RotateCcw size={12} />
+                    Restore
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
