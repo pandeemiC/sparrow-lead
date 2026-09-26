@@ -39,7 +39,7 @@ export default function KeywordsPage() {
             }
             setScanning(false);
           }
-        } catch (err) {
+        } catch {
           clearInterval(poll);
           setScanning(false);
           toast("Lost track of the scan. Check Signals in a minute.");

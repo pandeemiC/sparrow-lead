@@ -7,13 +7,12 @@ import { FaRedditAlien, FaYCombinator } from "react-icons/fa6";
 import { Keyword } from "@/types";
 import { apiFetch } from "@/lib/apiFetch";
 import { useToastStore } from "@/store/toastStore";
+import { usePlan } from "@/components/dashboard/PlanContext";
 
 const PLATFORMS = [
   { label: "Reddit", value: "reddit" },
   { label: "Hacker News", value: "hackernews" },
 ];
-
-const MAX = 5;
 
 const platformIcon: Record<string, React.ReactNode> = {
   reddit: <FaRedditAlien className="text-orange-500" size={12} />,
@@ -29,6 +28,7 @@ export default function KeywordManager() {
   const [loading, setLoading] = useState(false);
 
   const toast = useToastStore((s) => s.show);
+  const MAX = usePlan().limits.keywords;
 
   useEffect(() => {
     async function load() {
