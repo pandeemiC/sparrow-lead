@@ -2,17 +2,18 @@ import { auth } from "@clerk/nextjs/server";
 import { getDb } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const archived = new URL(req.url).searchParams.get("archived") === "true";
   const sql = getDb();
   const keywords = await sql`
     SELECT k.*, COUNT(m.id)::int AS mention_count
     FROM keywords k
     LEFT JOIN mentions m ON m.keyword_id = k.id
-    WHERE k.user_id = ${userId}
+    WHERE k.user_id = ${userId} AND k.active = ${!archived}
     GROUP BY k.id
     ORDER BY k.created_at DESC
   `;
@@ -52,7 +53,21 @@ export async function DELETE(req: NextRequest) {
   const { id } = await req.json();
 
   const sql = getDb();
-  await sql`DELETE FROM keywords WHERE id = ${id} AND user_id = ${userId}`;
+  await sql`UPDATE keywords SET active = false WHERE id = ${id} AND user_id = ${userId}`;
+
+  return NextResponse.json({ success: true });
+}
+
+export async function PATCH(req: NextRequest) {
+  const { userId } = await auth();
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id, active } = await req.json();
+
+  const sql = getDb();
+  await sql`UPDATE keywords SET active = ${active} WHERE id = ${id} AND user_id = ${userId}`;
 
   return NextResponse.json({ success: true });
 }

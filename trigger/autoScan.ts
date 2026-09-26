@@ -21,7 +21,7 @@ export const autoScanTask = task({
       const [userRow] =
         await sql`SELECT email, listener_context FROM users WHERE user_id = ${user.user_id}`;
       const keywords =
-        (await sql`SELECT * FROM keywords WHERE user_id = ${user.user_id}`) as Keyword[];
+        (await sql`SELECT * FROM keywords WHERE user_id = ${user.user_id} AND active = true`) as Keyword[];
       const hotSignals: HotSignal[] = [];
 
       for (const kw of keywords) {

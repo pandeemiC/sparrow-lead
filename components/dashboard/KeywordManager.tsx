@@ -50,7 +50,7 @@ export default function KeywordManager() {
     setLoading(false);
   }
 
-  async function deleteKeyword(id: string) {
+  async function archiveKeyword(id: string) {
     await fetch("/api/keywords", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -140,7 +140,7 @@ export default function KeywordManager() {
                 <span className="text-sm text-white truncate">{k.keyword}</span>
               </div>
               <button
-                onClick={() => deleteKeyword(k.id)}
+                onClick={() => archiveKeyword(k.id)}
                 className="text-white/20 hover:text-red-400 transition-colors shrink-0 opacity-0 group-hover:opacity-100"
               >
                 <IoClose size={15} />
