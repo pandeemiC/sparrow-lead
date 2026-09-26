@@ -4,33 +4,51 @@ import { useState } from "react";
 import { ScanLine } from "lucide-react";
 import KeywordManager from "@/components/dashboard/KeywordManager";
 import { useScanStore } from "@/store/scanStore";
+import { apiFetch } from "@/lib/apiFetch";
+import { useToastStore } from "@/store/toastStore";
 
 export default function KeywordsPage() {
   const setNewSignalsCount = useScanStore((s) => s.setNewSignalsCount);
   const [scanning, setScanning] = useState(false);
 
+  const toast = useToastStore((s) => s.show);
+
   async function scan() {
     if (scanning) return;
     setScanning(true);
 
-    const baseRes = await fetch("/api/stats");
-    const baseData = await baseRes.json();
-    const prevTotal = baseData?.totalSignals ?? 0;
+    try {
+      const base = await apiFetch<{ totalSignals: number }>("/api/stats");
+      const prevTotal = base.totalSignals ?? 0;
+      await apiFetch("/api/scan/trigger", { method: "POST" });
 
-    await fetch("/api/scan/trigger", { method: "POST" });
-
-    let attempts = 0;
-    const poll = setInterval(async () => {
-      attempts++;
-      const res = await fetch("/api/stats");
-      const data = await res.json();
-      if (data.totalSignals > prevTotal || attempts >= 15) {
-        clearInterval(poll);
-        const newCount = data.totalSignals - prevTotal;
-        if (newCount > 0) setNewSignalsCount(newCount);
-        setScanning(false);
-      }
-    }, 3000);
+      let attempts = 0;
+      const poll = setInterval(async () => {
+        attempts++;
+        try {
+          const data = await apiFetch<{ totalSignals: number }>("/api/stats");
+          if (data.totalSignals > prevTotal || attempts >= 15) {
+            clearInterval(poll);
+            const newCount = data.totalSignals - prevTotal;
+            if (newCount > 0) {
+              setNewSignalsCount(newCount);
+              toast(
+                `${newCount} new signal${newCount > 1 ? "s" : ""} found`,
+                "success",
+              );
+            }
+            setScanning(false);
+          }
+        } catch (err) {
+          clearInterval(poll);
+          setScanning(false);
+          toast("Lost track of the scan. Check Signals in a minute.");
+        }
+      }, 3000);
+    } catch (err) {
+      setScanning(false);
+      toast(err instanceof Error ? err.message : "Could not start the scan.");
+    }
   }
 
   return (

@@ -5,6 +5,8 @@ import { IoClose } from "react-icons/io5";
 import { Tag, Plus, ChevronDown, RotateCcw } from "lucide-react";
 import { FaRedditAlien, FaYCombinator } from "react-icons/fa6";
 import { Keyword } from "@/types";
+import { apiFetch } from "@/lib/apiFetch";
+import { useToastStore } from "@/store/toastStore";
 
 const PLATFORMS = [
   { label: "Reddit", value: "reddit" },
@@ -26,14 +28,23 @@ export default function KeywordManager() {
   const [platforms, setPlatforms] = useState<string[]>(["reddit"]);
   const [loading, setLoading] = useState(false);
 
+  const toast = useToastStore((s) => s.show);
+
   useEffect(() => {
-    fetch("/api/keywords")
-      .then((r) => r.json())
-      .then(setKeywords);
-    fetch("/api/keywords?archived=true")
-      .then((r) => r.json())
-      .then(setArchived);
-  }, []);
+    async function load() {
+      try {
+        const [active, archivedList] = await Promise.all([
+          apiFetch<Keyword[]>("/api/keywords"),
+          apiFetch<Keyword[]>("/api/keywords?archived=true"),
+        ]);
+        setKeywords(active);
+        setArchived(archivedList);
+      } catch (err) {
+        toast(err instanceof Error ? err.message : "Couldn't load keywords");
+      }
+    }
+    load();
+  }, [toast]);
 
   const atLimit = keywords.length >= MAX;
 
@@ -45,39 +56,52 @@ export default function KeywordManager() {
 
   async function addKeyword(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!newKeyword.trim()) return;
+    if (!newKeyword.trim() || platforms.length === 0) return;
     setLoading(true);
-    const res = await fetch("/api/keywords", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ keyword: newKeyword, platforms }),
-    });
-    const created = await res.json();
-    setKeywords((prev) => [created, ...prev]);
-    setNewKeyword("");
-    setPlatforms(["reddit"]);
-    setLoading(false);
+    try {
+      const created = await apiFetch<Keyword>("/api/keywords", {
+        method: "POST",
+        body: JSON.stringify({ keyword: newKeyword, platforms }),
+      });
+      setKeywords((prev) => [created, ...prev]);
+      setNewKeyword("");
+      setPlatforms(["reddit"]);
+    } catch (err) {
+      toast(err instanceof Error ? err.message : "Couldn't add keyword.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function archiveKeyword(k: Keyword) {
-    await fetch("/api/keywords", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: k.id }),
-    });
     setKeywords((prev) => prev.filter((x) => x.id !== k.id));
     setArchived((prev) => [k, ...prev]);
+    try {
+      await apiFetch("/api/keywords", {
+        method: "DELETE",
+        body: JSON.stringify({ id: k.id }),
+      });
+    } catch (err) {
+      setArchived((prev) => prev.filter((x) => x.id !== k.id));
+      setKeywords((prev) => [k, ...prev]);
+      toast(err instanceof Error ? err.message : "Couldn't archive keyword.");
+    }
   }
 
   async function restoreKeyword(k: Keyword) {
     if (atLimit) return;
-    await fetch("/api/keywords", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: k.id, active: true }),
-    });
     setArchived((prev) => prev.filter((x) => x.id !== k.id));
     setKeywords((prev) => [k, ...prev]);
+    try {
+      await apiFetch<Keyword>("/api/keywords", {
+        method: "PATCH",
+        body: JSON.stringify({ id: k.id, active: true }),
+      });
+    } catch (err) {
+      setKeywords((prev) => prev.filter((x) => x.id !== k.id));
+      setArchived((prev) => [k, ...prev]);
+      toast(err instanceof Error ? err.message : "Couldn't restore keyword");
+    }
   }
 
   return (
