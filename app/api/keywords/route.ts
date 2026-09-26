@@ -1,8 +1,10 @@
 import { auth } from "@clerk/nextjs/server";
 import { getDb } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
+import { handler } from "@/lib/api";
+import { PLAN_LIMITS, type Plan } from "@/lib/plans";
 
-export async function GET(req: NextRequest) {
+export const GET = handler(async (req: NextRequest) => {
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -18,16 +20,18 @@ export async function GET(req: NextRequest) {
     ORDER BY k.created_at DESC
   `;
   return NextResponse.json(keywords);
-}
+});
 
-export async function POST(req: NextRequest) {
+export const POST = handler(async (req: NextRequest) => {
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { keyword, platforms } = await req.json();
-  if (!keyword || !platforms || platforms.length === 0) {
+  const trimmed = typeof keyword === "string" ? keyword.trim() : "";
+
+  if (!trimmed || !Array.isArray(platforms) || platforms.length === 0) {
     return NextResponse.json(
       { error: "Keyword and at least one platform are required" },
       { status: 400 },
@@ -35,39 +39,63 @@ export async function POST(req: NextRequest) {
   }
 
   const sql = getDb();
-  const result = await sql`
-  INSERT INTO keywords (user_id, keyword, platforms)
-  VALUES (${userId}, ${keyword}, ${platforms})
-  RETURNING *
+
+  const [userRow] = await sql`SELECT plan FROM users WHERE user_id = ${userId}`;
+  const plan = (userRow?.plan ?? "free") as Plan;
+  const [{ count }] = await sql`
+    SELECT COUNT(*)::int AS count FROM keywords
+    WHERE user_id = ${userId} AND active = true
   `;
 
-  return NextResponse.json(result[0]);
-}
+  if (count >= PLAN_LIMITS[plan].keywords) {
+    return NextResponse.json(
+      {
+        error: `You've reached your ${PLAN_LIMITS[plan].keywords}-keyword limit. Archive one first.`,
+      },
+      { status: 403 },
+    );
+  }
 
-export async function DELETE(req: NextRequest) {
+  const [created] = await sql`
+    INSERT INTO keywords (user_id, keyword, platforms)
+    VALUES (${userId}, ${trimmed}, ${platforms})
+    RETURNING *
+  `;
+  return NextResponse.json(created, { status: 201 });
+});
+
+export const DELETE = handler(async (req: NextRequest) => {
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
   const { id } = await req.json();
-
   const sql = getDb();
-  await sql`UPDATE keywords SET active = false WHERE id = ${id} AND user_id = ${userId}`;
-
+  const rows = await sql`
+    UPDATE keywords SET active = false
+    WHERE id = ${id} AND user_id = ${userId}
+    RETURNING id
+  `;
+  if (rows.length === 0) {
+    return NextResponse.json({ error: "Keyword not found" }, { status: 404 });
+  }
   return NextResponse.json({ success: true });
-}
+});
 
-export async function PATCH(req: NextRequest) {
+export const PATCH = handler(async (req: NextRequest) => {
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
   const { id, active } = await req.json();
-
   const sql = getDb();
-  await sql`UPDATE keywords SET active = ${active} WHERE id = ${id} AND user_id = ${userId}`;
-
+  const rows = await sql`
+    UPDATE keywords SET active = ${active}
+    WHERE id = ${id} AND user_id = ${userId}
+    RETURNING id
+  `;
+  if (rows.length === 0) {
+    return NextResponse.json({ error: "Keyword not found" }, { status: 404 });
+  }
   return NextResponse.json({ success: true });
-}
+});
