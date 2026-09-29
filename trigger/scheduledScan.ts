@@ -13,7 +13,9 @@ export const scheduledScanTask = schedules.task({
       SELECT DISTINCT u.user_id, u.email, u.email_notifications
       FROM users u
       JOIN keywords k ON k.user_id = u.user_id
-      WHERE u.onboarded_at IS NOT NULL AND k.active = true
+      WHERE u.onboarded_at IS NOT NULL
+        AND u.auto_scan = true
+        AND k.active = true
     `;
 
     logger.log("Scheduled scan starting", { users: users.length });

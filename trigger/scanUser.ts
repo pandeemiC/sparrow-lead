@@ -7,10 +7,11 @@ import type { ScannedPost, Keyword, HotSignal, ScanResult } from "@/types";
 export async function scanUser(userId: string): Promise<ScanResult> {
   const sql = getDb();
   const [userRow] =
-    await sql`SELECT listener_context FROM users WHERE user_id = ${userId}`;
+    await sql`SELECT listener_context, alert_min_score FROM users WHERE user_id = ${userId}`;
   const keywords =
     (await sql`SELECT * FROM keywords WHERE user_id = ${userId} AND active = true`) as Keyword[];
 
+  const alertMinScore: number = userRow?.alert_min_score ?? 7;
   const hotSignals: HotSignal[] = [];
   let found = 0;
 
@@ -48,7 +49,7 @@ export async function scanUser(userId: string): Promise<ScanResult> {
                   VALUES (${kw.id}, ${post.platform}, ${post.post_url}, ${post.post_title}, ${post.post_body}, ${post.author}, ${analysis.score}, ${analysis.reason}, ${analysis.type}, NOW())
         `;
 
-        if (analysis.score >= 7) {
+        if (analysis.score >= alertMinScore) {
           hotSignals.push({
             title: post.post_title,
             score: analysis.score,

@@ -54,6 +54,20 @@ export const settingsItems = [
   { label: "Usage", href: "/dashboard/settings/usage", icon: BarChart2 },
 ];
 
+export const ROLE_OPTIONS = [
+  { label: "Founder / Business Owner", value: "founder" },
+  { label: "Developer", value: "developer" },
+  { label: "Marketer / Growth", value: "marketer" },
+  { label: "Student", value: "student" },
+  { label: "Other", value: "other" },
+];
+
+export const ALERT_SCORE_OPTIONS = [
+  { label: "Warm (5+)", value: "5" },
+  { label: "Hot (7+)", value: "7" },
+  { label: "Very hot (9+)", value: "9" },
+];
+
 export const HUNT_COLUMNS: { id: HuntStatus; label: string; color: string }[] =
   [
     { id: "hunting", label: "Hunting (NEW)", color: "text-white/40" },

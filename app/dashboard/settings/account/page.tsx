@@ -1,25 +1,11 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useUser, useClerk } from "@clerk/nextjs";
+import { useUser, useClerk, useSession } from "@clerk/nextjs";
 import { MoreHorizontal } from "lucide-react";
-
-const currentPlan = "free";
-
-const mockSessions = [
-  {
-    id: "1",
-    device: "Chrome on macOS",
-    location: "Istanbul, TR",
-    created: "Mar 28, 2026",
-  },
-  {
-    id: "2",
-    device: "Safari on iPhone",
-    location: "Istanbul, TR",
-    created: "Mar 30, 2026",
-  },
-];
+import { usePlan } from "@/components/dashboard/PlanContext";
+import { useToastStore } from "@/store/toastStore";
+import type { AccountSession } from "@/types";
 
 function SessionMenu({ onTerminate }: { onTerminate: () => void }) {
   const [open, setOpen] = useState(false);
@@ -61,13 +47,54 @@ function SessionMenu({ onTerminate }: { onTerminate: () => void }) {
 
 export default function SettingsAccount() {
   const { user } = useUser();
+  const { session: currentSession } = useSession();
   const { signOut } = useClerk();
-  const [sessions, setSessions] = useState(mockSessions);
+  const { plan } = usePlan();
+  const toast = useToastStore((s) => s.show);
+  const [sessions, setSessions] = useState<AccountSession[]>([]);
 
   const [editingName, setEditingName] = useState(false);
   const [draftFirst, setDraftFirst] = useState("");
   const [draftLast, setDraftLast] = useState("");
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    const clerkUser = user;
+
+    async function loadSessions() {
+      try {
+        const clerkSessions = await clerkUser.getSessions();
+        setSessions(
+          clerkSessions.map((cs) => {
+            const activity = cs.latestActivity;
+            const browser = activity?.browserName ?? "Unknown browser";
+            const device =
+              activity?.deviceType ??
+              (activity?.isMobile ? "Mobile" : "Desktop");
+            const location =
+              [activity?.city, activity?.country].filter(Boolean).join(", ") ||
+              "Unknown";
+            return {
+              id: cs.id,
+              device: `${browser} on ${device}`,
+              location,
+              lastActive: cs.lastActiveAt.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              }),
+              isCurrent: cs.id === currentSession?.id,
+              revoke: () => cs.revoke(),
+            };
+          }),
+        );
+      } catch {
+        toast("Couldn't load your active sessions");
+      }
+    }
+    loadSessions();
+  }, [user, currentSession?.id, toast]);
 
   if (!user) return null;
 
@@ -76,10 +103,27 @@ export default function SettingsAccount() {
     : (user.emailAddresses[0]?.emailAddress ?? "User");
   const email = user.emailAddresses[0]?.emailAddress ?? "";
   const isOAuthUser = (user.externalAccounts ?? []).length > 0;
-  const isPaidPlan = currentPlan !== "free";
+  const isPaidPlan = plan !== "free";
 
-  function terminateSession(id: string) {
-    setSessions((prev) => prev.filter((s) => s.id !== id));
+  async function terminateSession(session: AccountSession) {
+    try {
+      await session.revoke();
+      setSessions((prev) => prev.filter((s) => s.id !== session.id));
+      toast("Session signed out", "success");
+    } catch {
+      toast("Couldn't sign out that session");
+    }
+  }
+
+  async function logOutEverywhere() {
+    try {
+      for (const session of sessions) {
+        if (!session.isCurrent) await session.revoke();
+      }
+    } catch {
+      toast("Couldn't sign out every device. Signing out here.");
+    }
+    await signOut({ redirectUrl: "/sign-in" });
   }
 
   function editName() {
@@ -92,12 +136,17 @@ export default function SettingsAccount() {
   async function saveDisplayName() {
     if (!user) return;
     setSaving(true);
-    await user.update({
-      firstName: draftFirst,
-      lastName: draftLast || undefined,
-    });
-    setSaving(false);
-    setEditingName(false);
+    try {
+      await user.update({
+        firstName: draftFirst,
+        lastName: draftLast || undefined,
+      });
+      setEditingName(false);
+    } catch {
+      toast("Couldn't update your name");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -190,10 +239,7 @@ export default function SettingsAccount() {
               Revokes all active sessions across every device
             </p>
           </div>
-          <button
-            onClick={() => signOut({ redirectUrl: "/sign-in" })}
-            className="edit-btn"
-          >
+          <button onClick={logOutEverywhere} className="edit-btn">
             Log Out All
           </button>
         </div>
@@ -211,8 +257,7 @@ export default function SettingsAccount() {
             {isPaidPlan ? (
               <p className="text-sm text-white/35">
                 To delete your account, please cancel your{" "}
-                <span className="capitalize">{currentPlan}</span> subscription
-                first.
+                <span className="capitalize">{plan}</span> subscription first.
               </p>
             ) : (
               <p className="text-sm text-white/35">
@@ -244,7 +289,7 @@ export default function SettingsAccount() {
               Location
             </span>
             <span className="text-xs text-white/25 uppercase tracking-wider">
-              Created
+              Last Active
             </span>
             <span />
           </div>
@@ -256,8 +301,14 @@ export default function SettingsAccount() {
             >
               <span className="text-sm text-white/70">{s.device}</span>
               <span className="text-sm text-white/50">{s.location}</span>
-              <span className="text-sm text-white/50">{s.created}</span>
-              <SessionMenu onTerminate={() => terminateSession(s.id)} />
+              <span className="text-sm text-white/50">{s.lastActive}</span>
+              {s.isCurrent ? (
+                <span className="text-xs text-white/40 px-1.5">
+                  This device
+                </span>
+              ) : (
+                <SessionMenu onTerminate={() => terminateSession(s)} />
+              )}
             </div>
           ))}
         </div>

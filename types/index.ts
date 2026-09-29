@@ -10,6 +10,24 @@ export type Payload = {
   userId: string;
 };
 
+export type UserSettings = {
+  emailNotifications: boolean;
+  alertMinScore: number;
+  autoScan: boolean;
+  role: string;
+  description: string;
+  listenerContext: string;
+};
+
+export type AccountSession = {
+  id: string;
+  device: string;
+  location: string;
+  lastActive: string;
+  isCurrent: boolean;
+  revoke: () => Promise<unknown>;
+};
+
 export type ScanResult = {
   found: number;
   hotSignals: HotSignal[];

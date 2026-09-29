@@ -3,6 +3,9 @@
 import { BarChart2 } from "lucide-react";
 import { usePlan } from "@/components/dashboard/PlanContext";
 import { useState, useEffect } from "react";
+import { apiFetch } from "@/lib/apiFetch";
+import { useToastStore } from "@/store/toastStore";
+import type { Stats } from "@/types";
 
 function UsageBar({
   label,
@@ -39,25 +42,34 @@ function UsageBar({
   );
 }
 
+function nextResetDate() {
+  const now = new Date();
+  const firstOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  return firstOfNextMonth.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 export default function SettingsUsage() {
   const { plan, limits } = usePlan();
-  const [used, setUsed] = useState({ keywords: 0, signals: 0, scans: 0 });
+  const [used, setUsed] = useState({ keywords: 0, signals: 0 });
+  const toast = useToastStore((s) => s.show);
 
   useEffect(() => {
-    fetch("/api/stats")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.keywordsTracked !== undefined) {
-          setUsed({
-            keywords: data.keywordsTracked,
-            signals: data.totalSignals,
-            scans: 0,
-          });
-        }
-      });
-  }, []);
+    async function load() {
+      try {
+        const data = await apiFetch<Stats>("/api/stats");
+        setUsed({ keywords: data.keywordsTracked, signals: data.totalSignals });
+      } catch (err) {
+        toast(err instanceof Error ? err.message : "Couldn't load usage");
+      }
+    }
+    load();
+  }, [toast]);
 
-  const resetDate = "May 31, 2026"; // remove after striep
+  const resetDate = nextResetDate();
 
   return (
     <div className="space-y-4">
@@ -94,36 +106,6 @@ export default function SettingsUsage() {
             used={used.signals}
             limit={limits.signals}
           />
-          <div className="h-px bg-white/5" />
-          <UsageBar
-            label="Scans Run"
-            used={used.scans}
-            limit={limits.scans}
-            unit="scans"
-          />
-        </div>
-      </div>
-
-      <div className="rounded-xl glass-red border border-white/5 p-6">
-        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-6">
-          Recent Scans
-        </h2>
-        <div className="space-y-1">
-          <div className="grid grid-cols-[1fr_1fr_auto] gap-4 px-3 py-2">
-            <span className="text-xs text-white/25 uppercase tracking-wider">
-              Date
-            </span>
-            <span className="text-xs text-white/25 uppercase tracking-wider">
-              Signals Found
-            </span>
-            <span className="text-xs text-white/25 uppercase tracking-wider">
-              Keywords
-            </span>
-          </div>
-          <div className="h-px bg-white/5" />
-          <div className="px-3 py-6 text-center">
-            <p className="text-sm text-white/25">No scans run yet.</p>
-          </div>
         </div>
       </div>
     </div>

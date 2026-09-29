@@ -2,14 +2,97 @@
 
 import { useState } from "react";
 import { Toggle, Row, Select } from "@/components/ui/SettingsUI";
+import { useSettings } from "@/hooks/useSettings";
+import { useToastStore } from "@/store/toastStore";
+import { ROLE_OPTIONS } from "@/lib/constants";
+import type { UserSettings } from "@/types";
+
+const textareaClass =
+  "w-full px-3.5 py-3 rounded-lg bg-white/3 border border-white/8 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20 resize-none";
+
+function ScanProfileForm({
+  initial,
+  onSave,
+}: {
+  initial: UserSettings;
+  onSave: (changes: Partial<UserSettings>) => Promise<boolean>;
+}) {
+  const toast = useToastStore((s) => s.show);
+  const [saved, setSaved] = useState(initial);
+  const [role, setRole] = useState(initial.role);
+  const [description, setDescription] = useState(initial.description);
+  const [listenerContext, setListenerContext] = useState(
+    initial.listenerContext,
+  );
+  const [saving, setSaving] = useState(false);
+
+  const changed =
+    role !== saved.role ||
+    description !== saved.description ||
+    listenerContext !== saved.listenerContext;
+
+  async function saveProfile() {
+    setSaving(true);
+    const ok = await onSave({ role, description, listenerContext });
+    setSaving(false);
+    if (ok) {
+      setSaved({ ...saved, role, description, listenerContext });
+      toast("Scan profile saved", "success");
+    }
+  }
+
+  return (
+    <div className="space-y-5">
+      <Row
+        title="Your Role"
+        description="What best describes you"
+        right={
+          <Select value={role} onChange={setRole} options={ROLE_OPTIONS} />
+        }
+      />
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-white">
+          What you&apos;re building
+        </p>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={3}
+          maxLength={1000}
+          className={textareaClass}
+        />
+      </div>
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-white">
+          What you&apos;re hunting for
+        </p>
+        <textarea
+          value={listenerContext}
+          onChange={(e) => setListenerContext(e.target.value)}
+          rows={4}
+          maxLength={1000}
+          className={textareaClass}
+        />
+      </div>
+      <div className="flex justify-end">
+        <button
+          onClick={saveProfile}
+          disabled={!changed || saving}
+          className="edit-btn disabled:opacity-35 disabled:cursor-not-allowed"
+        >
+          {saving ? "Saving…" : "Save profile"}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function SettingsScanPreferences() {
-  const [scanFreq, setScanFreq] = useState("manual");
-  const [scanDepth, setScanDepth] = useState("standard");
-  const [reddit, setReddit] = useState(true);
-  const [hackernews, setHackernews] = useState(true);
-  const [twitter, setTwitter] = useState(false);
-  const [deduplication, setDeduplication] = useState(true);
+  const { settings, save } = useSettings();
+
+  if (!settings) {
+    return <p className="text-sm text-white/30">Loading settings…</p>;
+  }
 
   return (
     <div className="space-y-4">
@@ -18,77 +101,26 @@ export default function SettingsScanPreferences() {
           Scan Schedule
         </h2>
         <Row
-          title="Scan Frequency"
-          description="How often Sparrow automatically scans for new signals"
+          title="Automatic Scanning"
+          description="Scan your active keywords every 6 hours. Manual scans always work."
           right={
-            <Select
-              value={scanFreq}
-              onChange={setScanFreq}
-              options={[
-                { label: "Manual only", value: "manual" },
-                { label: "Daily", value: "daily" },
-                { label: "Twice a day", value: "twice_daily" },
-                { label: "Weekly", value: "weekly" },
-              ]}
+            <Toggle
+              enabled={settings.autoScan}
+              onChange={(value) => save({ autoScan: value })}
             />
           }
         />
       </div>
 
       <div className="rounded-xl glass-red border border-white/5 p-6 glow-t-right">
-        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-6">
-          Sources
+        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-2">
+          Scan Profile
         </h2>
-        <div className="space-y-5">
-          <Row
-            title="Reddit"
-            description="Scan subreddits and comments for keyword mentions"
-            right={<Toggle enabled={reddit} onChange={setReddit} />}
-          />
-          <div className="h-px bg-white/5" />
-          <Row
-            title="Hacker News"
-            description="Scan posts and threads on Hacker News"
-            right={<Toggle enabled={hackernews} onChange={setHackernews} />}
-          />
-          <div className="h-px bg-white/5" />
-          <Row
-            title="Twitter / X"
-            description="Scan tweets and replies — coming soon"
-            right={<Toggle enabled={twitter} onChange={setTwitter} />}
-          />
-        </div>
-      </div>
-
-      <div className="rounded-xl glass-red border border-white/5 p-6">
-        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-6">
-          Results
-        </h2>
-        <div className="space-y-5">
-          <Row
-            title="Scan Depth"
-            description="How far back each scan searches for mentions"
-            right={
-              <Select
-                value={scanDepth}
-                onChange={setScanDepth}
-                options={[
-                  { label: "Light — last 24h", value: "light" },
-                  { label: "Standard — last 7d", value: "standard" },
-                  { label: "Deep — last 30d", value: "deep" },
-                ]}
-              />
-            }
-          />
-          <div className="h-px bg-white/5" />
-          <Row
-            title="Deduplication"
-            description="Filter out signals already seen in a previous scan"
-            right={
-              <Toggle enabled={deduplication} onChange={setDeduplication} />
-            }
-          />
-        </div>
+        <p className="text-sm text-white/35 mb-6">
+          The AI reads this when scoring every signal. The more specific, the
+          better your scores.
+        </p>
+        <ScanProfileForm initial={settings} onSave={save} />
       </div>
     </div>
   );
