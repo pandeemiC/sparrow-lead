@@ -7,7 +7,12 @@ export type Keyword = {
 };
 
 export type Payload = {
-  userId?: string;
+  userId: string;
+};
+
+export type ScanResult = {
+  found: number;
+  hotSignals: HotSignal[];
 };
 
 export type Mention = {
@@ -49,6 +54,11 @@ export type RedditResponse = {
   data: {
     children: RedditPost[];
   };
+};
+
+export type RedditToken = {
+  value: string;
+  expiresAt: number;
 };
 
 export type HackerNewsHit = {

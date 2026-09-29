@@ -1,10 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Toggle, Row, Select } from "@/components/ui/SettingsUI";
+import { apiFetch } from "@/lib/apiFetch";
+import { useToastStore } from "@/store/toastStore";
+
+type NotificationSettings = { emailNotifications: boolean };
 
 export default function SettingsNotifications() {
   const [newSignals, setNewSignals] = useState(true);
+  const toast = useToastStore((s) => s.show);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const data = await apiFetch<NotificationSettings>(
+          "/api/settings/notifications",
+        );
+        setNewSignals(data.emailNotifications);
+      } catch (err) {
+        toast(err instanceof Error ? err.message : "Couldn't load settings");
+      }
+    }
+    load();
+  }, [toast]);
+
+  async function toggleNewSignals(value: boolean) {
+    setNewSignals(value);
+    try {
+      await apiFetch("/api/settings/notifications", {
+        method: "PATCH",
+        body: JSON.stringify({ emailNotifications: value }),
+      });
+      toast(
+        value ? "Lead alerts turned on" : "Lead alerts turned off",
+        "success",
+      );
+    } catch (err) {
+      setNewSignals(!value);
+      toast(err instanceof Error ? err.message : "Couldn't save setting");
+    }
+  }
   const [digestFreq, setDigestFreq] = useState("daily");
   const [minRelevance, setMinRelevance] = useState("medium");
   const [scanComplete, setScanComplete] = useState(false);
@@ -19,9 +55,9 @@ export default function SettingsNotifications() {
         </h2>
         <div className="space-y-5">
           <Row
-            title="New Signal Alerts"
-            description="Email when a scan finds new mentions matching your keywords"
-            right={<Toggle enabled={newSignals} onChange={setNewSignals} />}
+            title="Hot Lead Alerts"
+            description="Email the top new hot leads (intent 7+) found by the automatic scan every 6 hours"
+            right={<Toggle enabled={newSignals} onChange={toggleNewSignals} />}
           />
           <div className="h-px bg-white/5" />
           <Row
