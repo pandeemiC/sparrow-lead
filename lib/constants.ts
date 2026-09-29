@@ -11,7 +11,19 @@ import {
   BarChart2,
   User,
 } from "lucide-react";
-import type { Signal, SignalType, HuntStatus, Lead } from "@/types";
+import type { SignalPlatform, SignalType, HuntStatus, Lead } from "@/types";
+
+export const PLATFORMS: { value: SignalPlatform; label: string }[] = [
+  { value: "reddit", label: "Reddit" },
+  { value: "hackernews", label: "Hacker News" },
+  { value: "bluesky", label: "Bluesky" },
+];
+
+export const PLATFORM_LABELS: Record<SignalPlatform, string> = {
+  reddit: "Reddit",
+  hackernews: "Hacker News",
+  bluesky: "Bluesky",
+};
 
 export const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
