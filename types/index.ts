@@ -68,6 +68,16 @@ export type RedditPost = {
   };
 };
 
+export type BlueSkyPost = {
+  uri: string;
+  author: { handle: string; displayName?: string };
+  record: { text: string; createdAt: string };
+};
+
+export type BlueSkyResponse = {
+  posts: BlueSkyPost[];
+};
+
 export type RedditResponse = {
   data: {
     children: RedditPost[];
@@ -75,6 +85,11 @@ export type RedditResponse = {
 };
 
 export type RedditToken = {
+  value: string;
+  expiresAt: number;
+};
+
+export type BlueSkyToken = {
   value: string;
   expiresAt: number;
 };
@@ -99,12 +114,12 @@ export type ScannedPost = {
   author: string;
 };
 
-export type SignalPlatform = "reddit" | "hackernews";
+export type SignalPlatform = "reddit" | "hackernews" | "bluesky";
 
 export type HotSignal = {
   title: string;
   score: number;
-  platform: "reddit" | "hackernews";
+  platform: "reddit" | "hackernews" | "bluesky";
   reason: string;
   url: string;
 };
@@ -134,7 +149,7 @@ export type Signal = {
 };
 
 export type SignalFilters = {
-  platform: "all" | "reddit" | "hackernews";
+  platform: "all" | "reddit" | "hackernews" | "bluesky";
   intent: "all" | "high" | "medium" | "low";
   sort: "score" | "newest" | "oldest";
   type: "all" | SignalType;
@@ -146,7 +161,7 @@ export type Lead = {
   id: string;
   title: string;
   source: string;
-  platform: "reddit" | "hackernews";
+  platform: "reddit" | "hackernews" | "bluesky";
   postUrl: string;
   keyword: string;
   timeAgo: string;
