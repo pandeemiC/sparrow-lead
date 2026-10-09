@@ -13,11 +13,15 @@ import {
   Copy,
   Check,
 } from "lucide-react";
-import { FaRedditAlien, FaYCombinator } from "react-icons/fa6";
+import PlatformIcon from "@/components/ui/PlatformIcon";
 import Fire from "@/public/animations/fire.json";
 import Lottie from "lottie-react";
 import type { Signal, SignalType, SignalFilters } from "@/types";
-import { SIGNAL_TYPE_LABELS, SIGNAL_TYPE_TAG_CLASS } from "@/lib/constants";
+import {
+  SIGNAL_TYPE_LABELS,
+  SIGNAL_TYPE_TAG_CLASS,
+  PLATFORMS,
+} from "@/lib/constants";
 import { timeAgo, extractSub } from "@/lib/utils";
 import { useScanStore } from "@/store/scanStore";
 import { apiFetch } from "@/lib/apiFetch";
@@ -102,17 +106,9 @@ function PlatformPill({
   platform: Signal["platform"];
   source: string;
 }) {
-  const shared =
-    "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-xs font-medium";
-  if (platform === "reddit")
-    return (
-      <span className={`${shared} text-orange-400 platform-pill-reddit`}>
-        <FaRedditAlien size={11} /> {source}
-      </span>
-    );
   return (
-    <span className={`${shared} text-orange-300 platform-pill-hn`}>
-      <FaYCombinator size={11} /> {source}
+    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-xs font-medium text-white/70 bg-white/4 border-white/10">
+      <PlatformIcon platform={platform} size={11} /> {source}
     </span>
   );
 }
@@ -501,11 +497,7 @@ export default function SignalsPage() {
             <RadioGroup
               value={filters.platform}
               onChange={(v) => set("platform", v)}
-              options={[
-                { label: "All Platforms", value: "all" },
-                { label: "Reddit", value: "reddit" },
-                { label: "Hacker News", value: "hackernews" },
-              ]}
+              options={[{ label: "All Platforms", value: "all" }, ...PLATFORMS]}
             />
           </FilterSection>
           <FilterSection label="Intent Score">

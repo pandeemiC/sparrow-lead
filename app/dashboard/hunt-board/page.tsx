@@ -9,7 +9,7 @@ import {
   StickyNote,
   ExternalLink,
 } from "lucide-react";
-import { FaRedditAlien, FaYCombinator } from "react-icons/fa6";
+import PlatformIcon from "@/components/ui/PlatformIcon";
 import Fire from "@/public/animations/fire.json";
 import Lottie from "lottie-react";
 import type { Lead, HuntStatus } from "@/types";
@@ -67,12 +67,6 @@ function ScoreBadge({ score }: { score: number | null }) {
   );
 }
 
-function PlatformIcon({ platform }: { platform: Lead["platform"] }) {
-  if (platform === "reddit")
-    return <FaRedditAlien size={11} className="text-orange-400 shrink-0" />;
-  return <FaYCombinator size={11} className="text-orange-300 shrink-0" />;
-}
-
 function LeadCard({
   lead,
   onMove,
@@ -95,7 +89,7 @@ function LeadCard({
       <TopSpotlight variant={variant === "unscored" ? "cold" : variant} />
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
-          <PlatformIcon platform={lead.platform} />
+          <PlatformIcon platform={lead.platform} className="shrink-0" />
           <span className="text-xs text-white/40">{lead.source}</span>
         </div>
         <div className="flex items-center gap-1.5">

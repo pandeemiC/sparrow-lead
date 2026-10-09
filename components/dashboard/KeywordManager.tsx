@@ -3,21 +3,12 @@
 import { useState, useEffect } from "react";
 import { IoClose } from "react-icons/io5";
 import { Tag, Plus, ChevronDown, RotateCcw } from "lucide-react";
-import { FaRedditAlien, FaYCombinator } from "react-icons/fa6";
 import { Keyword } from "@/types";
 import { apiFetch } from "@/lib/apiFetch";
 import { useToastStore } from "@/store/toastStore";
 import { usePlan } from "@/components/dashboard/PlanContext";
-
-const PLATFORMS = [
-  { label: "Reddit", value: "reddit" },
-  { label: "Hacker News", value: "hackernews" },
-];
-
-const platformIcon: Record<string, React.ReactNode> = {
-  reddit: <FaRedditAlien className="text-orange-500" size={12} />,
-  hackernews: <FaYCombinator className="text-orange-400" size={12} />,
-};
+import PlatformIcon from "@/components/ui/PlatformIcon";
+import { PLATFORMS } from "@/lib/constants";
 
 export default function KeywordManager() {
   const [keywords, setKeywords] = useState<Keyword[]>([]);
@@ -129,7 +120,7 @@ export default function KeywordManager() {
                       : "bg-white/2 border-white/8 text-white/40 hover:text-white/70 hover:border-white/15"
                   }`}
                 >
-                  {platformIcon[p.value]}
+                  <PlatformIcon platform={p.value} size={12} />
                   {p.label}
                 </button>
               );
@@ -179,9 +170,7 @@ export default function KeywordManager() {
                   <span className="flex items-center gap-1.5 shrink-0">
                     {(k.platforms ?? []).map((p) => (
                       <span key={p}>
-                        {platformIcon[p] ?? (
-                          <Tag size={12} className="text-white/20" />
-                        )}
+                        <PlatformIcon platform={p} size={12} />
                       </span>
                     ))}
                   </span>
@@ -228,9 +217,7 @@ export default function KeywordManager() {
                     <span className="flex items-center gap-1.5 shrink-0 opacity-50">
                       {(k.platforms ?? []).map((p) => (
                         <span key={p}>
-                          {platformIcon[p] ?? (
-                            <Tag size={12} className="text-white/20" />
-                          )}
+                          <PlatformIcon platform={p} size={12} />
                         </span>
                       ))}
                     </span>

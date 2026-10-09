@@ -18,20 +18,22 @@ import {
   Check,
   Loader,
 } from "lucide-react";
-import { SiReddit, SiYcombinator } from "react-icons/si";
-import { FaRedditAlien, FaYCombinator } from "react-icons/fa6";
+import { SiReddit, SiYcombinator, SiBluesky } from "react-icons/si";
+import PlatformIcon from "@/components/ui/PlatformIcon";
+import { PLATFORMS } from "@/lib/constants";
 import type { Stats } from "@/types";
 import { timeAgo } from "@/lib/utils";
 
 const SCAN_STEPS = [
   "Fetching keywords",
-  "Scanning Reddit & HackerNews",
+  "Scanning your sources",
   "Running AI analysis",
 ];
 
 const sources = [
   { label: "Reddit", icon: SiReddit, active: true },
   { label: "Hacker News", icon: SiYcombinator, active: true },
+  { label: "Bluesky", icon: SiBluesky, active: true },
 ];
 
 const huntColumns = [
@@ -159,18 +161,9 @@ function SignalPill({
     >
       <div
         className="w-4 h-4 rounded flex items-center justify-center shrink-0"
-        style={{
-          background:
-            s.platform === "reddit"
-              ? "rgba(255,100,0,0.12)"
-              : "rgba(255,102,0,0.10)",
-        }}
+        style={{ background: "rgba(255,255,255,0.06)" }}
       >
-        {s.platform === "reddit" ? (
-          <FaRedditAlien size={8} className="text-orange-400" />
-        ) : (
-          <FaYCombinator size={8} className="text-orange-300" />
-        )}
+        <PlatformIcon platform={s.platform} size={8} />
       </div>
       <span className="text-[10px] text-white/55 truncate flex-1 leading-none">
         {s.post_title}
@@ -254,9 +247,7 @@ export default function DashboardPage() {
     : 0;
 
   return (
-    <div
-      className="p-5 h-full flex gap-4 overflow-hidden"
-    >
+    <div className="p-5 h-full flex gap-4 overflow-hidden">
       <div className="flex flex-col flex-6 gap-4 min-h-0 min-w-0">
         <div className="flex-1 rounded-xl card p-5 flex flex-col min-h-0">
           <div className="flex items-center justify-between mb-4">
@@ -281,46 +272,24 @@ export default function DashboardPage() {
           {stats && stats.totalSignals > 0 ? (
             <div className="flex-1 flex flex-col justify-center gap-3">
               <div className="flex items-center gap-3">
-                <div className="flex-1 flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-white/3 border border-white/5">
-                  <FaRedditAlien
-                    size={13}
-                    className="text-orange-400 shrink-0"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[10px] text-white/40 uppercase tracking-widest mb-1">
-                      Reddit
+                {PLATFORMS.map((p) => (
+                  <div
+                    key={p.value}
+                    className="flex-1 flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-white/3 border border-white/5"
+                  >
+                    <PlatformIcon
+                      platform={p.value}
+                      size={13}
+                      className="shrink-0"
+                    />
+                    <p className="flex-1 text-[10px] text-white/40 uppercase tracking-widest truncate">
+                      {p.label}
                     </p>
-                    <div className="h-1 rounded-full bg-white/5 overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-orange-500/40"
-                        style={{ width: "60%" }}
-                      />
-                    </div>
+                    <span className="text-xs font-semibold text-white/60 shrink-0">
+                      Active
+                    </span>
                   </div>
-                  <span className="text-xs font-semibold text-white/60 shrink-0">
-                    Active
-                  </span>
-                </div>
-                <div className="flex-1 flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-white/3 border border-white/5">
-                  <FaYCombinator
-                    size={13}
-                    className="text-orange-300 shrink-0"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[10px] text-white/40 uppercase tracking-widest mb-1">
-                      Hacker News
-                    </p>
-                    <div className="h-1 rounded-full bg-white/5 overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-orange-400/30"
-                        style={{ width: "40%" }}
-                      />
-                    </div>
-                  </div>
-                  <span className="text-xs font-semibold text-white/60 shrink-0">
-                    Active
-                  </span>
-                </div>
+                ))}
               </div>
 
               <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-white/3 border border-white/5">
@@ -464,21 +433,9 @@ export default function DashboardPage() {
                     className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/3 border border-white/5"
                   >
                     <span className="flex items-center gap-1 shrink-0">
-                      {(kw.platforms ?? []).map((p) =>
-                        p === "reddit" ? (
-                          <FaRedditAlien
-                            key={p}
-                            size={9}
-                            className="text-orange-400"
-                          />
-                        ) : (
-                          <FaYCombinator
-                            key={p}
-                            size={9}
-                            className="text-orange-300"
-                          />
-                        ),
-                      )}
+                      {(kw.platforms ?? []).map((p) => (
+                        <PlatformIcon key={p} platform={p} size={9} />
+                      ))}
                     </span>
                     <span className="text-[10px] text-white/50 truncate flex-1">
                       {kw.keyword}
