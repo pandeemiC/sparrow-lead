@@ -1,7 +1,47 @@
-import type { RedditResponse, HackerNewsResponse, ScannedPost } from "@/types";
+import type {
+  RedditResponse,
+  HackerNewsResponse,
+  BlueSkyResponse,
+  ScannedPost,
+} from "@/types";
 import { redditConfigured, redditGet } from "@/lib/reddit";
+import { blueSkyConfigured, blueskyGet } from "@/lib/bluesky";
 
 let warnedRedditMissing = false;
+let warnedBlueskyMissing = false;
+
+export async function searchBluesky(keyword: string): Promise<ScannedPost[]> {
+  if (!blueSkyConfigured()) {
+    if (!warnedBlueskyMissing) {
+      console.warn(
+        "[search] Bluesky skipped: BLUESKY_HANDLE / BLUESKY_APP_PASSWORD not set",
+      );
+      warnedBlueskyMissing = true;
+    }
+    return [];
+  }
+
+  const res = await blueskyGet(
+    `/app.bsky.feed.searchPosts?q=${encodeURIComponent(keyword)}&sort=latest&limit=5`,
+  );
+
+  if (!res.ok) {
+    throw new Error(`Bluesky search failed (${res.status}) for "${keyword}"`);
+  }
+  const data: BlueSkyResponse = await res.json();
+  console.log(JSON.stringify(data.posts[0], null, 2));
+  return data.posts.map((post) => {
+    const postId = post.uri.split("/").pop();
+    const text = post.record.text ?? "";
+    return {
+      platform: "bluesky",
+      post_url: `https://bsky.app/profile/${post.author.handle}/post/${postId}`,
+      post_title: text.slice(0, 80) || "(no text)",
+      post_body: text.slice(0, 500),
+      author: post.author.handle,
+    };
+  });
+}
 
 export async function searchReddit(keyword: string): Promise<ScannedPost[]> {
   if (!redditConfigured()) {

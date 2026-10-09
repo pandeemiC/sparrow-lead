@@ -22,7 +22,6 @@ async function getToken(): Promise<string> {
       password: process.env.BLUESKY_APP_PASSWORD,
     }),
   });
-
   if (!res.ok) {
     throw new Error(`Bluesky login failed (${res.status})`);
   }

@@ -1,8 +1,14 @@
 import { logger } from "@trigger.dev/sdk";
 import { getDb } from "@/lib/db";
 import { analyzePost } from "@/lib/analysis";
-import { searchReddit, searchHackerNews } from "@/lib/search";
-import type { ScannedPost, Keyword, HotSignal, ScanResult } from "@/types";
+import { searchReddit, searchHackerNews, searchBluesky } from "@/lib/search";
+import type {
+  ScannedPost,
+  Keyword,
+  HotSignal,
+  ScanResult,
+  SignalPlatform,
+} from "@/types";
 
 export async function scanUser(userId: string): Promise<ScanResult> {
   const sql = getDb();
@@ -23,6 +29,9 @@ export async function scanUser(userId: string): Promise<ScanResult> {
       }
       if (kw.platforms.includes("hackernews")) {
         posts.push(...(await searchHackerNews(kw.keyword)));
+      }
+      if (kw.platforms.includes("bluesky")) {
+        posts.push(...(await searchBluesky(kw.keyword)));
       }
     } catch (err) {
       logger.error("Search failed for keyword", {
@@ -53,7 +62,7 @@ export async function scanUser(userId: string): Promise<ScanResult> {
           hotSignals.push({
             title: post.post_title,
             score: analysis.score,
-            platform: post.platform as "reddit" | "hackernews",
+            platform: post.platform as SignalPlatform,
             reason: analysis.reason,
             url: post.post_url,
           });
