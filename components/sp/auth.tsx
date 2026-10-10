@@ -211,7 +211,7 @@ export function Footnote({ children }: { children: React.ReactNode }) {
 export function Hint({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
-      className={cn("-mt-1.5 mb-4 text-xs text-white/42", className)}
+      className={cn("-mt-1.5 mb-4 text-[12px] text-white/42", className)}
       {...props}
     />
   );
