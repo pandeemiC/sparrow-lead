@@ -18,7 +18,7 @@ export default function DashboardError({
       <p className="text-sm text-white/70">
         Something went wrong loading this page.
       </p>
-      <button onClick={() => unstable_retry()} className="edit-btn">
+      <button onClick={() => unstable_retry()} className="sp-ghost">
         Try again
       </button>
     </div>

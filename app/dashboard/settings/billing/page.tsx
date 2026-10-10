@@ -32,10 +32,10 @@ export default function SettingsBilling() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl glass-red border border-white/5 p-6 glow-right">
+      <div className="sp-card">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="p-2.5 rounded-lg glass-red border border-white/10">
+            <div className="p-2.5 rounded-lg sp-chip">
               <GrCodeSandbox size={50} className="text-white/50" />
             </div>
             <div className="space-y-1">
@@ -55,18 +55,16 @@ export default function SettingsBilling() {
             </div>
           </div>
           {isPaid ? (
-            <button className="edit-btn shrink-0">Adjust Plan</button>
+            <button className="sp-ghost shrink-0">Adjust Plan</button>
           ) : (
-            <button className="edit-btn shrink-0">Upgrade</button>
+            <button className="sp-ghost shrink-0">Upgrade</button>
           )}
         </div>
       </div>
 
-      <div className="rounded-xl glass-red border border-white/5 p-6 glow-t-right flex items-center justify-between gap-4">
+      <div className="sp-card flex items-center justify-between gap-4">
         <div className="space-y-4">
-          <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest">
-            Payment
-          </h2>
+          <h2 className="sp-section !mb-0">Payment</h2>
           {isPaid ? (
             <div className="flex items-center gap-3">
               <CreditCard size={18} className="text-white/40 shrink-0" />
@@ -76,13 +74,11 @@ export default function SettingsBilling() {
             <p className="text-sm text-white/35">No payment method on file.</p>
           )}
         </div>
-        {isPaid && <button className="edit-btn">Update</button>}
+        {isPaid && <button className="sp-ghost">Update</button>}
       </div>
 
-      <div className="rounded-xl glass-red border border-white/5 p-6">
-        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-6">
-          Invoices
-        </h2>
+      <div className="sp-card">
+        <h2 className="sp-section">Invoices</h2>
         {isPaid ? (
           <div className="space-y-1">
             <div className="grid grid-cols-[1fr_1fr_1fr_auto] gap-4 px-3 py-2">
@@ -120,11 +116,9 @@ export default function SettingsBilling() {
       </div>
 
       {isPaid && (
-        <div className="rounded-xl glass-red border border-white/10 p-6 flex items-center justify-between gap-4">
+        <div className="sp-card flex items-center justify-between gap-4">
           <div className="space-y-4">
-            <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest">
-              Danger Zone — Cancellation
-            </h2>
+            <h2 className="sp-section !mb-0">Danger Zone — Cancellation</h2>
             <div className="space-y-3">
               <p className="text-sm font-medium text-white">Cancel plan</p>
               <p className="text-sm text-white/35">

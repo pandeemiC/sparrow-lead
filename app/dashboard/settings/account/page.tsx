@@ -151,10 +151,8 @@ export default function SettingsAccount() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl glass-red border border-white/5 p-6 glow-right">
-        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-6">
-          Account
-        </h2>
+      <div className="sp-card">
+        <h2 className="sp-section">Account</h2>
         <div className="space-y-5">
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1 space-y-1.5">
@@ -184,20 +182,20 @@ export default function SettingsAccount() {
               <div className="flex gap-2 shrink-0">
                 <button
                   onClick={() => setEditingName(false)}
-                  className="edit-btn"
+                  className="sp-ghost"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={saveDisplayName}
                   disabled={saving}
-                  className="edit-btn"
+                  className="sp-ghost"
                 >
                   {saving ? "Saving..." : "Save"}
                 </button>
               </div>
             ) : (
-              <button onClick={editName} className="edit-btn shrink-0">
+              <button onClick={editName} className="sp-ghost shrink-0">
                 Edit
               </button>
             )}
@@ -208,28 +206,24 @@ export default function SettingsAccount() {
               <p className="text-sm font-medium text-white">Email</p>
               <p className="text-sm text-white/35 truncate max-w-xs">{email}</p>
             </div>
-            {!isOAuthUser && <button className="edit-btn">Change</button>}
+            {!isOAuthUser && <button className="sp-ghost">Change</button>}
           </div>
         </div>
       </div>
 
-      <div className="rounded-xl glass-red border border-white/5 p-6 glow-t-right">
-        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-6">
-          Password
-        </h2>
+      <div className="sp-card">
+        <h2 className="sp-section">Password</h2>
         <div className="flex items-center justify-between">
           <div className="space-y-1.5">
             <p className="text-sm font-medium text-white">Change Password</p>
             <p className="text-sm text-white/35">••••••••••••</p>
           </div>
-          {!isOAuthUser && <button className="edit-btn">Change</button>}
+          {!isOAuthUser && <button className="sp-ghost">Change</button>}
         </div>
       </div>
 
-      <div className="rounded-xl glass-red border border-white/5 p-6">
-        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-6">
-          Sessions
-        </h2>
+      <div className="sp-card">
+        <h2 className="sp-section">Sessions</h2>
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-sm font-medium text-white">
@@ -239,16 +233,14 @@ export default function SettingsAccount() {
               Revokes all active sessions across every device
             </p>
           </div>
-          <button onClick={logOutEverywhere} className="edit-btn">
+          <button onClick={logOutEverywhere} className="sp-ghost">
             Log Out All
           </button>
         </div>
       </div>
 
-      <div className="rounded-xl glass-red border border-white/10 p-6">
-        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-6">
-          Danger Zone
-        </h2>
+      <div className="sp-card">
+        <h2 className="sp-section">Danger Zone</h2>
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-sm font-medium text-white">
@@ -276,10 +268,8 @@ export default function SettingsAccount() {
         </div>
       </div>
 
-      <div className="rounded-xl glass-red border border-white/5 p-6">
-        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-6">
-          Active Sessions
-        </h2>
+      <div className="sp-card">
+        <h2 className="sp-section">Active Sessions</h2>
         <div className="space-y-1">
           <div className="grid grid-cols-[1fr_1fr_1fr_auto] gap-4 px-3 py-2">
             <span className="text-xs text-white/25 uppercase tracking-wider">

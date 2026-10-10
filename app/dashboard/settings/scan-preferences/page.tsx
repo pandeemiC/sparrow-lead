@@ -78,7 +78,7 @@ function ScanProfileForm({
         <button
           onClick={saveProfile}
           disabled={!changed || saving}
-          className="edit-btn disabled:opacity-35 disabled:cursor-not-allowed"
+          className="sp-ghost disabled:opacity-35 disabled:cursor-not-allowed"
         >
           {saving ? "Saving…" : "Save profile"}
         </button>
@@ -96,10 +96,8 @@ export default function SettingsScanPreferences() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl glass-red border border-white/5 p-6 glow-right">
-        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-6">
-          Scan Schedule
-        </h2>
+      <div className="sp-card">
+        <h2 className="sp-section">Scan Schedule</h2>
         <Row
           title="Automatic Scanning"
           description="Scan your active keywords every 6 hours. Manual scans always work."
@@ -112,10 +110,8 @@ export default function SettingsScanPreferences() {
         />
       </div>
 
-      <div className="rounded-xl glass-red border border-white/5 p-6 glow-t-right">
-        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-2">
-          Scan Profile
-        </h2>
+      <div className="sp-card">
+        <h2 className="sp-section !mb-2">Scan Profile</h2>
         <p className="text-sm text-white/35 mb-6">
           The AI reads this when scoring every signal. The more specific, the
           better your scores.

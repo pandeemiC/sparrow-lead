@@ -73,9 +73,9 @@ export default function SettingsUsage() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl glass-red border border-white/5 p-6 glow-right flex items-center justify-between gap-4">
+      <div className="sp-card flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="p-2.5 rounded-lg glass-red border border-white/10">
+          <div className="p-2.5 rounded-lg sp-chip">
             <BarChart2 size={22} className="text-white/50" />
           </div>
           <div className="space-y-1">
@@ -90,10 +90,8 @@ export default function SettingsUsage() {
         </span>
       </div>
 
-      <div className="rounded-xl glass-red border border-white/5 p-6 glow-t-right">
-        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-6">
-          This Period
-        </h2>
+      <div className="sp-card">
+        <h2 className="sp-section">This Period</h2>
         <div className="space-y-6">
           <UsageBar
             label="Keywords"

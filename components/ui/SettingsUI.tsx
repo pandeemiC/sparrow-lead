@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { ChevronDown } from "lucide-react";
 
 export function Toggle({
   enabled,
@@ -11,16 +12,13 @@ export function Toggle({
 }) {
   return (
     <button
+      type="button"
+      role="switch"
+      aria-checked={enabled}
       onClick={() => onChange(!enabled)}
-      className={`relative inline-flex h-5.5 w-9 shrink-0 cursor-pointer rounded-full border border-white/10 transition-colors duration-200 ${
-        enabled ? "bg-white/30" : "bg-white/8"
-      }`}
+      className={`sp-switch ${enabled ? "on" : ""}`}
     >
-      <span
-        className={`inline-block h-4 w-4 mt-0.5 rounded-full bg-white shadow transition-transform duration-200 ${
-          enabled ? "translate-x-4" : "translate-x-0.5"
-        }`}
-      />
+      <i />
     </button>
   );
 }
@@ -37,8 +35,12 @@ export function Row({
   return (
     <div className="flex items-center justify-between gap-6">
       <div className="space-y-1">
-        <p className="text-sm font-medium text-white">{title}</p>
-        <p className="text-sm text-white/35">{description}</p>
+        <p className="text-sm font-medium" style={{ color: "var(--ink)" }}>
+          {title}
+        </p>
+        <p className="text-sm" style={{ color: "var(--ink-3)" }}>
+          {description}
+        </p>
       </div>
       {right}
     </div>
@@ -71,38 +73,47 @@ export function Select({
   return (
     <div ref={ref} className="relative shrink-0">
       <button
+        type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-3 bg-white/5 border border-white/10 text-white text-sm rounded-lg px-3 py-1.5 hover:border-white/20 transition-colors min-w-36"
+        className="sp-ghost"
+        style={{
+          minWidth: 150,
+          justifyContent: "space-between",
+          color: "var(--ink)",
+        }}
       >
-        <span className="flex-1 text-left">{selected?.label}</span>
-        <svg
-          width="10"
-          height="6"
-          viewBox="0 0 10 6"
-          className={`text-white/40 transition-transform shrink-0 ${open ? "rotate-180" : ""}`}
-        >
-          <path
-            d="M1 1l4 4 4-4"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            fill="none"
-          />
-        </svg>
+        <span>{selected?.label ?? "Select…"}</span>
+        <ChevronDown
+          size={13}
+          style={{
+            transform: open ? "rotate(180deg)" : undefined,
+            transition: "transform .2s",
+          }}
+        />
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 z-50 bg-[#111111] border border-white/8 rounded-md overflow-hidden min-w-36 shadow-2xl">
+        <div
+          className="absolute right-0 top-full mt-1 z-50 overflow-hidden min-w-40"
+          style={{
+            background: "rgba(22,11,13,.96)",
+            border: "1px solid var(--line-2)",
+            borderRadius: 12,
+            boxShadow: "0 24px 60px rgba(0,0,0,.5)",
+            padding: 4,
+          }}
+        >
           {options.map((opt) => (
             <button
+              type="button"
               key={opt.value}
               onClick={() => {
                 onChange(opt.value);
                 setOpen(false);
               }}
-              className={`w-full text-left px-3 py-2 text-sm transition-colors hover:bg-white/5 ${
-                opt.value === value ? "text-white" : "text-white/50"
-              }`}
+              className="w-full text-left px-3 py-2 text-sm rounded-lg transition-colors hover:bg-white/5"
+              style={{
+                color: opt.value === value ? "var(--ink)" : "var(--ink-2)",
+              }}
             >
               {opt.label}
             </button>

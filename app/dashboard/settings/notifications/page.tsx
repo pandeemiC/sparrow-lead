@@ -13,10 +13,8 @@ export default function SettingsNotifications() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl glass-red border border-white/5 p-6 glow-right">
-        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-6">
-          Lead Alerts
-        </h2>
+      <div className="sp-card">
+        <h2 className="sp-section">Lead Alerts</h2>
         <div className="space-y-5">
           <Row
             title="Hot Lead Emails"

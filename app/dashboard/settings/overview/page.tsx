@@ -63,10 +63,8 @@ export default function SettingsOverview() {
     <div className="space-y-4">
       <div className="grid grid-cols-6 gap-4 items-stretch">
         <div className="col-span-4 flex flex-col gap-4">
-          <div className="rounded-xl glass-red border border-white/5 p-6 glow-right">
-            <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-6">
-              Profile
-            </h2>
+          <div className="sp-card">
+            <h2 className="sp-section">Profile</h2>
             <div className="flex items-center gap-5">
               {user.imageUrl ? (
                 <Image
@@ -98,10 +96,8 @@ export default function SettingsOverview() {
             </div>
           </div>
 
-          <div className="rounded-xl glass-red border border-white/5 p-6 glow-t-right flex-1">
-            <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-6">
-              Appearance
-            </h2>
+          <div className="sp-card flex-1">
+            <h2 className="sp-section">Appearance</h2>
             <div className="flex gap-3">
               {themes.map((t) => (
                 <button
@@ -117,10 +113,8 @@ export default function SettingsOverview() {
           </div>
         </div>
 
-        <div className="col-span-2 rounded-xl glass-red glow-t-left border border-white/5 p-6 flex flex-col gap-6">
-          <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest">
-            Plan
-          </h2>
+        <div className="col-span-2 sp-card flex flex-col gap-6">
+          <h2 className="sp-section !mb-0">Plan</h2>
           <div className="flex items-start justify-between gap-3">
             <div className="space-y-1.5">
               <p className="text-base font-semibold text-white">{plan}</p>
@@ -128,7 +122,7 @@ export default function SettingsOverview() {
                 {limits.keywords} keywords · {limits.signals} signals/mo
               </p>
             </div>
-            <button className="edit-btn">Upgrade</button>
+            <button className="sp-ghost">Upgrade</button>
           </div>
           <div className="flex gap-4 justify-center flex-1 items-center">
             <div className="flex-1 flex flex-col items-center gap-3">
@@ -197,10 +191,8 @@ export default function SettingsOverview() {
         </div>
       </div>
 
-      <div className="rounded-xl glass-red border border-white/5 p-6">
-        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-6">
-          Connected Accounts
-        </h2>
+      <div className="sp-card">
+        <h2 className="sp-section">Connected Accounts</h2>
         <div className="space-y-5">
           {providers.map(({ key, label, icon: Icon }, i) => {
             const connected = connectedProviders.includes(key);
@@ -217,7 +209,7 @@ export default function SettingsOverview() {
                       </p>
                     </div>
                   </div>
-                  <button className="edit-btn">
+                  <button className="sp-ghost">
                     {connected ? "Disconnect" : "Connect"}
                   </button>
                 </div>
