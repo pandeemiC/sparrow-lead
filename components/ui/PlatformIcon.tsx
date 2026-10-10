@@ -8,27 +8,32 @@ const ICONS: Record<SignalPlatform, IconType> = {
   bluesky: FaBluesky,
 };
 
-const COLORS: Record<SignalPlatform, string> = {
-  reddit: "text-orange-400",
-  hackernews: "text-orange-300",
-  bluesky: "text-sky-400",
+export const PLATFORM_HEX: Record<SignalPlatform, string> = {
+  reddit: "#E2501A",
+  hackernews: "#FFA552",
+  bluesky: "#6EC1FF",
 };
 
 export default function PlatformIcon({
   platform,
   size = 11,
   className = "",
+  plain = false,
 }: {
   platform: string;
   size?: number;
   className?: string;
+  plain?: boolean;
 }) {
   const Icon = ICONS[platform as SignalPlatform];
   if (!Icon) return null;
   return (
     <Icon
       size={size}
-      className={`${COLORS[platform as SignalPlatform]} ${className}`}
+      className={className}
+      style={
+        plain ? undefined : { color: PLATFORM_HEX[platform as SignalPlatform] }
+      }
     />
   );
 }
