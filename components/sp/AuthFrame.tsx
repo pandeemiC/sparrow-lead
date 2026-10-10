@@ -125,7 +125,6 @@ export default function AuthFrame({
         </main>
 
         <footer className="sp-auth-foot">
-          <span>© {new Date().getFullYear()} Sparrow</span>
           <span>Reddit · Hacker News · Bluesky</span>
         </footer>
       </div>
@@ -134,13 +133,13 @@ export default function AuthFrame({
 }
 
 export const SPARROW_LEDE: AuthLede = {
-  eyebrow: "AI social listening",
+  eyebrow: "Social Listener",
   title: (
     <>
       Hear the buyers <em>first.</em>
     </>
   ),
-  body: "Sparrow watches Reddit, Hacker News and Bluesky for people asking for what you sell, scores how ready each one is to buy, and puts the best leads in front of you — so you reply while the thread is still warm.",
+  body: "Sparrow watches Reddit, Hacker News and Bluesky for people asking for what you sell, scores how ready each one is to buy, and puts the best leads in front of you so you reply while the thread is still warm.",
   facts: [
     { num: "3", label: "Sources watched" },
     { num: "1–10", label: "AI intent score" },
