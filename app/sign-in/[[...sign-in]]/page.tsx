@@ -2,13 +2,10 @@
 
 import { useSignIn, useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
-import { motion } from "motion/react";
 import { useState, useEffect } from "react";
-import { Eye, EyeOff } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
-import AnimatedBackground from "@/components/ui/AnimatedBackground";
+import AuthFrame, { SPARROW_LEDE } from "@/components/sp/AuthFrame";
 
 function GoogleIcon() {
   return (
@@ -37,7 +34,6 @@ function GoogleIcon() {
     </svg>
   );
 }
-
 
 export default function SignInPage() {
   const { signIn } = useSignIn();
@@ -89,193 +85,76 @@ export default function SignInPage() {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex"
-      style={{ fontFamily: "var(--font-montserrat), sans-serif" }}
+    <AuthFrame
+      lede={SPARROW_LEDE}
+      topLink={{ href: "/sign-up", label: "Create account →" }}
     >
-      <AnimatedBackground />
-
-      <div className="relative z-10 flex w-full">
-        <div className="hidden lg:flex lg:w-[50%] flex-col justify-between p-12">
-          <Link href="/">
-            <div className="flex items-center gap-2">
-              <Image
-                src="/sparrow-no-text-logo.png"
-                alt="Sparrow"
-                width={18}
-                height={18}
-                className="opacity-65"
-              />
-              <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
-                Sparrow
-              </span>
-            </div>
-          </Link>
-
-          <motion.div
-            className="flex flex-col gap-5"
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
-          >
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/30">
-              AI Social Listener
-            </p>
-            <h2 className="text-5xl font-semibold text-white/80 leading-[1.1] tracking-tight">
-              Every signal.
-              <br />
-              <span className="text-white/50 font-semibold">Before</span>
-              <br />
-              they do.
-            </h2>
-            <p className="text-sm text-white/30 leading-relaxed max-w-72">
-              Reddit threads, Hacker News posts — Sparrow surfaces buying intent
-              the moment it appears, so you can reach out first.
-            </p>
-          </motion.div>
-        </div>
-
-        <motion.div
-          className="auth-glass w-full lg:w-[40%] my-10 mr-25 rounded-2xl p-8 lg:p-12"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
-        >
-            <div className="flex flex-col items-center mb-7">
-              <div
-                className="relative flex justify-center mb-10"
-                style={{ height: 136 }}
-              >
-                <Link href="/">
-                  <Image
-                    src="/sparrow-no-text-logo.png"
-                    alt="Sparrow"
-                    width={200}
-                    height={200}
-                    className="relative top-0 left-1/2 -translate-x-1/2 opacity-90"
-                    style={{
-                      filter:
-                        "brightness(1) drop-shadow(0 0 18px rgba(210, 43, 43,0.6))",
-                    }}
-                  />
-                </Link>
-                <h1 className="absolute bottom-[-15] text-[20px] font-semibold uppercase tracking-[0.22em] text-white/35">
-                  Sparrow
-                </h1>
-              </div>
-              <h2 className="text-[21px] font-bold text-white tracking-tight mt-3">
-                Welcome back
-              </h2>
-              <p className="text-[11px] text-white/30 mt-1">
-                Sign in to continue to Sparrow
-              </p>
-            </div>
-
-            <div className="flex gap-2.5 mb-5">
-              <button
-                type="button"
-                onClick={() => handleOAuth("oauth_google")}
-                className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg auth-btn-secondary text-[12px] font-medium text-white/60 hover:text-white cursor-pointer transition-colors"
-              >
-                <GoogleIcon />
-                Google
-              </button>
-              <button
-                type="button"
-                onClick={() => handleOAuth("oauth_github")}
-                className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg auth-btn-secondary text-[12px] font-medium text-white/60 hover:text-white cursor-pointer transition-colors"
-              >
-                <FaGithub size={13} color="#ffffff" />
-                GitHub
-              </button>
-            </div>
-
-            <div className="flex items-center gap-3 mb-5">
-              <div
-                className="flex-1 h-px"
-                style={{ background: "rgba(255,255,255,0.08)" }}
-              />
-              <span className="text-[10px] text-white/25 uppercase tracking-wider">
-                or
-              </span>
-              <div
-                className="flex-1 h-px"
-                style={{ background: "rgba(255,255,255,0.08)" }}
-              />
-            </div>
-
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  required
-                  className="w-full h-10 px-3.5 rounded-lg auth-input text-[13px] text-white placeholder:text-white/20 focus:outline-none transition-colors"
-                />
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
-                    Password
-                  </label>
-                  <button
-                    type="button"
-                    className="text-[10px] text-white/30 hover:text-white/60 transition-colors"
-                  >
-                    Forgot password?
-                  </button>
-                </div>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                    className="w-full h-10 px-3.5 pr-10 rounded-lg auth-input text-[13px] text-white placeholder:text-white/20 focus:outline-none transition-colors"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/55 transition-colors"
-                  >
-                    {showPassword ? <EyeOff size={13} /> : <Eye size={13} />}
-                  </button>
-                </div>
-              </div>
-
-              {error && (
-                <p className="text-[11px] text-red-400 bg-red-500/8 border border-red-500/15 rounded-lg px-3 py-2">
-                  {error}
-                </p>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full h-10 rounded-lg auth-btn-primary cursor-pointer text-[13px] font-semibold transition-opacity disabled:opacity-50 disabled:cursor-not-allowed mt-0.5"
-              >
-                {loading ? "Signing in…" : "Sign in"}
-              </button>
-            </form>
-
-            <p className="text-center text-[11px] text-white/30 mt-5">
-              Don&apos;t have an account?{" "}
-              <Link
-                href="/sign-up"
-                className="text-white/55 font-semibold hover:text-white transition-colors"
-              >
-                Sign up
-              </Link>
-            </p>
-          </motion.div>
+      <div className="sp-glass-head">
+        <div className="sp-glass-title">Sign in</div>
+        <div className="sp-glass-sub">Welcome back</div>
       </div>
-    </div>
+
+      {error && <div className="sp-auth-error">{error}</div>}
+
+      <form onSubmit={handleSubmit}>
+        <div className="sp-field">
+          <label htmlFor="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@studio.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div className="sp-field">
+          <label htmlFor="password">Password</label>
+          <input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            autoComplete="current-password"
+            placeholder="••••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button
+            type="button"
+            className="reveal"
+            onClick={() => setShowPassword((v) => !v)}
+          >
+            {showPassword ? "Hide" : "Show"}
+          </button>
+        </div>
+        <button className="sp-submit" type="submit" disabled={loading}>
+          {loading ? (
+            "Signing in…"
+          ) : (
+            <>
+              Continue<span className="arrow">→</span>
+            </>
+          )}
+        </button>
+      </form>
+
+      <div className="sp-divider">or</div>
+
+      <div className="sp-sso">
+        <button type="button" onClick={() => handleOAuth("oauth_google")}>
+          <GoogleIcon />
+          Google
+        </button>
+        <button type="button" onClick={() => handleOAuth("oauth_github")}>
+          <FaGithub size={15} />
+          GitHub
+        </button>
+      </div>
+
+      <div className="sp-footnote">
+        New to Sparrow? <Link href="/sign-up">Create an account</Link>
+      </div>
+    </AuthFrame>
   );
 }
