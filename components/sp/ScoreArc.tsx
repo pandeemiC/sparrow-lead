@@ -126,7 +126,7 @@ export default function ScoreArc({
         {score ?? "–"}
       </b>
       {dial && (
-        <small className="absolute bottom-px left-1/2 -translate-x-1/2 rounded-full border border-[color-mix(in_oklab,var(--dc)_35%,transparent)] bg-[#120a0b] px-1.5 py-[3px] font-mono text-[8.5px] leading-none font-semibold tracking-[0.18em] text-(--dc)">
+        <small className="absolute bottom-px left-1/2 -translate-x-1/2 rounded-full border border-[color-mix(in_oklab,var(--dc)_35%,transparent)] bg-[#120a0b] px-1.5 py-0.75 font-mono text-[8.5px] leading-none font-semibold tracking-[0.18em] text-(--dc)">
           {scoreLabel(score)}
         </small>
       )}

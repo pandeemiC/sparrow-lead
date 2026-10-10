@@ -82,7 +82,7 @@ export default function AuthFrame({
     >
       <AuroraBackground />
       <div className="relative z-2 grid min-h-screen grid-rows-[auto_1fr_auto]">
-        <header className="flex items-center justify-between px-8 py-6 max-[980px]:px-[22px] max-[980px]:py-5">
+        <header className="flex items-center justify-between px-8 py-6 max-[980px]:px-5.5 max-[980px]:py-5">
           <Link
             href="/"
             className="flex items-center gap-2.5 font-mono text-xs leading-[normal] font-normal tracking-[0.18em] text-white/62 uppercase"
@@ -113,7 +113,7 @@ export default function AuthFrame({
 
         <main
           className={cn(
-            "mx-auto grid w-full max-w-[1440px] items-center gap-12 px-16 py-6 max-[980px]:px-[22px] max-[980px]:pt-3 max-[980px]:pb-8",
+            "mx-auto grid w-full max-w-360 items-center gap-12 px-16 py-6 max-[980px]:px-5.5 max-[980px]:pt-3 max-[980px]:pb-8",
             lede
               ? "grid-cols-[1.15fr_0.85fr] max-[980px]:grid-cols-[minmax(0,1fr)]"
               : "grid-cols-[minmax(0,560px)] justify-center",
@@ -137,7 +137,7 @@ export default function AuthFrame({
                 {lede.body}
               </p>
               {lede.facts && (
-                <div className="mt-11 flex max-w-[540px] flex-wrap gap-10 border-t border-white/12 pt-6 max-[980px]:hidden">
+                <div className="mt-11 flex max-w-135 flex-wrap gap-10 border-t border-white/12 pt-6 max-[980px]:hidden">
                   {lede.facts.map((f) => (
                     <div data-fade key={f.label}>
                       <div className="font-display text-[26px] leading-none font-normal">
@@ -156,7 +156,7 @@ export default function AuthFrame({
             data-glass
             className="rounded-3xl bg-linear-to-b from-white/18 via-white/2 to-black/20 p-px shadow-[0_24px_80px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.06)]"
           >
-            <div className="rounded-[23px] bg-[rgba(20,4,8,0.45)] px-9 pt-9 pb-[30px] backdrop-blur-[18px] backdrop-saturate-130 max-[560px]:px-5 max-[560px]:pt-[26px] max-[560px]:pb-[22px]">
+            <div className="rounded-[23px] bg-[rgba(20,4,8,0.45)] px-9 pt-9 pb-7.5 backdrop-blur-[18px] backdrop-saturate-130 max-[560px]:px-5 max-[560px]:pt-6.5 max-[560px]:pb-5.5">
               {children}
             </div>
           </section>

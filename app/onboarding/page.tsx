@@ -103,7 +103,7 @@ export default function OnboardingPage() {
         body: "Your answers go straight into the AI that scores every post, so it can tell a real buyer from background noise. You can change them later in Settings.",
       }}
     >
-      <div className="mb-[26px] flex items-center gap-2">
+      <div className="mb-6.5 flex items-center gap-2">
         {[1, 2, 3].map((s) => (
           <i
             key={s}
@@ -136,7 +136,7 @@ export default function OnboardingPage() {
                   key={value}
                   type="button"
                   className={cn(
-                    "flex items-center gap-2.5 rounded-xl border border-white/10 bg-black/20 px-3.5 py-[13px] text-left font-body text-[13px] leading-[normal] font-normal text-white/60 transition-all duration-150 hover:border-white/22 hover:text-white",
+                    "flex items-center gap-2.5 rounded-xl border border-white/10 bg-black/20 px-3.5 py-3.25 text-left font-body text-[13px] leading-[normal] font-normal text-white/60 transition-all duration-150 hover:border-white/22 hover:text-white",
                     role === value &&
                       "border-r1/55 bg-r1/12 text-white shadow-[0_0_0_4px_rgba(255,36,56,0.08)] hover:border-r1/55",
                   )}

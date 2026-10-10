@@ -8,9 +8,7 @@ import { Card, GhostButton, Switch } from "@/components/sp/ui";
 
 // data-card is what the settings layout animates in
 export function SettingsCard({ className, ...props }: ComponentProps<"div">) {
-  return (
-    <Card data-card className={cn("px-6 py-[22px]", className)} {...props} />
-  );
+  return <Card data-card className={cn("px-6 py-5.5", className)} {...props} />;
 }
 
 export function Toggle({
@@ -71,7 +69,7 @@ export function Select({
       <GhostButton
         type="button"
         onClick={() => setOpen(!open)}
-        className="min-w-[150px] justify-between text-ink"
+        className="min-w-37.5 justify-between text-ink"
       >
         <span>{selected?.label ?? "Select…"}</span>
         <ChevronDown

@@ -14,7 +14,7 @@ export function GlassHead({
   titleClassName?: string;
 }) {
   return (
-    <div className="mb-[26px] flex items-baseline justify-between">
+    <div className="mb-6.5 flex items-baseline justify-between">
       <div
         className={cn(
           "font-display text-[30px] leading-none font-normal tracking-[-0.01em]",
@@ -39,7 +39,7 @@ export function AuthError({ children }: { children: React.ReactNode }) {
 }
 
 const inputClass =
-  "w-full rounded-xl border border-white/12 bg-black/25 px-3.5 py-[13px] font-body text-[14.5px] leading-[normal] font-light text-white outline-0 transition-[border-color,box-shadow,background-color] duration-150 placeholder:text-white/28 focus:border-r1/55 focus:bg-black/32 focus:shadow-[0_0_0_4px_rgba(255,36,56,0.1)]";
+  "w-full rounded-xl border border-white/12 bg-black/25 px-3.5 py-3.25 font-body text-[14.5px] leading-[normal] font-light text-white outline-0 transition-[border-color,box-shadow,background-color] duration-150 placeholder:text-white/28 focus:border-r1/55 focus:bg-black/32 focus:shadow-[0_0_0_4px_rgba(255,36,56,0.1)]";
 
 export function Field({
   label,
@@ -54,7 +54,7 @@ export function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative mb-[18px]">
+    <div className="relative mb-4.5">
       {label && (
         <label
           htmlFor={htmlFor}
@@ -68,7 +68,7 @@ export function Field({
         <button
           type="button"
           onClick={reveal.onToggle}
-          className="absolute right-2.5 bottom-[9px] border-0 bg-transparent p-1.5 font-mono text-[10px] leading-[normal] font-normal tracking-[0.14em] text-white/50 uppercase hover:text-white"
+          className="absolute right-2.5 bottom-2.25 border-0 bg-transparent p-1.5 font-mono text-[10px] leading-[normal] font-normal tracking-[0.14em] text-white/50 uppercase hover:text-white"
         >
           {reveal.shown ? "Hide" : "Show"}
         </button>
@@ -136,7 +136,7 @@ export function ButtonRow({ className, ...props }: ComponentProps<"div">) {
 
 export function Divider({ children }: { children: React.ReactNode }) {
   return (
-    <div className="my-[22px] flex items-center gap-3.5 font-mono text-[10px] leading-[normal] font-normal tracking-[0.2em] text-white/35 uppercase before:h-px before:flex-1 before:bg-white/12 after:h-px after:flex-1 after:bg-white/12">
+    <div className="my-5.5 flex items-center gap-3.5 font-mono text-[10px] leading-[normal] font-normal tracking-[0.2em] text-white/35 uppercase before:h-px before:flex-1 before:bg-white/12 after:h-px after:flex-1 after:bg-white/12">
       {children}
     </div>
   );
@@ -171,7 +171,7 @@ function GoogleIcon() {
 }
 
 const ssoButtonClass =
-  "flex h-11 items-center justify-center gap-[9px] rounded-xl border border-white/12 bg-white/4 font-body text-[13px] leading-[normal] font-normal text-white transition-all duration-150 not-disabled:hover:border-white/25 not-disabled:hover:bg-white/7";
+  "flex h-11 items-center justify-center gap-2.25 rounded-xl border border-white/12 bg-white/4 font-body text-[13px] leading-[normal] font-normal text-white transition-all duration-150 not-disabled:hover:border-white/25 not-disabled:hover:bg-white/7";
 
 export function SsoButtons({
   onSelect,
@@ -202,7 +202,7 @@ export function SsoButtons({
 
 export function Footnote({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mt-[22px] text-center text-[13px] text-white/50 [&_a]:border-b [&_a]:border-white/30 [&_a]:text-white [&_a:hover]:border-r1">
+    <div className="mt-5.5 text-center text-[13px] text-white/50 [&_a]:border-b [&_a]:border-white/30 [&_a]:text-white [&_a:hover]:border-r1">
       {children}
     </div>
   );

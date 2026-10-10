@@ -33,8 +33,8 @@ function navLinkClass(active: boolean, rail: boolean) {
   return cn(
     "relative flex items-center gap-3 whitespace-nowrap rounded-[10px] text-left text-[13.5px] text-ink-2 transition-colors hover:bg-panel-2 hover:text-ink [&>svg]:flex-none",
     rail
-      ? "justify-center px-0 py-[11px] [&>svg]:size-[18px]"
-      : "px-2.5 py-[9px] [&>svg]:size-4",
+      ? "justify-center px-0 py-2.75 [&>svg]:size-4.5"
+      : "px-2.5 py-2.25 [&>svg]:size-4",
     active &&
       "bg-linear-to-r from-r1/16 to-r1/3 text-ink shadow-[inset_0_0_0_1px_rgba(255,36,56,0.22)] hover:bg-transparent [&>svg]:text-r1",
   );
@@ -57,7 +57,7 @@ function NavBadge({
       className={cn(
         "font-mono leading-[normal] font-medium",
         rail
-          ? "absolute top-[3px] right-1.5 grid h-[15px] min-w-[15px] place-items-center rounded-[9px] bg-white/8 px-[3px] text-[9px] text-ink-2"
+          ? "absolute top-0.75 right-1.5 grid h-3.75 min-w-3.75 place-items-center rounded-[9px] bg-white/8 px-0.75 text-[9px] text-ink-2"
           : "ml-auto text-[11px] text-ink-3",
         hot &&
           !rail &&
@@ -168,14 +168,14 @@ export default function DashboardShell({
             ref={sideRef}
             className={cn(
               "flex min-w-0 flex-1 flex-col overflow-hidden border-r border-line bg-[rgba(8,4,5,0.55)] backdrop-blur-md",
-              rail ? "items-center px-2.5 py-[18px]" : "px-3 py-5",
+              rail ? "items-center px-2.5 py-4.5" : "px-3 py-5",
             )}
           >
             <Link
               href="/dashboard"
               className={cn(
                 "flex items-center gap-2.5 whitespace-nowrap font-mono text-[11px] leading-[normal] font-medium tracking-[0.28em] text-ink-2",
-                rail ? "justify-center pt-0.5 pb-[22px]" : "px-2.5 pt-0.5 pb-6",
+                rail ? "justify-center pt-0.5 pb-5.5" : "px-2.5 pt-0.5 pb-6",
               )}
             >
               <Image
@@ -214,7 +214,7 @@ export default function DashboardShell({
             {rail ? (
               <div className="mx-auto my-3 w-6 border-t border-line" />
             ) : (
-              <div className="whitespace-nowrap px-2.5 pt-[22px] pb-2 font-mono text-[10px] leading-[normal] font-medium tracking-[0.2em] text-ink-3">
+              <div className="whitespace-nowrap px-2.5 pt-5.5 pb-2 font-mono text-[10px] leading-[normal] font-medium tracking-[0.2em] text-ink-3">
                 ACCOUNT
               </div>
             )}
@@ -238,7 +238,7 @@ export default function DashboardShell({
                   </span>
                 </h6>
                 <div className="mb-2.5">
-                  <div className="mb-[5px] flex justify-between text-[11.5px] text-ink-2">
+                  <div className="mb-1.25 flex justify-between text-[11.5px] text-ink-2">
                     Signals this month
                     <b className="font-mono text-[11px] leading-[normal] font-medium text-ink">
                       {signalsThisMonth} / {limits.signals}
@@ -247,7 +247,7 @@ export default function DashboardShell({
                   <Bar pct={sigPct} />
                 </div>
                 <div className="mb-2.5">
-                  <div className="mb-[5px] flex justify-between text-[11.5px] text-ink-2">
+                  <div className="mb-1.25 flex justify-between text-[11.5px] text-ink-2">
                     Keywords
                     <b className="font-mono text-[11px] leading-[normal] font-medium text-ink">
                       {keywordsTracked} / {limits.keywords}
@@ -328,7 +328,7 @@ export default function DashboardShell({
         </div>
 
         <main className="relative z-1 flex min-h-0 min-w-0 flex-col overflow-hidden">
-          <div className="flex h-[60px] flex-none items-center gap-4 border-b border-line px-7 max-[760px]:px-3.5">
+          <div className="flex h-15 flex-none items-center gap-4 border-b border-line px-7 max-[760px]:px-3.5">
             <div className="flex gap-2 text-[13px] text-ink-3">
               {crumb !== "Dashboard" && (
                 <>

@@ -35,7 +35,7 @@ type Row = Keyword & { paused: boolean };
 
 // table columns, sources + avg intent drop off on smaller screens
 const tableCols =
-  "grid grid-cols-[minmax(0,1.6fr)_88px_150px_120px_70px_90px] items-center gap-3 px-[18px] max-[1180px]:grid-cols-[minmax(180px,1fr)_124px_50px_92px]";
+  "grid grid-cols-[minmax(0,1.6fr)_88px_150px_120px_70px_90px] items-center gap-3 px-4.5 max-[1180px]:grid-cols-[minmax(180px,1fr)_124px_50px_92px]";
 
 const SCORE_BOX = {
   hi: "bg-r1/14 text-r1 shadow-[inset_0_0_0_1px_rgba(255,36,56,0.3)]",
@@ -68,7 +68,7 @@ function HelpStep({
         {n}
       </div>
       <div>
-        <h4 className="mt-[3px] mb-0.5 text-[13.5px] font-medium">{title}</h4>
+        <h4 className="mt-0.75 mb-0.5 text-[13.5px] font-medium">{title}</h4>
         <p className="m-0 text-[12.5px] leading-[1.45] text-pretty text-ink-3">
           {children}
         </p>
@@ -486,7 +486,7 @@ export default function KeywordsPage() {
           </span>
           <button
             className={cn(
-              "grid size-[22px] place-items-center rounded-full border border-line-2 bg-panel-2 p-0 font-mono text-[11px] leading-[normal] font-medium text-ink-2 transition-colors hover:border-r1 hover:bg-r1/12 hover:text-ink",
+              "grid size-5.5 place-items-center rounded-full border border-line-2 bg-panel-2 p-0 font-mono text-[11px] leading-[normal] font-medium text-ink-2 transition-colors hover:border-r1 hover:bg-r1/12 hover:text-ink",
               helpOpen && "border-r1 bg-r1/12 text-ink",
             )}
             onClick={() => setHelpOpen((v) => !v)}
@@ -499,7 +499,7 @@ export default function KeywordsPage() {
             <div
               data-pop
               role="dialog"
-              className="absolute top-[calc(100%+12px)] left-0 z-20 w-[340px] origin-top-left rounded-2xl border border-line-2 bg-[rgba(22,11,13,0.96)] p-1.5 shadow-[0_24px_60px_rgba(0,0,0,0.5)] backdrop-blur-lg"
+              className="absolute top-[calc(100%+12px)] left-0 z-20 w-85 origin-top-left rounded-2xl border border-line-2 bg-[rgba(22,11,13,0.96)] p-1.5 shadow-[0_24px_60px_rgba(0,0,0,0.5)] backdrop-blur-lg"
             >
               <h5 className="m-0 px-3 pt-2.5 pb-1 font-mono text-[10.5px] leading-[normal] font-medium tracking-[0.16em] text-ink-3">
                 HOW KEYWORDS WORK
@@ -542,7 +542,7 @@ export default function KeywordsPage() {
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addKeyword()}
             placeholder="Add a phrase buyers would type — e.g. “looking for a web designer”"
-            className="min-w-[180px] flex-1 border-0 bg-transparent text-[14.5px] text-ink outline-0 placeholder:text-ink-3"
+            className="min-w-45 flex-1 border-0 bg-transparent text-[14.5px] text-ink outline-0 placeholder:text-ink-3"
           />
           <div className="flex gap-1.5">
             {PLATFORMS.map((p) => {
@@ -662,7 +662,7 @@ export default function KeywordsPage() {
                 </div>
                 <div
                   className={cn(
-                    "flex items-center gap-2.5 [&_svg]:h-7 [&_svg]:w-[92px] [&_svg]:overflow-visible",
+                    "flex items-center gap-2.5 [&_svg]:h-7 [&_svg]:w-23 [&_svg]:overflow-visible",
                     dim,
                   )}
                 >
@@ -680,10 +680,10 @@ export default function KeywordsPage() {
                 >
                   <Bar
                     pct={s.avg * 10}
-                    className="h-[5px] flex-1"
+                    className="h-1.25 flex-1"
                     fillStyle={{ background: intentColor(s.avg) }}
                   />
-                  <span className="w-[26px] text-right font-mono text-[12px] leading-[normal] font-medium">
+                  <span className="w-6.5 text-right font-mono text-[12px] leading-[normal] font-medium">
                     {s.avg ? s.avg.toFixed(1) : "–"}
                   </span>
                 </div>
@@ -728,8 +728,8 @@ export default function KeywordsPage() {
                   className="overflow-hidden border-b border-line bg-linear-to-b from-r1/5 to-white/0 to-70%"
                   ref={xpRef}
                 >
-                  <div className="mx-[18px] mb-[18px] grid grid-cols-[280px_minmax(0,1fr)] rounded-[14px] border border-line bg-[rgba(10,5,6,0.55)] max-[1180px]:grid-cols-1">
-                    <div className="flex flex-col gap-[22px] border-r border-line p-[18px] max-[1180px]:border-r-0 max-[1180px]:border-b">
+                  <div className="mx-4.5 mb-4.5 grid grid-cols-[280px_minmax(0,1fr)] rounded-[14px] border border-line bg-[rgba(10,5,6,0.55)] max-[1180px]:grid-cols-1">
+                    <div className="flex flex-col gap-5.5 border-r border-line p-4.5 max-[1180px]:border-r-0 max-[1180px]:border-b">
                       <div className="grid grid-cols-3 gap-2.5 [&_b]:mb-1 [&_b]:block [&_b]:font-mono [&_b]:text-[22px] [&_b]:leading-[1.1] [&_b]:font-medium [&_small]:text-[11px] [&_small]:text-ink-3">
                         <div data-fade>
                           <b>
@@ -866,7 +866,7 @@ export default function KeywordsPage() {
                             >
                               <div
                                 className={cn(
-                                  "grid size-[34px] place-items-center rounded-[10px] font-mono text-[13px] leading-[normal] font-medium",
+                                  "grid size-8.5 place-items-center rounded-[10px] font-mono text-[13px] leading-[normal] font-medium",
                                   SCORE_BOX[scoreTier(m.score)],
                                 )}
                               >
@@ -886,7 +886,7 @@ export default function KeywordsPage() {
                                   {shortAgo(m.createdAt)} ago
                                   <button
                                     className={cn(
-                                      "ml-auto rounded-full border border-line-2 bg-transparent px-[9px] py-px text-[11.5px] text-ink-2 not-disabled:hover:border-r1 not-disabled:hover:text-ink",
+                                      "ml-auto rounded-full border border-line-2 bg-transparent px-2.25 py-px text-[11.5px] text-ink-2 not-disabled:hover:border-r1 not-disabled:hover:text-ink",
                                       onBoard &&
                                         "border-green/40 text-[#7be3a0]",
                                     )}

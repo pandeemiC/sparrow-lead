@@ -29,7 +29,7 @@ export default function SettingsLayout({
   );
 
   return (
-    <div className="grid max-w-[1080px] grid-cols-1 items-start gap-7 min-[861px]:grid-cols-[220px_minmax(0,1fr)]">
+    <div className="grid max-w-270 grid-cols-1 items-start gap-7 min-[861px]:grid-cols-[220px_minmax(0,1fr)]">
       <nav className="flex flex-row flex-wrap gap-0.5 rounded-2xl border border-line bg-panel p-2 min-[861px]:sticky min-[861px]:top-0 min-[861px]:flex-col">
         {settingsItems.map(({ label, href, icon: Icon }) => {
           const active = pathname === href;
@@ -44,7 +44,7 @@ export default function SettingsLayout({
               )}
             >
               <Icon
-                className={cn("size-[15px] flex-none", active && "text-r1")}
+                className={cn("size-3.75 flex-none", active && "text-r1")}
               />
               {label}
             </Link>
@@ -52,7 +52,7 @@ export default function SettingsLayout({
         })}
       </nav>
       <div ref={contentRef}>
-        <h1 className="mt-1 mb-[22px] font-display text-[clamp(28px,2.6vw,38px)] leading-none tracking-[-0.02em]">
+        <h1 className="mt-1 mb-5.5 font-display text-[clamp(28px,2.6vw,38px)] leading-none tracking-[-0.02em]">
           {current?.label ?? "Settings"}
         </h1>
         {children}

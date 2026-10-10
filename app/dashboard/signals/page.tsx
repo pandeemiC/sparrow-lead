@@ -93,7 +93,7 @@ function FilterOption({
     <button
       onClick={onClick}
       className={cn(
-        "flex w-full items-center gap-[9px] rounded-lg border-0 bg-transparent px-2 py-[7px] text-left text-[13px] text-ink-2 transition-colors hover:bg-panel-2 hover:text-ink",
+        "flex w-full items-center gap-2.25 rounded-lg border-0 bg-transparent px-2 py-1.75 text-left text-[13px] text-ink-2 transition-colors hover:bg-panel-2 hover:text-ink",
         active &&
           "bg-r1/10 text-ink shadow-[inset_0_0_0_1px_rgba(255,36,56,0.22)] hover:bg-r1/10",
         zero && "opacity-40",
@@ -219,7 +219,7 @@ function SignalCard({
   return (
     <article
       ref={ref}
-      className="group relative overflow-hidden rounded-[18px] border border-line bg-linear-to-b from-white/3.5 to-white/1.5 px-[22px] pt-5 pb-[18px] transition-[border-color,background-color] duration-200 hover:border-line-2 [&>*:not([data-wm])]:relative before:pointer-events-none before:absolute before:-top-[100px] before:-left-[90px] before:size-[300px] before:rounded-full before:bg-[radial-gradient(circle,color-mix(in_oklab,var(--pc)_26%,transparent)_0%,color-mix(in_oklab,var(--pc)_8%,transparent)_40%,transparent_68%)] before:opacity-85 before:[transition:opacity_0.3s,transform_0.5s] hover:before:scale-108 hover:before:opacity-100"
+      className="group relative overflow-hidden rounded-[18px] border border-line bg-linear-to-b from-white/3.5 to-white/1.5 px-5.5 pt-5 pb-4.5 transition-[border-color,background-color] duration-200 hover:border-line-2 [&>*:not([data-wm])]:relative before:pointer-events-none before:absolute before:-top-25 before:-left-22.5 before:size-75 before:rounded-full before:bg-[radial-gradient(circle,color-mix(in_oklab,var(--pc)_26%,transparent)_0%,color-mix(in_oklab,var(--pc)_8%,transparent)_40%,transparent_68%)] before:opacity-85 before:[transition:opacity_0.3s,transform_0.5s] hover:before:scale-108 hover:before:opacity-100"
       style={{ "--pc": platformVar(mention.platform) } as React.CSSProperties}
     >
       <Watermark
@@ -233,7 +233,7 @@ function SignalCard({
           gutterPad,
         )}
       >
-        <span className="inline-flex min-w-0 items-center gap-[7px] font-medium text-ink">
+        <span className="inline-flex min-w-0 items-center gap-1.75 font-medium text-ink">
           <PlatformIcon platform={mention.platform} size={15} />
           {PLATFORM_LABELS[mention.platform]}
           <span className="truncate font-normal text-ink-3">
@@ -243,7 +243,7 @@ function SignalCard({
         <span>{shortAgo(mention.createdAt)} ago</span>
         {isNew && (
           <span
-            className="size-[7px] flex-none rounded-full bg-r1 shadow-[0_0_8px_var(--r1)]"
+            className="size-1.75 flex-none rounded-full bg-r1 shadow-[0_0_8px_var(--r1)]"
             title="New since your last visit"
           />
         )}
@@ -678,7 +678,7 @@ export default function SignalsPage() {
                 onClick={() => setFilter("intent", o.value)}
               >
                 <span
-                  className="size-[7px] flex-none rounded-full"
+                  className="size-1.75 flex-none rounded-full"
                   style={{ background: o.color }}
                 />
                 <span className={optionLabel}>{o.label}</span>
@@ -744,7 +744,7 @@ export default function SignalsPage() {
           {chips.map((c) => (
             <button
               key={c.key}
-              className="inline-flex items-center gap-1.5 rounded-full border border-line-2 bg-transparent py-[3px] pr-1.5 pl-2.5 text-[12px] text-ink-2 hover:border-r1 hover:text-ink [&_svg]:size-[11px]"
+              className="inline-flex items-center gap-1.5 rounded-full border border-line-2 bg-transparent py-0.75 pr-1.5 pl-2.5 text-[12px] text-ink-2 hover:border-r1 hover:text-ink [&_svg]:size-2.75"
               onClick={() => clearChip(c.key)}
             >
               {c.label}

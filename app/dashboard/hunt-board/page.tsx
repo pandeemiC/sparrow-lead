@@ -315,7 +315,7 @@ export default function HuntBoardPage() {
   const open = leads.find((l) => l.id === openId) ?? null;
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-[18px]">
+    <div className="flex h-full min-h-0 flex-col gap-4.5">
       <div className="flex flex-wrap items-end justify-between gap-6">
         <div className="flex flex-wrap items-center gap-3 text-[13.5px] text-ink-2">
           <span>
@@ -380,7 +380,7 @@ export default function HuntBoardPage() {
                 <StageDot color={stage.color} className="size-2" />
                 <b className="text-[14px] font-medium">{stage.label}</b>
                 <small className="text-[12px] text-ink-3">{stage.hint}</small>
-                <span className="ml-auto grid h-[22px] min-w-6 place-items-center rounded-full border border-line-2 px-[7px] font-mono text-[11px] leading-[normal] font-medium text-ink-2">
+                <span className="ml-auto grid h-5.5 min-w-6 place-items-center rounded-full border border-line-2 px-1.75 font-mono text-[11px] leading-[normal] font-medium text-ink-2">
                   {leads.filter((l) => l.status === stage.key).length}
                 </span>
               </div>
@@ -391,7 +391,7 @@ export default function HuntBoardPage() {
                       key={lead.id}
                       data-lead
                       className={cn(
-                        "group relative flex-none cursor-grab overflow-hidden rounded-[14px] border border-line bg-linear-to-b from-white/4 to-white/1.5 px-3.5 pt-3.5 pb-3 transition-[border-color] duration-200 select-none hover:border-line-2 [&>*:not([data-wm])]:relative before:pointer-events-none before:absolute before:-top-[70px] before:-left-[60px] before:size-[190px] before:rounded-full before:bg-[radial-gradient(circle,color-mix(in_oklab,var(--pc)_22%,transparent),transparent_65%)]",
+                        "group relative flex-none cursor-grab overflow-hidden rounded-[14px] border border-line bg-linear-to-b from-white/4 to-white/1.5 px-3.5 pt-3.5 pb-3 transition-[border-color] duration-200 select-none hover:border-line-2 [&>*:not([data-wm])]:relative before:pointer-events-none before:absolute before:-top-17.5 before:-left-15 before:size-47.5 before:rounded-full before:bg-[radial-gradient(circle,color-mix(in_oklab,var(--pc)_22%,transparent),transparent_65%)]",
                         dragId === lead.id && "opacity-35",
                       )}
                       data-flip-id={lead.id}
@@ -414,9 +414,9 @@ export default function HuntBoardPage() {
                     >
                       <Watermark
                         platform={lead.platform}
-                        className="-top-[26px] -left-[22px] size-[104px] opacity-11 drop-shadow-[0_0_10px_currentColor] group-hover:opacity-16 group-hover:[transform:rotate(-12deg)_scale(1.04)]"
+                        className="-top-6.5 -left-5.5 size-26 opacity-11 drop-shadow-[0_0_10px_currentColor] group-hover:opacity-16 group-hover:[transform:rotate(-12deg)_scale(1.04)]"
                       />
-                      <div className="flex min-h-[34px] items-center gap-2 pl-[34px] text-[12px] text-ink-3">
+                      <div className="flex min-h-8.5 items-center gap-2 pl-8.5 text-[12px] text-ink-3">
                         <span className="min-w-0 truncate text-ink-2">
                           {PLATFORM_LABELS[lead.platform]} · {lead.source}
                         </span>
@@ -429,7 +429,7 @@ export default function HuntBoardPage() {
                         {lead.keyword}
                       </KwTag>
                       {lead.notes && (
-                        <div className="mt-2.5 flex items-start gap-1.5 text-[12px] leading-[1.45] text-ink-2 [&_svg]:mt-[3px] [&_svg]:size-3 [&_svg]:flex-none [&_svg]:text-ink-3">
+                        <div className="mt-2.5 flex items-start gap-1.5 text-[12px] leading-[1.45] text-ink-2 [&_svg]:mt-0.75 [&_svg]:size-3 [&_svg]:flex-none [&_svg]:text-ink-3">
                           <StickyNote />
                           <span>{lead.notes}</span>
                         </div>
@@ -438,7 +438,7 @@ export default function HuntBoardPage() {
                         <span>found {shortAgo(lead.createdAt)} ago</span>
                         {next ? (
                           <button
-                            className="ml-auto inline-flex h-[26px] items-center gap-[5px] rounded-full border border-line-2 bg-transparent px-2.5 text-[11.5px] whitespace-nowrap text-ink-2 transition-all duration-150 hover:border-[color-mix(in_oklab,var(--nc)_70%,transparent)] hover:bg-[color-mix(in_oklab,var(--nc)_10%,transparent)] hover:text-ink [&_svg]:size-[11px]"
+                            className="ml-auto inline-flex h-6.5 items-center gap-1.25 rounded-full border border-line-2 bg-transparent px-2.5 text-[11.5px] whitespace-nowrap text-ink-2 transition-all duration-150 hover:border-[color-mix(in_oklab,var(--nc)_70%,transparent)] hover:bg-[color-mix(in_oklab,var(--nc)_10%,transparent)] hover:text-ink [&_svg]:size-2.75"
                             style={
                               { "--nc": next.color } as React.CSSProperties
                             }
@@ -451,7 +451,7 @@ export default function HuntBoardPage() {
                             <ArrowRight />
                           </button>
                         ) : (
-                          <span className="ml-auto inline-flex items-center gap-[5px] font-mono text-[10.5px] leading-[normal] font-medium tracking-[0.12em] text-[#7be3a0] [&_svg]:size-3">
+                          <span className="ml-auto inline-flex items-center gap-1.25 font-mono text-[10.5px] leading-[normal] font-medium tracking-[0.12em] text-[#7be3a0] [&_svg]:size-3">
                             <Check />
                             HUNTED
                           </span>
@@ -460,7 +460,7 @@ export default function HuntBoardPage() {
                     </article>
                   ))
                 ) : (
-                  <div className="grid min-h-[140px] flex-1 place-items-center rounded-[14px] border border-dashed border-line-2 p-[18px] text-center text-[12.5px] text-ink-3 [&_svg]:mx-auto [&_svg]:mb-2 [&_svg]:block [&_svg]:size-[22px] [&_svg]:opacity-60">
+                  <div className="grid min-h-35 flex-1 place-items-center rounded-[14px] border border-dashed border-line-2 p-4.5 text-center text-[12.5px] text-ink-3 [&_svg]:mx-auto [&_svg]:mb-2 [&_svg]:block [&_svg]:size-5.5 [&_svg]:opacity-60">
                     <div>
                       <Target />
                       {platform !== "all" ? "No matching leads" : stage.empty}
@@ -487,12 +487,12 @@ export default function HuntBoardPage() {
               { "--pc": platformVar(open.platform) } as React.CSSProperties
             }
           >
-            <div className="relative overflow-hidden border-b border-line px-5 pt-5 pb-4 [&>*:not([data-wm])]:relative before:pointer-events-none before:absolute before:-top-[90px] before:-left-20 before:size-[260px] before:rounded-full before:bg-[radial-gradient(circle,color-mix(in_oklab,var(--pc)_22%,transparent),transparent_65%)]">
+            <div className="relative overflow-hidden border-b border-line px-5 pt-5 pb-4 [&>*:not([data-wm])]:relative before:pointer-events-none before:absolute before:-top-22.5 before:-left-20 before:size-65 before:rounded-full before:bg-[radial-gradient(circle,color-mix(in_oklab,var(--pc)_22%,transparent),transparent_65%)]">
               <Watermark
                 platform={open.platform}
-                className="-top-9 -left-[30px] size-[150px]"
+                className="-top-9 -left-7.5 size-37.5"
               />
-              <div className="flex min-h-8 items-center gap-2 pl-[46px] text-[12.5px] text-ink-3">
+              <div className="flex min-h-8 items-center gap-2 pl-11.5 text-[12.5px] text-ink-3">
                 <span>
                   {PLATFORM_LABELS[open.platform]} · {open.source}
                 </span>
@@ -511,18 +511,18 @@ export default function HuntBoardPage() {
             </div>
             <div
               data-drawer-body
-              className="flex flex-1 flex-col gap-5 overflow-y-auto px-5 py-[18px]"
+              className="flex flex-1 flex-col gap-5 overflow-y-auto px-5 py-4.5"
             >
               <div>
                 <Label className="mb-2">Stage</Label>
-                <div className="grid grid-cols-4 gap-1 rounded-xl border border-line bg-white/4 p-[3px]">
+                <div className="grid grid-cols-4 gap-1 rounded-xl border border-line bg-white/4 p-0.75">
                   {STAGES.map((s) => {
                     const on = open.status === s.key;
                     return (
                       <button
                         key={s.key}
                         className={cn(
-                          "flex flex-col items-center gap-[5px] rounded-[9px] border-0 bg-transparent px-1 py-2 text-[12px] text-ink-3",
+                          "flex flex-col items-center gap-1.25 rounded-[9px] border-0 bg-transparent px-1 py-2 text-[12px] text-ink-3",
                           on &&
                             "bg-[color-mix(in_oklab,var(--sc)_14%,transparent)] text-ink shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--sc)_40%,transparent)]",
                         )}
@@ -531,7 +531,7 @@ export default function HuntBoardPage() {
                       >
                         <i
                           className={cn(
-                            "size-[7px] rounded-full bg-(--sc) opacity-40",
+                            "size-1.75 rounded-full bg-(--sc) opacity-40",
                             on && "opacity-100 shadow-[0_0_8px_var(--sc)]",
                           )}
                         />

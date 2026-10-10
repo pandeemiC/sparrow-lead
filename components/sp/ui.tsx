@@ -32,10 +32,10 @@ export function buttonClass({
 }: ButtonOptions = {}) {
   return cn(
     "inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-line-2 bg-panel-2 px-4 text-[13px] font-medium transition-all",
-    "not-disabled:hover:border-white/28 not-disabled:hover:bg-white/7 disabled:opacity-40 [&_svg]:size-[15px]",
+    "not-disabled:hover:border-white/28 not-disabled:hover:bg-white/7 disabled:opacity-40 [&_svg]:size-3.75",
     variant === "primary" &&
       "border-0 bg-linear-to-b from-r1 to-r2 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_6px_20px_rgba(255,36,56,0.3)] not-disabled:hover:brightness-108",
-    size === "sm" && "h-8 px-[13px] text-[12.5px]",
+    size === "sm" && "h-8 px-3.25 text-[12.5px]",
     spinning && "[&_svg]:animate-spin",
   );
 }
@@ -66,7 +66,7 @@ type GhostTone = keyof typeof ghostTones;
 // exported so an <a> can look like a ghost button too
 export function ghostClass(tone: GhostTone = "default") {
   return cn(
-    "inline-flex h-8 items-center gap-[7px] whitespace-nowrap rounded-full border border-line-2 bg-transparent px-3 text-[12.5px] text-ink-2 transition-all",
+    "inline-flex h-8 items-center gap-1.75 whitespace-nowrap rounded-full border border-line-2 bg-transparent px-3 text-[12.5px] text-ink-2 transition-all",
     "not-disabled:hover:border-white/30 not-disabled:hover:text-ink disabled:cursor-not-allowed disabled:opacity-35 [&_svg]:size-3.5",
     ghostTones[tone],
   );
@@ -98,7 +98,7 @@ export function Seg({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       className={cn(
-        "flex rounded-full border border-line bg-white/5 p-[3px]",
+        "flex rounded-full border border-line bg-white/5 p-0.75",
         className,
       )}
       {...props}
@@ -114,7 +114,7 @@ export function SegButton({
   return (
     <button
       className={cn(
-        "flex items-center gap-1.5 rounded-full border-0 bg-transparent px-3 py-[5px] text-[12px] text-ink-3 [&_svg]:size-[13px]",
+        "flex items-center gap-1.5 rounded-full border-0 bg-transparent px-3 py-1.25 text-[12px] text-ink-3 [&_svg]:size-3.25",
         active && "bg-white/10 text-ink",
         className,
       )}
@@ -140,7 +140,7 @@ export function SectionTitle({ className, ...props }: ComponentProps<"h2">) {
   return (
     <h2
       className={cn(
-        "mb-[18px] font-mono text-[10px] leading-[normal] font-medium tracking-[0.18em] text-ink-3 uppercase",
+        "mb-4.5 font-mono text-[10px] leading-[normal] font-medium tracking-[0.18em] text-ink-3 uppercase",
         className,
       )}
       {...props}
@@ -153,7 +153,7 @@ export function KwTag({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
       className={cn(
-        "max-w-[220px] truncate rounded-full border border-line bg-black/25 px-[9px] py-0.5 font-mono text-[10.5px] leading-[normal] font-medium text-ink-2",
+        "max-w-55 truncate rounded-full border border-line bg-black/25 px-2.25 py-0.5 font-mono text-[10.5px] leading-[normal] font-medium text-ink-2",
         className,
       )}
       {...props}
@@ -180,7 +180,7 @@ export function CardHead({
   more?: { href: string; label: string };
 }) {
   return (
-    <div className="flex items-center gap-2.5 px-[18px] pt-4 pb-3">
+    <div className="flex items-center gap-2.5 px-4.5 pt-4 pb-3">
       <b className="text-[14px] font-medium">{title}</b>
       {meta && (
         <span className="font-mono text-[11px] leading-[normal] font-medium text-ink-3">
@@ -190,7 +190,7 @@ export function CardHead({
       {more && (
         <Link
           href={more.href}
-          className="ml-auto flex items-center gap-[5px] text-[12.5px] text-ink-3 transition-colors hover:text-ink"
+          className="ml-auto flex items-center gap-1.25 text-[12.5px] text-ink-3 transition-colors hover:text-ink"
         >
           {more.label} <ArrowUpRight className="size-3" />
         </Link>
@@ -222,7 +222,7 @@ export function StageDot({
   return (
     <span
       className={cn(
-        "size-[7px] flex-none rounded-full bg-(--sc) shadow-[0_0_8px_color-mix(in_oklab,var(--sc)_70%,transparent)]",
+        "size-1.75 flex-none rounded-full bg-(--sc) shadow-[0_0_8px_color-mix(in_oklab,var(--sc)_70%,transparent)]",
         className,
       )}
       style={{ "--sc": color } as React.CSSProperties}
@@ -244,7 +244,7 @@ export function Watermark({
     <div
       data-wm
       className={cn(
-        "pointer-events-none absolute -top-[38px] -left-[34px] size-[168px] text-(--pc) opacity-12 drop-shadow-[0_0_14px_currentColor] [transform:rotate(-16deg)] [transition:opacity_0.3s,transform_0.5s_cubic-bezier(0.2,0.8,0.2,1)] [&_svg]:size-full",
+        "pointer-events-none absolute -top-9.5 -left-8.5 size-42 text-(--pc) opacity-12 drop-shadow-[0_0_14px_currentColor] [transform:rotate(-16deg)] [transition:opacity_0.3s,transform_0.5s_cubic-bezier(0.2,0.8,0.2,1)] [&_svg]:size-full",
         className,
       )}
     >
@@ -291,7 +291,7 @@ export function Switch({
       role="switch"
       aria-checked={on}
       className={cn(
-        "relative h-[18px] w-8 flex-none rounded-full border-0 bg-white/14 p-0 transition-colors duration-200",
+        "relative h-4.5 w-8 flex-none rounded-full border-0 bg-white/14 p-0 transition-colors duration-200",
         on && "bg-r1",
         className,
       )}

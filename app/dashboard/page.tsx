@@ -67,7 +67,7 @@ const kpiUnitClass =
   "font-mono text-xs leading-[normal] font-medium text-ink-3 not-italic";
 const kpiFootClass = "mt-2.5 truncate text-[12px] text-ink-3";
 const rowClass =
-  "relative grid h-[52px] grid-cols-[22px_minmax(0,1fr)_auto_28px_40px] items-center gap-3 overflow-hidden border-b border-line px-[18px] transition-colors last:border-b-0 hover:bg-white/2.5 *:relative @max-[640px]:grid-cols-[22px_minmax(0,1fr)_28px_36px] before:pointer-events-none before:absolute before:top-1/2 before:-left-[30px] before:size-[90px] before:-translate-y-1/2 before:rounded-full before:bg-[radial-gradient(circle,color-mix(in_oklab,var(--pc)_16%,transparent),transparent_65%)]";
+  "relative grid h-13 grid-cols-[22px_minmax(0,1fr)_auto_28px_40px] items-center gap-3 overflow-hidden border-b border-line px-4.5 transition-colors last:border-b-0 hover:bg-white/2.5 *:relative @max-[640px]:grid-cols-[22px_minmax(0,1fr)_28px_36px] before:pointer-events-none before:absolute before:top-1/2 before:-left-7.5 before:size-22.5 before:-translate-y-1/2 before:rounded-full before:bg-[radial-gradient(circle,color-mix(in_oklab,var(--pc)_16%,transparent),transparent_65%)]";
 const thresholdClass =
   "absolute top-full -right-16 -translate-y-1/2 whitespace-nowrap font-mono text-[9.5px] leading-[normal] font-medium tracking-[0.14em]";
 
@@ -80,7 +80,7 @@ function IconBox({
   return (
     <span
       className={cn(
-        "grid size-[18px] place-items-center text-(--pc) [&_svg]:size-full",
+        "grid size-4.5 place-items-center text-(--pc) [&_svg]:size-full",
         className,
       )}
       {...props}
@@ -470,7 +470,7 @@ export default function DashboardPage() {
               <i
                 className={cn(
                   kpiUnitClass,
-                  "rounded-full px-[7px] py-0.5",
+                  "rounded-full px-1.75 py-0.5",
                   data.delta > 0
                     ? "bg-green/10 text-[#7be3a0]"
                     : "bg-white/6 text-ink-3",
@@ -523,7 +523,7 @@ export default function DashboardPage() {
             <i className={kpiUnitClass}>intent 8+</i>
           </div>
           {data.hotCount > 0 ? (
-            <div data-mix className="flex h-[30px] items-center gap-1.5">
+            <div data-mix className="flex h-7.5 items-center gap-1.5">
               {PLATFORMS.filter((p) => data.mix[p.value] > 0).map((p) => (
                 <span
                   key={p.value}
@@ -542,7 +542,7 @@ export default function DashboardPage() {
               ))}
             </div>
           ) : (
-            <div className="flex h-[30px] items-center text-[12px] text-ink-3">
+            <div className="flex h-7.5 items-center text-[12px] text-ink-3">
               No hot leads this week yet
             </div>
           )}
@@ -563,7 +563,7 @@ export default function DashboardPage() {
           {(stats?.sources ?? []).map((src) => (
             <div
               key={src.platform}
-              className="flex items-center gap-2.5 border-b border-line px-[18px] py-[11px] text-[13px] text-ink-2"
+              className="flex items-center gap-2.5 border-b border-line px-4.5 py-2.75 text-[13px] text-ink-2"
             >
               <IconBox className="size-4">
                 <PlatformIcon platform={src.platform} size={15} />
@@ -574,14 +574,14 @@ export default function DashboardPage() {
               </SourceStatus>
             </div>
           ))}
-          <div className="flex items-center gap-2.5 px-[18px] py-[11px] text-[13px] text-ink-2">
+          <div className="flex items-center gap-2.5 px-4.5 py-2.75 text-[13px] text-ink-2">
             <IconBox className="size-4 text-r1">
               <Sparkles size={15} />
             </IconBox>
             AI intent scoring<SourceStatus on>ON</SourceStatus>
           </div>
         </div>
-        <div className="mt-auto border-t border-line px-[18px] pt-4 pb-[18px]">
+        <div className="mt-auto border-t border-line px-4.5 pt-4 pb-4.5">
           <div className="mb-3 flex justify-between text-[12px] text-ink-3">
             <span>Last scan</span>
             <b className="font-mono text-xs leading-[normal] font-medium text-ink-2">
@@ -647,7 +647,7 @@ export default function DashboardPage() {
         />
         <div
           data-pipe
-          className="mx-[18px] mb-4 flex h-1.5 gap-[3px] overflow-hidden rounded-[9px]"
+          className="mx-4.5 mb-4 flex h-1.5 gap-0.75 overflow-hidden rounded-[9px]"
         >
           {huntSum > 0 ? (
             STAGES.map((s) =>
@@ -671,7 +671,7 @@ export default function DashboardPage() {
             <Link
               key={s.key}
               href="/dashboard/hunt-board"
-              className="flex items-center gap-2.5 border-b border-line px-[18px] py-3.5 text-[13px] text-ink-2 transition-colors odd:border-r hover:bg-white/2.5 hover:text-ink [&:nth-last-child(-n+2)]:border-b-0"
+              className="flex items-center gap-2.5 border-b border-line px-4.5 py-3.5 text-[13px] text-ink-2 transition-colors odd:border-r hover:bg-white/2.5 hover:text-ink [&:nth-last-child(-n+2)]:border-b-0"
             >
               <StageDot color={s.color} />
               {s.label}
@@ -681,7 +681,7 @@ export default function DashboardPage() {
             </Link>
           ))}
         </div>
-        <div className="mt-auto border-t border-line px-[18px] py-3.5">
+        <div className="mt-auto border-t border-line px-4.5 py-3.5">
           <Label className="mb-2">FOLLOW UP</Label>
           {data.followUp ? (
             <Link
@@ -710,13 +710,10 @@ export default function DashboardPage() {
           meta="Higher = stronger buying intent"
           more={{ href: "/dashboard/signals", label: "All signals" }}
         />
-        <div
-          className="relative mx-4 mb-3.5 min-h-[190px] flex-1"
-          ref={pulseRef}
-        >
+        <div className="relative mx-4 mb-3.5 min-h-47.5 flex-1" ref={pulseRef}>
           <div
             ref={plotRef}
-            className="absolute top-2.5 right-16 bottom-[26px] left-0"
+            className="absolute top-2.5 right-16 bottom-6.5 left-0"
           >
             <div
               data-line
@@ -733,7 +730,7 @@ export default function DashboardPage() {
             <div className="absolute inset-y-0 right-0 border-r border-white/14" />
             <div
               data-sweep
-              className="pointer-events-none absolute inset-y-0 -left-[120px] w-[120px] border-r border-r1/50 bg-linear-to-r from-transparent to-r1/16 opacity-0"
+              className="pointer-events-none absolute inset-y-0 -left-30 w-30 border-r border-r1/50 bg-linear-to-r from-transparent to-r1/16 opacity-0"
             />
             {data.pulse.map((m) => {
               const age = now - new Date(m.createdAt).getTime();
@@ -774,7 +771,7 @@ export default function DashboardPage() {
           </div>
           {tip && (
             <div
-              className="pointer-events-none absolute z-5 w-[280px] rounded-xl border border-line-2 bg-[rgba(20,10,12,0.96)] px-3.5 py-3 text-[12.5px] shadow-[0_16px_40px_rgba(0,0,0,0.5)]"
+              className="pointer-events-none absolute z-5 w-70 rounded-xl border border-line-2 bg-[rgba(20,10,12,0.96)] px-3.5 py-3 text-[12.5px] shadow-[0_16px_40px_rgba(0,0,0,0.5)]"
               style={{ left: tip.left, top: tip.top }}
             >
               <b className="mb-1.5 block text-[13px] leading-[1.4] font-medium">
@@ -803,7 +800,7 @@ export default function DashboardPage() {
               data-row
               data-kw-row
               className={cn(
-                "grid h-11 grid-cols-[minmax(0,1fr)_clamp(56px,28%,140px)_36px] items-center gap-3.5 border-t border-line px-[18px] text-[13px]",
+                "grid h-11 grid-cols-[minmax(0,1fr)_clamp(56px,28%,140px)_36px] items-center gap-3.5 border-t border-line px-4.5 text-[13px]",
                 !k.hits && "text-ink-3",
               )}
             >

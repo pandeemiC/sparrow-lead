@@ -82,7 +82,7 @@ export default function SSOCallback() {
           height={72}
           className="drop-shadow-[0_0_22px_rgba(210,43,43,0.65)]"
         />
-        <div className="flex gap-[3px] font-mono text-xs leading-[normal] font-medium tracking-[0.3em]">
+        <div className="flex gap-0.75 font-mono text-xs leading-[normal] font-medium tracking-[0.3em]">
           {LETTERS.map((letter, i) => (
             <motion.span
               key={i}

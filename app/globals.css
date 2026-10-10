@@ -192,7 +192,12 @@ body {
   position: fixed;
   inset: 0;
   overflow: hidden;
-  background: radial-gradient(120% 80% at 50% 110%, var(--r3) 0%, var(--r4) 55%, #160407 100%);
+  background: radial-gradient(
+    120% 80% at 50% 110%,
+    var(--r3) 0%,
+    var(--r4) 55%,
+    #160407 100%
+  );
   pointer-events: none;
 }
 .sp-aurora .blobs {
@@ -259,7 +264,12 @@ body {
 .sp-aurora .vignette {
   position: absolute;
   inset: 0;
-  background: radial-gradient(110% 80% at 50% 40%, transparent 40%, rgba(0, 0, 0, 0.35) 75%, rgba(0, 0, 0, 0.7) 100%);
+  background: radial-gradient(
+    110% 80% at 50% 40%,
+    transparent 40%,
+    rgba(0, 0, 0, 0.35) 75%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
 }
 .sp-aurora .grain {
   position: absolute;
