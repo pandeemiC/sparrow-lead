@@ -1,4 +1,6 @@
 import type { ComponentProps } from "react";
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // small building blocks shared by the dashboard pages
@@ -111,7 +113,7 @@ export function SegButton({
   return (
     <button
       className={cn(
-        "flex items-center gap-1.5 rounded-full border-0 bg-transparent px-3 py-[5px] text-xs text-ink-3 [&_svg]:size-[13px]",
+        "flex items-center gap-1.5 rounded-full border-0 bg-transparent px-3 py-[5px] text-[12px] text-ink-3 [&_svg]:size-[13px]",
         active && "bg-white/10 text-ink",
         className,
       )}
@@ -163,6 +165,58 @@ export function Loading({ children }: { children: React.ReactNode }) {
     <div className="py-10 font-mono text-[11px] leading-[normal] font-medium tracking-[0.16em] text-ink-3">
       {children}
     </div>
+  );
+}
+
+// card title row: bold title, optional mono meta and a "more" link on the right
+export function CardHead({
+  title,
+  meta,
+  more,
+}: {
+  title: string;
+  meta?: string;
+  more?: { href: string; label: string };
+}) {
+  return (
+    <div className="flex items-center gap-2.5 px-[18px] pt-4 pb-3">
+      <b className="text-[14px] font-medium">{title}</b>
+      {meta && (
+        <span className="font-mono text-[11px] leading-[normal] font-medium text-ink-3">
+          {meta}
+        </span>
+      )}
+      {more && (
+        <Link
+          href={more.href}
+          className="ml-auto flex items-center gap-[5px] text-[12.5px] text-ink-3 transition-colors hover:text-ink"
+        >
+          {more.label} <ArrowUpRight className="size-3" />
+        </Link>
+      )}
+    </div>
+  );
+}
+
+export function NoData({ className, ...props }: ComponentProps<"div">) {
+  return (
+    <div
+      className={cn(
+        "border-t border-line px-5 py-7 text-center text-[13px] text-ink-3",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+// glowing colored dot for hunt board stages
+export function StageDot({ color }: { color: string }) {
+  return (
+    <span
+      className="size-[7px] flex-none rounded-full bg-(--sc) shadow-[0_0_8px_color-mix(in_oklab,var(--sc)_70%,transparent)]"
+      style={{ "--sc": color } as React.CSSProperties}
+    />
   );
 }
 

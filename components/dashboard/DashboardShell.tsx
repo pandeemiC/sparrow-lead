@@ -240,7 +240,7 @@ export default function DashboardShell({
                 <div className="mb-2.5">
                   <div className="mb-[5px] flex justify-between text-[11.5px] text-ink-2">
                     Signals this month
-                    <b className="font-mono text-[11px] font-medium text-ink">
+                    <b className="font-mono text-[11px] leading-[normal] font-medium text-ink">
                       {signalsThisMonth} / {limits.signals}
                     </b>
                   </div>
@@ -249,7 +249,7 @@ export default function DashboardShell({
                 <div className="mb-2.5">
                   <div className="mb-[5px] flex justify-between text-[11.5px] text-ink-2">
                     Keywords
-                    <b className="font-mono text-[11px] font-medium text-ink">
+                    <b className="font-mono text-[11px] leading-[normal] font-medium text-ink">
                       {keywordsTracked} / {limits.keywords}
                     </b>
                   </div>
@@ -274,7 +274,7 @@ export default function DashboardShell({
                   : "items-center gap-2.5 px-2 pt-3.5",
               )}
             >
-              <span className="grid size-8 flex-none place-items-center overflow-hidden rounded-full bg-[radial-gradient(circle_at_30%_30%,#b58cff,#3a1e6e)] text-xs font-medium">
+              <span className="grid size-8 flex-none place-items-center overflow-hidden rounded-full bg-[radial-gradient(circle_at_30%_30%,#b58cff,#3a1e6e)] text-xs leading-[normal] font-medium">
                 {imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -345,7 +345,7 @@ export default function DashboardShell({
               Hunt
             </Link>
           </div>
-          <div className="@container/sp-body min-h-0 flex-1 overflow-auto px-[clamp(12px,1.4vw,20px)] pt-[clamp(12px,1.4vw,20px)] pb-7">
+          <div className="@container min-h-0 flex-1 overflow-auto px-[clamp(12px,1.4vw,20px)] pt-[clamp(12px,1.4vw,20px)] pb-7">
             {children}
           </div>
         </main>

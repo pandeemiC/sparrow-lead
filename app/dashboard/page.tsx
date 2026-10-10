@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowUpRight, RefreshCw, Sparkles } from "lucide-react";
+import { RefreshCw, Sparkles } from "lucide-react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import PlatformIcon from "@/components/ui/PlatformIcon";
@@ -11,12 +11,23 @@ import CountUp from "@/components/sp/CountUp";
 import { apiFetch } from "@/lib/apiFetch";
 import { toMentionRow } from "@/lib/mentions";
 import { platformVar, scoreColor, scoreTier, shortAgo } from "@/lib/score";
-import { timeAgo } from "@/lib/utils";
+import { cn, timeAgo } from "@/lib/utils";
 import { PLATFORMS, PLATFORM_LABELS } from "@/lib/constants";
 import { usePlan } from "@/components/dashboard/PlanContext";
 import { useStatsStore } from "@/store/statsStore";
 import { useScanStore } from "@/store/scanStore";
 import { useToastStore } from "@/store/toastStore";
+import {
+  Bar,
+  Button,
+  Card,
+  CardHead,
+  KwTag,
+  Label,
+  Loading,
+  NoData,
+  StageDot,
+} from "@/components/sp/ui";
 import type { Keyword, MentionRow, SignalPlatform } from "@/types";
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -29,6 +40,68 @@ const STAGES = [
 ] as const;
 
 type Tip = { mention: MentionRow; left: number; top: number };
+
+// dot size + glow per intent tier on the 24h chart
+const DOT_SIZE = {
+  hi: { size: "11px", glow: "14px" },
+  md: { size: "8px", glow: "4px" },
+  lo: { size: "6px", glow: "0px" },
+};
+
+// 2 columns -> 2 columns with kpi/sig/pulse full width -> 1 column, based on the body width
+const gridClass = cn(
+  "grid items-stretch gap-[clamp(12px,1.2vw,18px)]",
+  "grid-cols-[minmax(0,1fr)_minmax(300px,clamp(300px,30%,400px))] [grid-template-areas:'kpi_scan'_'sig_hunt'_'pul_kw']",
+  "@max-[1020px]:grid-cols-2 @max-[1020px]:[grid-template-areas:'kpi_kpi'_'sig_sig'_'hunt_scan'_'pul_pul'_'kw_kw']",
+  "@max-[640px]:grid-cols-1 @max-[640px]:[grid-template-areas:'kpi'_'sig'_'hunt'_'scan'_'pul'_'kw']",
+);
+
+const cardClass = "flex min-w-0 flex-col";
+const kpiClass =
+  "flex min-w-0 flex-col border-r border-line px-[clamp(14px,1.6vw,22px)] py-[clamp(14px,1.4vw,20px)] last:border-r-0 @max-[640px]:border-r-0 @max-[640px]:border-b";
+const kpiLabelClass =
+  "block truncate font-mono text-[10px] leading-[normal] font-medium tracking-[0.18em] text-ink-3";
+const kpiValueClass =
+  "font-mono text-[clamp(26px,2.4vw,36px)] leading-[1.1] font-medium tracking-[-0.02em]";
+const kpiUnitClass =
+  "font-mono text-xs leading-[normal] font-medium text-ink-3 not-italic";
+const kpiFootClass = "mt-2.5 truncate text-[12px] text-ink-3";
+const rowClass =
+  "relative grid h-[52px] grid-cols-[22px_minmax(0,1fr)_auto_28px_40px] items-center gap-3 overflow-hidden border-b border-line px-[18px] transition-colors last:border-b-0 hover:bg-white/2.5 *:relative @max-[640px]:grid-cols-[22px_minmax(0,1fr)_28px_36px] before:pointer-events-none before:absolute before:top-1/2 before:-left-[30px] before:size-[90px] before:-translate-y-1/2 before:rounded-full before:bg-[radial-gradient(circle,color-mix(in_oklab,var(--pc)_16%,transparent),transparent_65%)]";
+const thresholdClass =
+  "absolute top-full -right-16 -translate-y-1/2 whitespace-nowrap font-mono text-[9.5px] leading-[normal] font-medium tracking-[0.14em]";
+
+// small square that holds a platform icon
+function IconBox({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<"span">) {
+  return (
+    <span
+      className={cn(
+        "grid size-[18px] place-items-center text-(--pc) [&_svg]:size-full",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </span>
+  );
+}
+
+function SourceStatus({ on, children }: { on: boolean; children: string }) {
+  return (
+    <em
+      className={cn(
+        "ml-auto flex items-center gap-1.5 font-mono text-[10.5px] leading-[normal] font-medium tracking-[0.1em] not-italic before:size-1.5 before:rounded-full",
+        on ? "text-[#7be3a0] before:bg-green" : "text-ink-3 before:bg-white/25",
+      )}
+    >
+      {children}
+    </em>
+  );
+}
 
 function isSameDay(a: Date, b: Date) {
   return (
@@ -157,12 +230,12 @@ export default function DashboardPage() {
     () => {
       if (!loaded) return;
       gsap.fromTo(
-        ".sp-dash > .sp-card",
+        "[data-card]",
         { opacity: 0, y: 12 },
         { opacity: 1, y: 0, duration: 0.5, stagger: 0.07, ease: "power2.out" },
       );
       gsap.fromTo(
-        ".sp-sr, .sp-kwrow",
+        "[data-row]",
         { opacity: 0, x: -6 },
         {
           opacity: 1,
@@ -174,12 +247,12 @@ export default function DashboardPage() {
         },
       );
       gsap.fromTo(
-        ".sp-quota span",
+        "[data-quota]",
         { scaleX: 0 },
         { scaleX: 1, duration: 1, delay: 0.3, ease: "power3.out" },
       );
       gsap.fromTo(
-        ".sp-hours i",
+        "[data-hours] i",
         { scaleY: 0 },
         {
           scaleY: 1,
@@ -190,12 +263,12 @@ export default function DashboardPage() {
         },
       );
       gsap.fromTo(
-        ".sp-mix span",
+        "[data-mix] > span",
         { opacity: 0, y: 6 },
         { opacity: 1, y: 0, duration: 0.4, stagger: 0.08, delay: 0.4 },
       );
       gsap.fromTo(
-        ".sp-pipe i",
+        "[data-pipe] i",
         { scaleX: 0 },
         {
           scaleX: 1,
@@ -206,7 +279,7 @@ export default function DashboardPage() {
         },
       );
       gsap.fromTo(
-        ".sp-kwrow .sp-bar i",
+        "[data-kw-row] i",
         { scaleX: 0 },
         {
           scaleX: 1,
@@ -217,12 +290,12 @@ export default function DashboardPage() {
         },
       );
       gsap.fromTo(
-        ".sp-band, .sp-midline",
+        "[data-line]",
         { scaleX: 0 },
         { scaleX: 1, duration: 1, delay: 0.2, ease: "power3.out" },
       );
       gsap.fromTo(
-        ".sp-dt",
+        "[data-dot]",
         { scale: 0 },
         {
           scale: 1,
@@ -257,7 +330,7 @@ export default function DashboardPage() {
     setScanning(true);
     const prevTotal = stats?.totalSignals ?? 0;
     const bar = progressRef.current;
-    const sweep = plotRef.current?.querySelector(".sp-sweep");
+    const sweep = plotRef.current?.querySelector("[data-sweep]");
 
     if (bar) {
       gsap.fromTo(
@@ -335,7 +408,7 @@ export default function DashboardPage() {
   }
 
   if (!loaded) {
-    return <div className="sp-loading">LOADING YOUR SIGNALS…</div>;
+    return <Loading>LOADING YOUR SIGNALS…</Loading>;
   }
 
   const huntCounts = stats?.huntCounts ?? {
@@ -358,21 +431,28 @@ export default function DashboardPage() {
     .toUpperCase();
 
   return (
-    <div className="sp-dash" ref={rootRef}>
-      <div className="sp-card sp-kpis b-kpi">
-        <div className="sp-kpi">
-          <small>SIGNALS · {monthName}</small>
-          <div className="sp-kv">
-            <b>
+    <div className={gridClass} ref={rootRef}>
+      <Card data-card className={cn(cardClass, "[grid-area:kpi]")}>
+        <div className={kpiClass}>
+          <small className={kpiLabelClass}>SIGNALS · {monthName}</small>
+          <div className="mt-2.5 mb-3 flex items-baseline gap-2">
+            <b className={kpiValueClass}>
               <CountUp value={monthUsed} />
             </b>
-            <i>/ {limits.signals}</i>
+            <i className={kpiUnitClass}>/ {limits.signals}</i>
           </div>
-          <div className="sp-quota">
-            <span style={{ width: `${monthPct}%` }} />
+          <div className="relative h-1.5 rounded-[9px] bg-[repeating-linear-gradient(90deg,rgba(255,255,255,0.07)_0_calc(10%-2px),transparent_calc(10%-2px)_10%)]">
+            <span
+              data-quota
+              className="absolute inset-y-0 left-0 origin-left rounded-[9px] bg-linear-to-r from-r2 to-r1 shadow-[0_0_10px_rgba(255,36,56,0.5)]"
+              style={{ width: `${monthPct}%` }}
+            />
           </div>
-          <span className="sp-kf">
-            <em>{Math.max(limits.signals - monthUsed, 0)} left</em> · resets{" "}
+          <span className={kpiFootClass}>
+            <em className="text-ink-2 not-italic">
+              {Math.max(limits.signals - monthUsed, 0)} left
+            </em>{" "}
+            · resets{" "}
             {resetDate.toLocaleDateString("en-US", {
               month: "short",
               day: "numeric",
@@ -380,19 +460,27 @@ export default function DashboardPage() {
           </span>
         </div>
 
-        <div className="sp-kpi">
-          <small>TODAY</small>
-          <div className="sp-kv">
-            <b>
+        <div className={kpiClass}>
+          <small className={kpiLabelClass}>TODAY</small>
+          <div className="mt-2.5 mb-3 flex items-baseline gap-2">
+            <b className={kpiValueClass}>
               <CountUp value={data.todayCount} />
             </b>
             {data.delta !== 0 && (
-              <i className={data.delta > 0 ? "up" : "down"}>
+              <i
+                className={cn(
+                  kpiUnitClass,
+                  "rounded-full px-[7px] py-0.5",
+                  data.delta > 0
+                    ? "bg-green/10 text-[#7be3a0]"
+                    : "bg-white/6 text-ink-3",
+                )}
+              >
                 {data.delta > 0 ? `+${data.delta}` : data.delta}
               </i>
             )}
           </div>
-          <div className="sp-hours">
+          <div data-hours className="flex h-7 items-end gap-0.5">
             {data.hours.map((count, hour) => {
               const future = hour > data.currentHour;
               const height =
@@ -402,149 +490,171 @@ export default function DashboardPage() {
               return (
                 <i
                   key={hour}
-                  className={future ? "fut" : count ? "on" : ""}
+                  className={cn(
+                    "min-h-0.5 flex-1 origin-bottom rounded-[2px] bg-white/12",
+                    future && "bg-white/4",
+                    !future &&
+                      count > 0 &&
+                      "bg-r1 shadow-[0_0_6px_rgba(255,36,56,0.5)]",
+                  )}
                   style={{ height: `${height}%` }}
                   title={`${formatHour(hour)} · ${count}`}
                 />
               );
             })}
           </div>
-          <span className="sp-kf">
+          <span className={kpiFootClass}>
             vs {data.yesterdayCount} yesterday
             {data.peakHour !== null && ` · peak ${formatHour(data.peakHour)}`}
           </span>
         </div>
 
-        <div className="sp-kpi hot">
-          <small>HOT LEADS · 7D</small>
-          <div className="sp-kv">
-            <b>
+        <div className={kpiClass}>
+          <small className={kpiLabelClass}>HOT LEADS · 7D</small>
+          <div className="mt-2.5 mb-3 flex items-baseline gap-2">
+            <b
+              className={cn(
+                kpiValueClass,
+                "text-r1 [text-shadow:0_0_18px_rgba(255,36,56,0.35)]",
+              )}
+            >
               <CountUp value={data.hotCount} />
             </b>
-            <i>intent 8+</i>
+            <i className={kpiUnitClass}>intent 8+</i>
           </div>
           {data.hotCount > 0 ? (
-            <div className="sp-mix">
+            <div data-mix className="flex h-[30px] items-center gap-1.5">
               {PLATFORMS.filter((p) => data.mix[p.value] > 0).map((p) => (
                 <span
                   key={p.value}
+                  className="flex h-full min-w-0 flex-[1_1_0] items-center justify-center gap-1.5 rounded-lg bg-[color-mix(in_oklab,var(--pc)_12%,transparent)] px-2.5 font-mono text-[11.5px] leading-[normal] font-semibold text-(--pc) shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--pc)_30%,transparent),0_0_12px_color-mix(in_oklab,var(--pc)_18%,transparent)] [&_svg]:size-3.5 [&_svg]:flex-none"
                   style={
                     { "--pc": platformVar(p.value) } as React.CSSProperties
                   }
                   title={`${data.mix[p.value]} from ${p.label}`}
                 >
                   <PlatformIcon platform={p.value} size={14} plain />
-                  <em>{p.label}</em>
+                  <em className="truncate font-body text-xs leading-[normal] font-medium text-ink not-italic">
+                    {p.label}
+                  </em>
                   {data.mix[p.value]}
                 </span>
               ))}
             </div>
           ) : (
-            <div className="sp-mix-none">No hot leads this week yet</div>
+            <div className="flex h-[30px] items-center text-[12px] text-ink-3">
+              No hot leads this week yet
+            </div>
           )}
-          <span className="sp-kf">
+          <span className={kpiFootClass}>
             {data.topPlatform
               ? `Most from ${PLATFORM_LABELS[data.topPlatform]}`
               : "Keep scanning"}
           </span>
         </div>
-      </div>
+      </Card>
 
-      <div className="sp-card b-scan">
-        <div className="sp-c-h">
-          <b>Scanner</b>
-          <span className="meta">
-            {stats?.autoScan === false ? "manual only" : "every 6h"}
-          </span>
-        </div>
-        <div className="sp-src">
+      <Card data-card className={cn(cardClass, "[grid-area:scan]")}>
+        <CardHead
+          title="Scanner"
+          meta={stats?.autoScan === false ? "manual only" : "every 6h"}
+        />
+        <div className="flex flex-col border-t border-line">
           {(stats?.sources ?? []).map((src) => (
-            <div key={src.platform}>
-              <span className="sp-pi">
+            <div
+              key={src.platform}
+              className="flex items-center gap-2.5 border-b border-line px-[18px] py-[11px] text-[13px] text-ink-2"
+            >
+              <IconBox className="size-4">
                 <PlatformIcon platform={src.platform} size={15} />
-              </span>
+              </IconBox>
               {PLATFORM_LABELS[src.platform]}
-              <em className={src.active ? "" : "off"}>
+              <SourceStatus on={src.active}>
                 {src.active ? "ACTIVE" : "NOT CONNECTED"}
-              </em>
+              </SourceStatus>
             </div>
           ))}
-          <div>
-            <span className="sp-pi" style={{ color: "var(--r1)" }}>
+          <div className="flex items-center gap-2.5 px-[18px] py-[11px] text-[13px] text-ink-2">
+            <IconBox className="size-4 text-r1">
               <Sparkles size={15} />
-            </span>
-            AI intent scoring<em>ON</em>
+            </IconBox>
+            AI intent scoring<SourceStatus on>ON</SourceStatus>
           </div>
         </div>
-        <div className="sp-scan">
-          <div className="sp-scan-m">
+        <div className="mt-auto border-t border-line px-[18px] pt-4 pb-[18px]">
+          <div className="mb-3 flex justify-between text-[12px] text-ink-3">
             <span>Last scan</span>
-            <b>
+            <b className="font-mono text-xs leading-[normal] font-medium text-ink-2">
               {stats?.lastScannedAt ? timeAgo(stats.lastScannedAt) : "never"}
             </b>
           </div>
-          <button
-            className={`sp-btn ${scanning ? "spin" : ""}`}
+          <Button
+            spinning={scanning}
+            className="relative w-full overflow-hidden"
             onClick={scan}
             disabled={scanning}
           >
-            <i className="pg" ref={progressRef} />
-            <span>
+            <i
+              ref={progressRef}
+              className="absolute inset-y-0 left-0 w-0 bg-white/14"
+            />
+            <span className="relative flex items-center gap-2">
               <RefreshCw />
               {scanning ? "Scanning…" : "Scan now"}
             </span>
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
 
-      <div className="sp-card b-sig">
-        <div className="sp-c-h">
-          <b>Recent signals</b>
-          <Link className="more" href="/dashboard/signals">
-            View all <ArrowUpRight />
-          </Link>
-        </div>
+      <Card data-card className={cn(cardClass, "[grid-area:sig]")}>
+        <CardHead
+          title="Recent signals"
+          more={{ href: "/dashboard/signals", label: "View all" }}
+        />
         {data.recent.length ? (
-          <div className="sp-rows">
+          <div className="border-t border-line">
             {data.recent.map((m) => (
               <Link
                 key={m.id}
+                data-row
                 href="/dashboard/signals"
-                className="sp-sr"
+                className={rowClass}
                 style={
                   { "--pc": platformVar(m.platform) } as React.CSSProperties
                 }
               >
-                <span className="sp-pi" title={PLATFORM_LABELS[m.platform]}>
+                <IconBox title={PLATFORM_LABELS[m.platform]}>
                   <PlatformIcon platform={m.platform} size={16} />
-                </span>
-                <span className="t">{m.title}</span>
-                <span className="sp-kwt">{m.keyword}</span>
+                </IconBox>
+                <span className="truncate text-[13.5px]">{m.title}</span>
+                <KwTag className="@max-[640px]:hidden">{m.keyword}</KwTag>
                 <ScoreArc score={m.score} delay={0.35} />
-                <span className="sp-ago">{shortAgo(m.createdAt)}</span>
+                <span className="text-right font-mono text-[11px] leading-[normal] font-medium text-ink-3">
+                  {shortAgo(m.createdAt)}
+                </span>
               </Link>
             ))}
           </div>
         ) : (
-          <div className="sp-nodata">
-            No signals yet — add a keyword and run a scan.
-          </div>
+          <NoData>No signals yet — add a keyword and run a scan.</NoData>
         )}
-      </div>
+      </Card>
 
-      <div className="sp-card b-hunt">
-        <div className="sp-c-h">
-          <b>Hunt Board</b>
-          <Link className="more" href="/dashboard/hunt-board">
-            Open board <ArrowUpRight />
-          </Link>
-        </div>
-        <div className="sp-pipe">
+      <Card data-card className={cn(cardClass, "[grid-area:hunt]")}>
+        <CardHead
+          title="Hunt Board"
+          more={{ href: "/dashboard/hunt-board", label: "Open board" }}
+        />
+        <div
+          data-pipe
+          className="mx-[18px] mb-4 flex h-1.5 gap-[3px] overflow-hidden rounded-[9px]"
+        >
           {huntSum > 0 ? (
             STAGES.map((s) =>
               huntCounts[s.key] ? (
                 <i
                   key={s.key}
+                  className="block h-full origin-left"
                   style={{
                     flex: huntCounts[s.key] / huntSum,
                     background: s.color,
@@ -553,77 +663,93 @@ export default function DashboardPage() {
               ) : null,
             )
           ) : (
-            <i style={{ flex: 1, background: "rgba(255,255,255,.07)" }} />
+            <i className="block h-full flex-1 origin-left bg-white/7" />
           )}
         </div>
-        <div className="sp-stg">
+        <div className="grid grid-cols-2 border-t border-line">
           {STAGES.map((s) => (
             <Link
               key={s.key}
               href="/dashboard/hunt-board"
-              style={{ "--sc": s.color } as React.CSSProperties}
+              className="flex items-center gap-2.5 border-b border-line px-[18px] py-3.5 text-[13px] text-ink-2 transition-colors odd:border-r hover:bg-white/2.5 hover:text-ink [&:nth-last-child(-n+2)]:border-b-0"
             >
-              <span className="sp-dot" />
+              <StageDot color={s.color} />
               {s.label}
-              <b>
+              <b className="ml-auto font-mono text-base leading-[normal] font-medium text-ink">
                 <CountUp value={huntCounts[s.key]} />
               </b>
             </Link>
           ))}
         </div>
-        <div className="sp-next">
-          <small>FOLLOW UP</small>
+        <div className="mt-auto border-t border-line px-[18px] py-3.5">
+          <Label className="mb-2">FOLLOW UP</Label>
           {data.followUp ? (
-            <Link href="/dashboard/hunt-board">
-              <span className="sp-pi">
+            <Link
+              href="/dashboard/hunt-board"
+              className="flex items-center gap-2.5 text-[13px] text-ink-2 hover:text-ink"
+            >
+              <IconBox>
                 <PlatformIcon platform={data.followUp.platform} size={16} />
-              </span>
-              <span className="t">
+              </IconBox>
+              <span className="min-w-0 flex-1 truncate">
                 {data.followUp.notes || data.followUp.title}
               </span>
               <ScoreArc score={data.followUp.score} />
             </Link>
           ) : (
-            <span style={{ fontSize: 13, color: "var(--ink-3)" }}>
+            <span className="text-[13px] text-ink-3">
               Nothing waiting on you.
             </span>
           )}
         </div>
-      </div>
+      </Card>
 
-      <div className="sp-card b-pulse">
-        <div className="sp-c-h">
-          <b>Last 24 hours</b>
-          <span className="meta">Higher = stronger buying intent</span>
-          <Link className="more" href="/dashboard/signals">
-            All signals <ArrowUpRight />
-          </Link>
-        </div>
-        <div className="sp-pulse" ref={pulseRef}>
-          <div className="sp-plot" ref={plotRef}>
-            <div className="sp-band">
-              <span className="sp-thr" style={{ color: "var(--r1)" }}>
-                HOT 8+
-              </span>
+      <Card data-card className={cn(cardClass, "[grid-area:pul]")}>
+        <CardHead
+          title="Last 24 hours"
+          meta="Higher = stronger buying intent"
+          more={{ href: "/dashboard/signals", label: "All signals" }}
+        />
+        <div
+          className="relative mx-4 mb-3.5 min-h-[190px] flex-1"
+          ref={pulseRef}
+        >
+          <div
+            ref={plotRef}
+            className="absolute top-2.5 right-16 bottom-[26px] left-0"
+          >
+            <div
+              data-line
+              className="absolute inset-x-0 top-0 h-1/5 origin-left border-b border-dashed border-r1/28 bg-linear-to-b from-r1/7 to-transparent"
+            >
+              <span className={cn(thresholdClass, "text-r1")}>HOT 8+</span>
             </div>
-            <div className="sp-midline">
-              <span className="sp-thr" style={{ color: "var(--ink-3)" }}>
-                WARM 5+
-              </span>
+            <div
+              data-line
+              className="absolute inset-x-0 top-1/2 origin-left border-b border-dashed border-white/7"
+            >
+              <span className={cn(thresholdClass, "text-ink-3")}>WARM 5+</span>
             </div>
-            <div className="sp-now" />
-            <div className="sp-sweep" />
+            <div className="absolute inset-y-0 right-0 border-r border-white/14" />
+            <div
+              data-sweep
+              className="pointer-events-none absolute inset-y-0 -left-[120px] w-[120px] border-r border-r1/50 bg-linear-to-r from-transparent to-r1/16 opacity-0"
+            />
             {data.pulse.map((m) => {
               const age = now - new Date(m.createdAt).getTime();
+              const dot = DOT_SIZE[scoreTier(m.score)];
               return (
                 <Link
                   key={m.id}
+                  data-dot
                   href="/dashboard/signals"
-                  className={`sp-dt ${scoreTier(m.score)}`}
                   aria-label={m.title}
+                  className="absolute size-(--sz) -translate-x-1/2 -translate-y-1/2 rounded-full bg-(--dc) shadow-[0_0_var(--gw)_color-mix(in_oklab,var(--dc)_75%,transparent)] transition-transform duration-200 hover:z-2 hover:scale-160"
                   style={
                     {
                       "--dc": scoreColor(m.score),
+                      "--sz": dot.size,
+                      "--gw": dot.glow,
                       left: `${100 - (age / DAY) * 100}%`,
                       top: `${100 - (m.score ?? 0) * 10}%`,
                     } as React.CSSProperties
@@ -634,12 +760,12 @@ export default function DashboardPage() {
               );
             })}
             {data.pulse.length === 0 && (
-              <div className="sp-pulse-empty">
+              <div className="absolute inset-0 grid place-items-center text-[12.5px] text-ink-3">
                 No mentions in the last 24 hours
               </div>
             )}
           </div>
-          <div className="sp-xax">
+          <div className="absolute right-16 bottom-0 left-0 flex justify-between font-mono text-[10px] leading-[normal] font-medium text-ink-3">
             <span>24h ago</span>
             <span>18h</span>
             <span>12h</span>
@@ -647,9 +773,14 @@ export default function DashboardPage() {
             <span>Now</span>
           </div>
           {tip && (
-            <div className="sp-tip" style={{ left: tip.left, top: tip.top }}>
-              <b>{tip.mention.title}</b>
-              <span>
+            <div
+              className="pointer-events-none absolute z-5 w-[280px] rounded-xl border border-line-2 bg-[rgba(20,10,12,0.96)] px-3.5 py-3 text-[12.5px] shadow-[0_16px_40px_rgba(0,0,0,0.5)]"
+              style={{ left: tip.left, top: tip.top }}
+            >
+              <b className="mb-1.5 block text-[13px] leading-[1.4] font-medium">
+                {tip.mention.title}
+              </b>
+              <span className="text-ink-3">
                 {PLATFORM_LABELS[tip.mention.platform]} · {tip.mention.source} ·{" "}
                 {timeAgo(tip.mention.createdAt)} · intent{" "}
                 {tip.mention.score ?? "–"}
@@ -657,44 +788,48 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
-      </div>
+      </Card>
 
-      <div className="sp-card b-kw">
-        <div className="sp-c-h">
-          <b>Keywords</b>
-          <span className="meta">7-day hits</span>
-          <Link className="more" href="/dashboard/keywords">
-            Manage <ArrowUpRight />
-          </Link>
-        </div>
+      <Card data-card className={cn(cardClass, "[grid-area:kw]")}>
+        <CardHead
+          title="Keywords"
+          meta="7-day hits"
+          more={{ href: "/dashboard/keywords", label: "Manage" }}
+        />
         {data.keywordHits.length ? (
           data.keywordHits.map((k) => (
-            <div key={k.keyword} className={`sp-kwrow ${k.hits ? "" : "zero"}`}>
-              <div className="n">
-                <span className="icons">
+            <div
+              key={k.keyword}
+              data-row
+              data-kw-row
+              className={cn(
+                "grid h-11 grid-cols-[minmax(0,1fr)_clamp(56px,28%,140px)_36px] items-center gap-3.5 border-t border-line px-[18px] text-[13px]",
+                !k.hits && "text-ink-3",
+              )}
+            >
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="flex flex-none gap-1">
                   {k.platforms.map((p) => (
                     <PlatformIcon key={p} platform={p} size={12} />
                   ))}
                 </span>
-                <span>{k.keyword}</span>
+                <span className="truncate">{k.keyword}</span>
               </div>
-              <div className="sp-bar">
-                <i
-                  style={{
-                    width: `${(k.hits / data.maxHits) * 100}%`,
-                    background: k.hits ? undefined : "transparent",
-                  }}
-                />
-              </div>
-              <span className="c">{k.hits}</span>
+              <Bar
+                pct={(k.hits / data.maxHits) * 100}
+                fillClassName={k.hits ? undefined : "bg-none"}
+              />
+              <span className="text-right font-mono text-xs leading-[normal] font-medium text-ink-2">
+                {k.hits}
+              </span>
             </div>
           ))
         ) : (
-          <div className="sp-nodata">
+          <NoData>
             <Link href="/dashboard/keywords">Add your first keyword →</Link>
-          </div>
+          </NoData>
         )}
-      </div>
+      </Card>
     </div>
   );
 }
