@@ -8,6 +8,7 @@ import { SplitText } from "gsap/SplitText";
 import { useGSAP } from "@gsap/react";
 import sparrowLogo from "@/public/sparrow-no-text-logo.png";
 import AuroraBackground from "./AuroraBackground";
+import { cn } from "@/lib/utils";
 
 gsap.registerPlugin(SplitText);
 
@@ -34,7 +35,7 @@ export default function AuthFrame({
       const reduced = window.matchMedia(
         "(prefers-reduced-motion: reduce)",
       ).matches;
-      const title = ref.current?.querySelector(".sp-lede h1");
+      const title = ref.current?.querySelector("h1");
       if (title && !reduced) {
         const split = SplitText.create(title, { type: "words" });
         gsap.from(split.words, {
@@ -47,7 +48,7 @@ export default function AuthFrame({
         });
       }
       gsap.fromTo(
-        ".sp-eyebrow, .sp-lede p, .sp-lede .fact",
+        "[data-fade]",
         { opacity: 0, y: 12 },
         {
           opacity: 1,
@@ -59,7 +60,7 @@ export default function AuthFrame({
         },
       );
       gsap.fromTo(
-        ".sp-glass-shell",
+        "[data-glass]",
         { opacity: 0, y: 24, scale: 0.98 },
         {
           opacity: 1,
@@ -75,11 +76,17 @@ export default function AuthFrame({
   );
 
   return (
-    <div className="sp-auth" ref={ref}>
+    <div
+      ref={ref}
+      className="fixed inset-0 z-50 overflow-auto bg-r4 font-body text-sm leading-normal font-light text-white"
+    >
       <AuroraBackground />
-      <div className="sp-auth-shell">
-        <header className="sp-auth-head">
-          <Link href="/" className="sp-brand">
+      <div className="relative z-2 grid min-h-screen grid-rows-[auto_1fr_auto]">
+        <header className="flex items-center justify-between px-8 py-6 max-[980px]:px-[22px] max-[980px]:py-5">
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 font-mono text-xs leading-[normal] font-normal tracking-[0.18em] text-white/62 uppercase"
+          >
             <Image
               src={sparrowLogo}
               alt="Sparrow"
@@ -95,36 +102,67 @@ export default function AuthFrame({
             Sparrow
           </Link>
           {topLink && (
-            <Link href={topLink.href} className="sp-auth-link">
+            <Link
+              href={topLink.href}
+              className="rounded-full border border-white/12 bg-white/3 px-3.5 py-2 font-mono text-[11px] leading-[normal] font-normal tracking-[0.16em] text-white/62 uppercase backdrop-blur-sm transition-all duration-200 hover:border-white/22 hover:text-white"
+            >
               {topLink.label}
             </Link>
           )}
         </header>
 
-        <main className={`sp-auth-main ${lede ? "" : "solo"}`}>
+        <main
+          className={cn(
+            "mx-auto grid w-full max-w-[1440px] items-center gap-12 px-16 py-6 max-[980px]:px-[22px] max-[980px]:pt-3 max-[980px]:pb-8",
+            lede
+              ? "grid-cols-[1.15fr_0.85fr] max-[980px]:grid-cols-[minmax(0,1fr)]"
+              : "grid-cols-[minmax(0,560px)] justify-center",
+          )}
+        >
           {lede && (
-            <section className="sp-lede">
-              <div className="sp-eyebrow">{lede.eyebrow}</div>
-              <h1>{lede.title}</h1>
-              <p>{lede.body}</p>
+            <section>
+              <div
+                data-fade
+                className="mb-6 flex items-center gap-3 font-mono text-[11px] leading-[normal] font-normal tracking-[0.22em] text-white/38 uppercase"
+              >
+                {lede.eyebrow}
+              </div>
+              <h1 className="mt-0 mb-7 font-display text-[clamp(48px,6.4vw,100px)] leading-[0.96] font-normal tracking-[-0.025em] [&_em]:text-white/78 [&_em]:italic">
+                {lede.title}
+              </h1>
+              <p
+                data-fade
+                className="m-0 max-w-[44ch] text-[15px] leading-[1.65] text-white/62"
+              >
+                {lede.body}
+              </p>
               {lede.facts && (
-                <div className="facts">
+                <div className="mt-11 flex max-w-[540px] flex-wrap gap-10 border-t border-white/12 pt-6 max-[980px]:hidden">
                   {lede.facts.map((f) => (
-                    <div className="fact" key={f.label}>
-                      <div className="num">{f.num}</div>
-                      <div className="lbl">{f.label}</div>
+                    <div data-fade key={f.label}>
+                      <div className="font-display text-[26px] leading-none font-normal">
+                        {f.num}
+                      </div>
+                      <div className="mt-2 font-mono text-[10px] leading-[normal] font-normal tracking-[0.18em] text-white/38 uppercase">
+                        {f.label}
+                      </div>
                     </div>
                   ))}
                 </div>
               )}
             </section>
           )}
-          <section className="sp-glass-shell">
-            <div className="sp-glass">{children}</div>
+          <section
+            data-glass
+            className="rounded-3xl bg-linear-to-b from-white/18 via-white/2 to-black/20 p-px shadow-[0_24px_80px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.06)]"
+          >
+            <div className="rounded-[23px] bg-[rgba(20,4,8,0.45)] px-9 pt-9 pb-[30px] backdrop-blur-[18px] backdrop-saturate-130 max-[560px]:px-5 max-[560px]:pt-[26px] max-[560px]:pb-[22px]">
+              {children}
+            </div>
           </section>
         </main>
 
-        <footer className="sp-auth-foot">
+        <footer className="flex justify-end px-8 py-5 font-mono text-[10.5px] leading-[normal] font-normal tracking-[0.14em] text-white/32 uppercase max-[560px]:hidden">
           <span>Reddit · Hacker News · Bluesky</span>
         </footer>
       </div>

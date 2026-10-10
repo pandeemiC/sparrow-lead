@@ -71,34 +71,18 @@ export default function SSOCallback() {
   }, [clerk, clerk.loaded, signIn, signUp]);
 
   return (
-    <div className="sp-auth" style={{ display: "grid", placeItems: "center" }}>
+    <div className="fixed inset-0 z-50 grid place-items-center overflow-auto bg-r4 font-body text-sm leading-normal font-light text-white">
       <div id="clerk-captcha" />
       <AuroraBackground />
-      <div
-        style={{
-          position: "relative",
-          zIndex: 2,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 28,
-        }}
-      >
+      <div className="relative z-2 flex flex-col items-center gap-7">
         <Image
           src={sparrowLogo}
           alt="Sparrow"
           width={72}
           height={72}
-          style={{ filter: "drop-shadow(0 0 22px rgba(210, 43, 43, 0.65))" }}
+          className="drop-shadow-[0_0_22px_rgba(210,43,43,0.65)]"
         />
-        <div
-          style={{
-            display: "flex",
-            gap: 3,
-            font: "500 12px var(--mono)",
-            letterSpacing: "0.3em",
-          }}
-        >
+        <div className="flex gap-[3px] font-mono text-xs leading-[normal] font-medium tracking-[0.3em]">
           {LETTERS.map((letter, i) => (
             <motion.span
               key={i}

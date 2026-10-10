@@ -11,6 +11,17 @@ import {
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import AuthFrame from "@/components/sp/AuthFrame";
+import {
+  AuthError,
+  AuthTextarea,
+  BackButton,
+  ButtonRow,
+  Field,
+  GlassHead,
+  Hint,
+  SubmitButton,
+} from "@/components/sp/auth";
+import { cn } from "@/lib/utils";
 
 const roles = [
   { value: "founder", label: "Founder / Business Owner", icon: Briefcase },
@@ -51,7 +62,7 @@ export default function OnboardingPage() {
         { opacity: 0, x: 14 },
         { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" },
       );
-      gsap.to(".sp-steps i b", {
+      gsap.to("[data-step-fill]", {
         scaleX: (i: number) => (i < step ? 1 : 0),
         duration: 0.5,
         ease: "power3.out",
@@ -92,35 +103,43 @@ export default function OnboardingPage() {
         body: "Your answers go straight into the AI that scores every post, so it can tell a real buyer from background noise. You can change them later in Settings.",
       }}
     >
-      <div className="sp-steps">
+      <div className="mb-[26px] flex items-center gap-2">
         {[1, 2, 3].map((s) => (
-          <i key={s}>
-            <b style={{ transform: `scaleX(${s <= step ? 1 : 0})` }} />
+          <i
+            key={s}
+            className="relative h-0.5 flex-1 overflow-hidden rounded-[2px] bg-white/12"
+          >
+            <b
+              data-step-fill
+              className="absolute inset-0 origin-left bg-linear-to-r from-r2 to-r1"
+              style={{ transform: `scaleX(${s <= step ? 1 : 0})` }}
+            />
           </i>
         ))}
       </div>
 
-      <div className="sp-glass-head">
-        <div className="sp-glass-title" style={{ fontSize: 26 }}>
-          {current.title}
-        </div>
-        <div className="sp-glass-sub">Step {step} of 3</div>
-      </div>
-      <p className="sp-hint" style={{ margin: "-12px 0 20px" }}>
-        {current.hint}
-      </p>
+      <GlassHead
+        title={current.title}
+        sub={`Step ${step} of 3`}
+        titleClassName="text-[26px]"
+      />
+      <Hint className="-mt-3 mb-5">{current.hint}</Hint>
 
-      {error && <div className="sp-auth-error">{error}</div>}
+      {error && <AuthError>{error}</AuthError>}
 
       <div ref={bodyRef}>
         {step === 1 && (
           <>
-            <div className="sp-roles">
+            <div className="grid grid-cols-1 gap-2 min-[561px]:grid-cols-2">
               {roles.map(({ value, label, icon: Icon }) => (
                 <button
                   key={value}
                   type="button"
-                  className={`sp-role ${role === value ? "on" : ""}`}
+                  className={cn(
+                    "flex items-center gap-2.5 rounded-xl border border-white/10 bg-black/20 px-3.5 py-[13px] text-left font-body text-[13px] leading-[normal] font-normal text-white/60 transition-all duration-150 hover:border-white/22 hover:text-white",
+                    role === value &&
+                      "border-r1/55 bg-r1/12 text-white shadow-[0_0_0_4px_rgba(255,36,56,0.08)] hover:border-r1/55",
+                  )}
                   onClick={() => setRole(value)}
                 >
                   <Icon size={15} />
@@ -128,74 +147,65 @@ export default function OnboardingPage() {
                 </button>
               ))}
             </div>
-            <div className="sp-btn-row" style={{ marginTop: 20 }}>
-              <button
-                className="sp-submit"
+            <ButtonRow className="mt-5">
+              <SubmitButton
+                className="flex-[2]"
                 onClick={() => setStep(2)}
                 disabled={!role}
               >
-                Continue<span className="arrow">→</span>
-              </button>
-            </div>
+                Continue
+              </SubmitButton>
+            </ButtonRow>
           </>
         )}
 
         {step === 2 && (
           <>
-            <div className="sp-field">
-              <textarea
+            <Field>
+              <AuthTextarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
                 placeholder="e.g. I'm building a client portal for freelance designers and looking for early users…"
               />
-            </div>
-            <div className="sp-btn-row">
-              <button className="sp-back" onClick={() => setStep(1)}>
-                Back
-              </button>
-              <button
-                className="sp-submit"
+            </Field>
+            <ButtonRow>
+              <BackButton onClick={() => setStep(1)}>Back</BackButton>
+              <SubmitButton
+                className="flex-[2]"
                 onClick={() => setStep(3)}
                 disabled={description.trim().length < 10}
               >
-                Continue<span className="arrow">→</span>
-              </button>
-            </div>
+                Continue
+              </SubmitButton>
+            </ButtonRow>
           </>
         )}
 
         {step === 3 && (
           <>
-            <div className="sp-field">
-              <textarea
+            <Field>
+              <AuthTextarea
                 value={listenerContext}
                 onChange={(e) => setListenerContext(e.target.value)}
                 rows={5}
                 placeholder="e.g. People frustrated with their current tools, asking for alternatives, or describing pain around team collaboration…"
               />
-            </div>
-            <p className="sp-hint">
+            </Field>
+            <Hint>
               This is fed directly to the AI when it scores your signals.
-            </p>
-            <div className="sp-btn-row">
-              <button className="sp-back" onClick={() => setStep(2)}>
-                Back
-              </button>
-              <button
-                className="sp-submit"
+            </Hint>
+            <ButtonRow>
+              <BackButton onClick={() => setStep(2)}>Back</BackButton>
+              <SubmitButton
+                className="flex-[2]"
                 onClick={handleSubmit}
                 disabled={listenerContext.trim().length < 10 || loading}
+                arrow={!loading}
               >
-                {loading ? (
-                  "Setting up…"
-                ) : (
-                  <>
-                    Start hunting<span className="arrow">→</span>
-                  </>
-                )}
-              </button>
-            </div>
+                {loading ? "Setting up…" : "Start hunting"}
+              </SubmitButton>
+            </ButtonRow>
           </>
         )}
       </div>
