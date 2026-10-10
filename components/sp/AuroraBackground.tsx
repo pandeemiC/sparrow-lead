@@ -1,11 +1,12 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 
 const ShaderLayer = dynamic(() => import("./ShaderLayer"), { ssr: false });
 
-export default function AuroraBackground() {
+// memo: auth pages re-render on every keystroke, the background never needs to
+function AuroraBackground() {
   const [ready, setReady] = useState(false);
   const [still, setStill] = useState(false);
 
@@ -36,3 +37,5 @@ export default function AuroraBackground() {
     </div>
   );
 }
+
+export default memo(AuroraBackground);

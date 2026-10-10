@@ -1,12 +1,17 @@
 "use client";
 
+import { memo } from "react";
 import { ShaderGradient, ShaderGradientCanvas } from "@shadergradient/react";
 
-export default function ShaderLayer({ still }: { still: boolean }) {
+// kept outside the component so the canvas never gets a "new" style object
+const CANVAS_STYLE = { position: "absolute", inset: 0 } as const;
+
+// memo so typing in a form (parent re-render) doesn't touch the webgl scene
+function ShaderLayer({ still }: { still: boolean }) {
   return (
     <ShaderGradientCanvas
-      style={{ position: "absolute", inset: 0 }}
-      pixelDensity={1}
+      style={CANVAS_STYLE}
+      pixelDensity={0.6}
       fov={45}
       pointerEvents="none"
       lazyLoad={false}
@@ -15,10 +20,10 @@ export default function ShaderLayer({ still }: { still: boolean }) {
         control="props"
         type="plane"
         animate={still ? "off" : "on"}
-        uSpeed={0.12}
-        uStrength={4}
-        uDensity={1.3}
-        uFrequency={5.5}
+        uSpeed={0.07}
+        uStrength={2.2}
+        uDensity={0.9}
+        uFrequency={3.5}
         uAmplitude={1}
         uTime={0}
         positionX={-1.4}
@@ -27,11 +32,11 @@ export default function ShaderLayer({ still }: { still: boolean }) {
         rotationX={0}
         rotationY={10}
         rotationZ={50}
-        color1="#ff2438"
-        color2="#7e0f1b"
-        color3="#2a060c"
-        brightness={0.9}
-        reflection={0.1}
+        color1="#c81d2e"
+        color2="#5e0b15"
+        color3="#1a0408"
+        brightness={0.7}
+        reflection={0.05}
         cAzimuthAngle={180}
         cPolarAngle={90}
         cDistance={3.6}
@@ -42,3 +47,5 @@ export default function ShaderLayer({ still }: { still: boolean }) {
     </ShaderGradientCanvas>
   );
 }
+
+export default memo(ShaderLayer);
