@@ -6,7 +6,6 @@ import {
   JetBrains_Mono,
 } from "next/font/google";
 import "./globals.css";
-import "./sparrow.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import Navbar from "@/components/Navbar";
 
