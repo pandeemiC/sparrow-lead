@@ -1,219 +1,306 @@
 "use client";
 
-import { useScanStore } from "@/store/scanStore";
-import { apiFetch } from "@/lib/apiFetch";
-import { useToastStore } from "@/store/toastStore";
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import {
-  Radio,
-  Tag,
-  ScanLine,
-  TrendingUp,
-  Target,
-  Clock,
-  Circle,
-  ArrowUpRight,
-  Zap,
-  Check,
-  Loader,
-} from "lucide-react";
-import { SiReddit, SiYcombinator, SiBluesky } from "react-icons/si";
+import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ArrowUpRight, RefreshCw, Sparkles } from "lucide-react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import PlatformIcon from "@/components/ui/PlatformIcon";
-import { PLATFORMS } from "@/lib/constants";
-import type { Stats } from "@/types";
+import ScoreArc from "@/components/sp/ScoreArc";
+import CountUp from "@/components/sp/CountUp";
+import { apiFetch } from "@/lib/apiFetch";
+import { toMentionRow } from "@/lib/mentions";
+import { platformVar, scoreColor, scoreTier, shortAgo } from "@/lib/score";
 import { timeAgo } from "@/lib/utils";
+import { PLATFORMS, PLATFORM_LABELS } from "@/lib/constants";
+import { usePlan } from "@/components/dashboard/PlanContext";
+import { useStatsStore } from "@/store/statsStore";
+import { useScanStore } from "@/store/scanStore";
+import { useToastStore } from "@/store/toastStore";
+import type { Keyword, MentionRow, SignalPlatform } from "@/types";
 
-const SCAN_STEPS = [
-  "Fetching keywords",
-  "Scanning your sources",
-  "Running AI analysis",
-];
+const DAY = 24 * 60 * 60 * 1000;
 
-const sources = [
-  { label: "Reddit", icon: SiReddit, active: true },
-  { label: "Hacker News", icon: SiYcombinator, active: true },
-  { label: "Bluesky", icon: SiBluesky, active: true },
-];
-
-const huntColumns = [
-  {
-    key: "hunting",
-    label: "Hunting",
-    color: "text-red-400",
-    dot: "bg-red-400/50",
-  },
-  {
-    key: "interested",
-    label: "Interested",
-    color: "text-sky-400",
-    dot: "bg-sky-400/55",
-  },
-  {
-    key: "engaged",
-    label: "Engaged",
-    color: "text-amber-400",
-    dot: "bg-amber-400/55",
-  },
-  {
-    key: "hunted",
-    label: "Hunted",
-    color: "text-emerald-400",
-    dot: "bg-emerald-400/60",
-  },
+const STAGES = [
+  { key: "hunting", label: "Hunting", color: "#B9B2B3" },
+  { key: "interested", label: "Interested", color: "var(--amber)" },
+  { key: "engaged", label: "Engaged", color: "var(--r1)" },
+  { key: "hunted", label: "Hunted", color: "var(--green)" },
 ] as const;
 
-function scoreMeta(score: number | null) {
-  if (score === null)
-    return {
-      border: "rgba(255,255,255,0.06)",
-      glow: "transparent",
-      text: "text-white/20",
-      barColor: "rgba(255,255,255,0.06)",
-      scoreColor: "text-white/20",
-      bars: 0,
-    };
-  if (score >= 8)
-    return {
-      border: "rgb(239,68,68)",
-      glow: "rgba(239,68,68,0.22)",
-      text: "text-red-400",
-      barColor: "rgb(239,68,68)",
-      scoreColor: "text-red-400/80",
-      bars: 3,
-    };
-  if (score >= 5)
-    return {
-      border: "rgb(249,115,22)",
-      glow: "rgba(249,115,22,0.14)",
-      text: "text-orange-400",
-      barColor: "rgb(249,115,22)",
-      scoreColor: "text-orange-400/80",
-      bars: 2,
-    };
-  return {
-    border: "rgb(59,130,246)",
-    glow: "rgba(59,130,246,0.14)",
-    text: "text-blue-400",
-    barColor: "rgb(59,130,246)",
-    scoreColor: "text-blue-400/80",
-    bars: 1,
-  };
-}
+type Tip = { mention: MentionRow; left: number; top: number };
 
-function ScoreBars({ score }: { score: number | null }) {
-  const { bars, barColor, scoreColor } = scoreMeta(score);
+function isSameDay(a: Date, b: Date) {
   return (
-    <div className="flex items-center gap-1 shrink-0">
-      <div className="flex items-end gap-px h-3">
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="w-0.75 rounded-full"
-            style={{
-              height: i === 1 ? 6 : i === 2 ? 9 : 12,
-              background: i <= bars ? barColor : "rgba(255,255,255,0.06)",
-            }}
-          />
-        ))}
-      </div>
-      {score !== null && (
-        <span className={`text-[9px] font-bold tabular-nums ${scoreColor}`}>
-          {score}
-        </span>
-      )}
-    </div>
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
   );
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  hunting: "text-red-400",
-  interested: "text-sky-400",
-  engaged: "text-amber-400",
-  hunted: "text-emerald-400",
-};
-
-function SignalPill({
-  s,
-  status,
-}: {
-  s: {
-    id: string | number;
-    post_url: string;
-    post_title: string;
-    platform: string;
-    ai_score: number | null;
-  };
-  status?: string;
-}) {
-  const { border, glow } = scoreMeta(s.ai_score);
-  return (
-    <a
-      href={s.post_url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/4 transition-colors"
-      style={{
-        background: "rgba(255,255,255,0.025)",
-        borderLeft: `2px solid ${border}`,
-        boxShadow: `inset 3px 0 10px -5px ${glow}`,
-      }}
-    >
-      <div
-        className="w-4 h-4 rounded flex items-center justify-center shrink-0"
-        style={{ background: "rgba(255,255,255,0.06)" }}
-      >
-        <PlatformIcon platform={s.platform} size={8} />
-      </div>
-      <span className="text-[10px] text-white/55 truncate flex-1 leading-none">
-        {s.post_title}
-      </span>
-      {status && (
-        <span
-          className={`text-[9px] font-semibold shrink-0 capitalize ${STATUS_COLORS[status] ?? "text-white/30"}`}
-        >
-          {status}
-        </span>
-      )}
-      <ScoreBars score={s.ai_score} />
-    </a>
-  );
+function formatHour(hour: number) {
+  const suffix = hour < 12 ? "am" : "pm";
+  const h = hour % 12 === 0 ? 12 : hour % 12;
+  return `${h}${suffix}`;
 }
 
 export default function DashboardPage() {
-  const [scanning, setScanning] = useState(false);
-  const [scanPhase, setScanPhase] = useState<number | null>(null);
-  const [stats, setStats] = useState<Stats | null>(null);
-
+  const { limits } = usePlan();
+  const stats = useStatsStore((s) => s.stats);
+  const refreshStats = useStatsStore((s) => s.refresh);
   const setNewSignalsCount = useScanStore((s) => s.setNewSignalsCount);
   const toast = useToastStore((s) => s.show);
+
+  const [mentions, setMentions] = useState<MentionRow[] | null>(null);
+  const [keywords, setKeywords] = useState<Keyword[]>([]);
+  const [scanning, setScanning] = useState(false);
+  const [tip, setTip] = useState<Tip | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+
+  const rootRef = useRef<HTMLDivElement>(null);
+  const pulseRef = useRef<HTMLDivElement>(null);
+  const plotRef = useRef<HTMLDivElement>(null);
+  const progressRef = useRef<HTMLElement>(null);
+
+  async function loadData() {
+    const [rows, kws] = await Promise.all([
+      apiFetch<Record<string, unknown>[]>(
+        "/api/mentions?limit=500&sort=newest",
+      ),
+      apiFetch<Keyword[]>("/api/keywords"),
+    ]);
+    setMentions(rows.map(toMentionRow));
+    setKeywords(kws);
+    setNow(Date.now());
+  }
 
   useEffect(() => {
     async function load() {
       try {
-        setStats(await apiFetch<Stats>("/api/stats"));
+        await loadData();
       } catch (err) {
-        toast(err instanceof Error ? err.message : "Couldn't load your stats");
+        toast(
+          err instanceof Error ? err.message : "Couldn't load your dashboard",
+        );
+        setMentions([]);
       }
     }
     load();
   }, [toast]);
 
-  function endScan() {
-    setScanning(false);
-    setScanPhase(null);
+  const data = useMemo(() => {
+    const list = mentions ?? [];
+    const today = new Date(now);
+    const yesterday = new Date(now - DAY);
+
+    const todayRows = list.filter((m) =>
+      isSameDay(new Date(m.createdAt), today),
+    );
+    const yesterdayCount = list.filter((m) =>
+      isSameDay(new Date(m.createdAt), yesterday),
+    ).length;
+
+    const hours = Array.from({ length: 24 }, () => 0);
+    todayRows.forEach((m) => {
+      hours[new Date(m.createdAt).getHours()] += 1;
+    });
+    const maxHour = Math.max(...hours);
+    const peakHour = maxHour > 0 ? hours.indexOf(maxHour) : null;
+
+    const weekRows = list.filter(
+      (m) => now - new Date(m.createdAt).getTime() < 7 * DAY,
+    );
+    const hot = weekRows.filter((m) => (m.score ?? 0) >= 8);
+    const mix: Record<SignalPlatform, number> = {
+      reddit: 0,
+      hackernews: 0,
+      bluesky: 0,
+    };
+    hot.forEach((m) => {
+      mix[m.platform] += 1;
+    });
+    const ranked = (Object.entries(mix) as [SignalPlatform, number][]).sort(
+      (a, b) => b[1] - a[1],
+    );
+
+    const keywordHits = keywords.map((k) => ({
+      keyword: k.keyword,
+      platforms: k.platforms ?? [],
+      hits: weekRows.filter((m) => m.keyword === k.keyword).length,
+    }));
+
+    return {
+      todayCount: todayRows.length,
+      delta: todayRows.length - yesterdayCount,
+      yesterdayCount,
+      hours,
+      maxHour,
+      peakHour,
+      currentHour: today.getHours(),
+      hotCount: hot.length,
+      mix,
+      topPlatform: ranked[0][1] > 0 ? ranked[0][0] : null,
+      recent: list.slice(0, 5),
+      keywordHits,
+      maxHits: Math.max(...keywordHits.map((k) => k.hits), 1),
+      pulse: list.filter((m) => now - new Date(m.createdAt).getTime() < DAY),
+      followUp:
+        list.find((m) => m.status === "engaged" && m.notes) ??
+        list.find((m) => m.status === "engaged") ??
+        null,
+    };
+  }, [mentions, keywords, now]);
+
+  const loaded = mentions !== null;
+
+  useGSAP(
+    () => {
+      if (!loaded) return;
+      gsap.fromTo(
+        ".sp-dash > .sp-card",
+        { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, duration: 0.5, stagger: 0.07, ease: "power2.out" },
+      );
+      gsap.fromTo(
+        ".sp-sr, .sp-kwrow",
+        { opacity: 0, x: -6 },
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.35,
+          stagger: 0.04,
+          delay: 0.25,
+          ease: "power2.out",
+        },
+      );
+      gsap.fromTo(
+        ".sp-quota span",
+        { scaleX: 0 },
+        { scaleX: 1, duration: 1, delay: 0.3, ease: "power3.out" },
+      );
+      gsap.fromTo(
+        ".sp-hours i",
+        { scaleY: 0 },
+        {
+          scaleY: 1,
+          duration: 0.5,
+          stagger: 0.02,
+          delay: 0.3,
+          ease: "power2.out",
+        },
+      );
+      gsap.fromTo(
+        ".sp-mix span",
+        { opacity: 0, y: 6 },
+        { opacity: 1, y: 0, duration: 0.4, stagger: 0.08, delay: 0.4 },
+      );
+      gsap.fromTo(
+        ".sp-pipe i",
+        { scaleX: 0 },
+        {
+          scaleX: 1,
+          duration: 0.8,
+          stagger: 0.08,
+          delay: 0.3,
+          ease: "power3.out",
+        },
+      );
+      gsap.fromTo(
+        ".sp-kwrow .sp-bar i",
+        { scaleX: 0 },
+        {
+          scaleX: 1,
+          duration: 0.8,
+          stagger: 0.05,
+          delay: 0.35,
+          ease: "power3.out",
+        },
+      );
+      gsap.fromTo(
+        ".sp-band, .sp-midline",
+        { scaleX: 0 },
+        { scaleX: 1, duration: 1, delay: 0.2, ease: "power3.out" },
+      );
+      gsap.fromTo(
+        ".sp-dt",
+        { scale: 0 },
+        {
+          scale: 1,
+          duration: 0.5,
+          stagger: { each: 0.03, from: "end" },
+          delay: 0.35,
+          ease: "back.out(2.5)",
+          clearProps: "transform",
+        },
+      );
+    },
+    { scope: rootRef, dependencies: [loaded] },
+  );
+
+  function showTip(mention: MentionRow, target: HTMLElement) {
+    const box = pulseRef.current?.getBoundingClientRect();
+    const dot = target.getBoundingClientRect();
+    if (!box) return;
+    const left = Math.max(
+      0,
+      Math.min(box.width - 280, dot.left - box.left - 140),
+    );
+    const top =
+      dot.top - box.top > 100
+        ? dot.top - box.top - 96
+        : dot.bottom - box.top + 12;
+    setTip({ mention, left, top });
   }
 
   async function scan() {
     if (scanning) return;
     setScanning(true);
-    setScanPhase(0);
     const prevTotal = stats?.totalSignals ?? 0;
+    const bar = progressRef.current;
+    const sweep = plotRef.current?.querySelector(".sp-sweep");
+
+    if (bar) {
+      gsap.fromTo(
+        bar,
+        { width: "0%", opacity: 1 },
+        { width: "90%", duration: 40, ease: "power1.out" },
+      );
+    }
+    if (sweep && plotRef.current) {
+      gsap.fromTo(
+        sweep,
+        { x: 0, opacity: 1 },
+        {
+          x: plotRef.current.offsetWidth + 120,
+          duration: 2.2,
+          ease: "power1.inOut",
+          repeat: -1,
+        },
+      );
+    }
+
+    function finish() {
+      if (bar) {
+        gsap.killTweensOf(bar);
+        gsap.to(bar, {
+          width: "100%",
+          duration: 0.3,
+          onComplete: () => {
+            gsap.to(bar, { opacity: 0, duration: 0.3 });
+          },
+        });
+      }
+      if (sweep) {
+        gsap.killTweensOf(sweep);
+        gsap.set(sweep, { x: 0, opacity: 0 });
+      }
+      setScanning(false);
+    }
 
     try {
       await apiFetch("/api/scan/trigger", { method: "POST" });
     } catch (err) {
-      endScan();
+      finish();
       toast(err instanceof Error ? err.message : "Couldn't start the scan");
       return;
     }
@@ -221,405 +308,392 @@ export default function DashboardPage() {
     let attempts = 0;
     const poll = setInterval(async () => {
       attempts++;
-      if (attempts === 1) setScanPhase(1);
-      if (attempts === 3) setScanPhase(2);
       try {
-        const data = await apiFetch<Stats>("/api/stats");
-        setStats(data);
-
-        if (data.totalSignals > prevTotal || attempts >= 15) {
+        await refreshStats();
+        const total = useStatsStore.getState().stats?.totalSignals ?? prevTotal;
+        if (total > prevTotal || attempts >= 15) {
           clearInterval(poll);
-          const newCount = data.totalSignals - prevTotal;
-          if (newCount > 0) setNewSignalsCount(newCount);
-          setScanPhase(3);
-          setTimeout(endScan, 1500);
+          const newCount = total - prevTotal;
+          if (newCount > 0) {
+            setNewSignalsCount(newCount);
+            toast(
+              `Scan complete — ${newCount} new signal${newCount > 1 ? "s" : ""}`,
+              "success",
+            );
+          } else {
+            toast("Scan complete — nothing new yet", "success");
+          }
+          await loadData();
+          finish();
         }
       } catch {
         clearInterval(poll);
-        endScan();
+        finish();
         toast("Lost track of the scan. Check Signals in a minute.");
       }
     }, 3000);
   }
 
-  const totalHunted = stats
-    ? Object.values(stats.huntCounts).reduce((a, b) => a + b, 0)
-    : 0;
+  if (!loaded) {
+    return <div className="sp-loading">LOADING YOUR SIGNALS…</div>;
+  }
+
+  const huntCounts = stats?.huntCounts ?? {
+    hunting: 0,
+    interested: 0,
+    engaged: 0,
+    hunted: 0,
+  };
+  const huntSum =
+    huntCounts.hunting +
+    huntCounts.interested +
+    huntCounts.engaged +
+    huntCounts.hunted;
+  const monthUsed = stats?.signalsThisMonth ?? 0;
+  const monthPct = Math.min((monthUsed / limits.signals) * 100, 100);
+  const nowDate = new Date(now);
+  const resetDate = new Date(nowDate.getFullYear(), nowDate.getMonth() + 1, 1);
+  const monthName = nowDate
+    .toLocaleDateString("en-US", { month: "long" })
+    .toUpperCase();
 
   return (
-    <div className="p-5 h-full flex gap-4 overflow-hidden">
-      <div className="flex flex-col flex-6 gap-4 min-h-0 min-w-0">
-        <div className="flex-1 rounded-xl card p-5 flex flex-col min-h-0">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm font-semibold text-white">
-                Recent Signals
-              </h2>
-              {stats && stats.totalSignals > 0 && (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/8 text-white/40 font-semibold">
-                  {stats.totalSignals} total
-                </span>
-              )}
-            </div>
-            <a
-              href="/dashboard/signals"
-              className="flex items-center gap-1 text-[10px] text-white/25 hover:text-white/50 transition-colors"
-            >
-              View all <ArrowUpRight size={10} />
-            </a>
+    <div className="sp-dash" ref={rootRef}>
+      <div className="sp-card sp-kpis b-kpi">
+        <div className="sp-kpi">
+          <small>SIGNALS · {monthName}</small>
+          <div className="sp-kv">
+            <b>
+              <CountUp value={monthUsed} />
+            </b>
+            <i>/ {limits.signals}</i>
           </div>
-
-          {stats && stats.totalSignals > 0 ? (
-            <div className="flex-1 flex flex-col justify-center gap-3">
-              <div className="flex items-center gap-3">
-                {PLATFORMS.map((p) => (
-                  <div
-                    key={p.value}
-                    className="flex-1 flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-white/3 border border-white/5"
-                  >
-                    <PlatformIcon
-                      platform={p.value}
-                      size={13}
-                      className="shrink-0"
-                    />
-                    <p className="flex-1 text-[10px] text-white/40 uppercase tracking-widest truncate">
-                      {p.label}
-                    </p>
-                    <span className="text-xs font-semibold text-white/60 shrink-0">
-                      Active
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-white/3 border border-white/5">
-                <div
-                  className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
-                  style={{ background: "rgba(255,255,255,0.04)" }}
-                >
-                  <Zap size={12} className="text-white/50" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-white/60">AI scoring active</p>
-                  <p className="text-[10px] text-white/25">
-                    Every new mention is scored on scan
-                  </p>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-[10px] text-emerald-400/70">Live</span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-white/3 border border-white/5">
-                <div
-                  className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
-                  style={{ background: "rgba(255,255,255,0.04)" }}
-                >
-                  <Zap size={12} className="text-white/50" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-white/60">AI input active</p>
-                  <p className="text-[10px] text-white/25">
-                    Signals receive AI input for relevance
-                  </p>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-[10px] text-emerald-400/70">Live</span>
-                </div>
-              </div>
-
-              <a
-                href="/dashboard/signals"
-                className="flex items-center justify-center gap-2 py-2 rounded-lg border border-white/8 text-xs text-white/30 hover:text-white/60 hover:border-white/15 transition-colors"
-              >
-                Open Signals Inbox <ArrowUpRight size={11} />
-              </a>
-            </div>
-          ) : (
-            <div className="flex-1 flex flex-col items-center justify-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-white/3 flex items-center justify-center">
-                <Radio size={18} className="text-white/15" />
-              </div>
-              <p className="text-sm text-white/25">No signals yet</p>
-              <p className="text-xs text-white/15">
-                Run a scan to start listening
-              </p>
-            </div>
-          )}
+          <div className="sp-quota">
+            <span style={{ width: `${monthPct}%` }} />
+          </div>
+          <span className="sp-kf">
+            <em>{Math.max(limits.signals - monthUsed, 0)} left</em> · resets{" "}
+            {resetDate.toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+            })}
+          </span>
         </div>
 
-        <div className="flex gap-4 flex-1 min-h-0">
-          <div className="flex-1 flex flex-col px-4 py-4 rounded-xl card gap-3 min-h-0 min-w-0 overflow-hidden">
-            <div className="flex items-center justify-between">
-              <p className="text-[10px] text-white/40 uppercase tracking-widest">
-                Total Signals
-              </p>
-              <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0 bg-white/4 border border-white/6">
-                <Radio size={13} className="text-white/50" />
-              </div>
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-white leading-none stat-num-glow">
-                {stats?.totalSignals ?? (
-                  <span className="text-white/20 text-lg">—</span>
-                )}
-              </p>
-              <p className="text-[10px] text-white/25 mt-1">
-                mentions captured
-              </p>
-            </div>
-            <div className="h-px bg-white/5" />
-            <div className="flex flex-col gap-1.5 overflow-y-auto flex-1 min-h-0">
-              {stats?.recentSignals && stats.recentSignals.length > 0 ? (
-                stats.recentSignals.map((s) => <SignalPill key={s.id} s={s} />)
-              ) : (
-                <p className="text-[10px] text-white/20">No signals yet</p>
-              )}
-            </div>
+        <div className="sp-kpi">
+          <small>TODAY</small>
+          <div className="sp-kv">
+            <b>
+              <CountUp value={data.todayCount} />
+            </b>
+            {data.delta !== 0 && (
+              <i className={data.delta > 0 ? "up" : "down"}>
+                {data.delta > 0 ? `+${data.delta}` : data.delta}
+              </i>
+            )}
           </div>
+          <div className="sp-hours">
+            {data.hours.map((count, hour) => {
+              const future = hour > data.currentHour;
+              const height =
+                future || count === 0
+                  ? 8
+                  : 30 + (count / Math.max(data.maxHour, 1)) * 70;
+              return (
+                <i
+                  key={hour}
+                  className={future ? "fut" : count ? "on" : ""}
+                  style={{ height: `${height}%` }}
+                  title={`${formatHour(hour)} · ${count}`}
+                />
+              );
+            })}
+          </div>
+          <span className="sp-kf">
+            vs {data.yesterdayCount} yesterday
+            {data.peakHour !== null && ` · peak ${formatHour(data.peakHour)}`}
+          </span>
+        </div>
 
-          <div className="flex-1 flex flex-col px-4 py-4 rounded-xl card gap-3 min-h-0 min-w-0 overflow-hidden">
-            <div className="flex items-center justify-between">
-              <p className="text-[10px] text-white/40 uppercase tracking-widest">
-                Signals Today
-              </p>
-              <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0 bg-white/4 border border-white/6">
-                <TrendingUp size={13} className="text-white/50" />
-              </div>
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-white leading-none stat-num-glow">
-                {stats?.signalsToday ?? (
-                  <span className="text-white/20 text-lg">—</span>
-                )}
-              </p>
-              <p className="text-[10px] text-white/25 mt-1">in last 24h</p>
-            </div>
-            <div className="h-px bg-white/5" />
-            <div className="flex flex-col gap-1.5 overflow-y-auto flex-1 min-h-0">
-              {stats?.topSignals && stats.topSignals.length > 0 ? (
-                stats.topSignals.map((s) => <SignalPill key={s.id} s={s} />)
-              ) : (
-                <p className="text-[10px] text-white/20">No signals today</p>
-              )}
-            </div>
+        <div className="sp-kpi hot">
+          <small>HOT LEADS · 7D</small>
+          <div className="sp-kv">
+            <b>
+              <CountUp value={data.hotCount} />
+            </b>
+            <i>intent 8+</i>
           </div>
-
-          <div className="flex-1 flex flex-col px-4 py-4 rounded-xl card gap-3 min-h-0 min-w-0 overflow-hidden">
-            <div className="flex items-center justify-between">
-              <p className="text-[10px] text-white/40 uppercase tracking-widest">
-                Keywords
-              </p>
-              <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0 bg-white/4 border border-white/6">
-                <Tag size={13} className="text-white/50" />
-              </div>
+          {data.hotCount > 0 ? (
+            <div className="sp-mix">
+              {PLATFORMS.filter((p) => data.mix[p.value] > 0).map((p) => (
+                <span
+                  key={p.value}
+                  style={
+                    { "--pc": platformVar(p.value) } as React.CSSProperties
+                  }
+                  title={`${data.mix[p.value]} from ${p.label}`}
+                >
+                  <PlatformIcon platform={p.value} size={14} plain />
+                  <em>{p.label}</em>
+                  {data.mix[p.value]}
+                </span>
+              ))}
             </div>
-            <div>
-              <p className="text-3xl font-bold text-white leading-none stat-num-glow">
-                {stats?.keywordsTracked ?? (
-                  <span className="text-white/20 text-lg">—</span>
-                )}
-              </p>
-              <p className="text-[10px] text-white/25 mt-1">being tracked</p>
-            </div>
-            <div className="h-px bg-white/5" />
-            <div className="flex flex-col gap-1.5 overflow-y-auto flex-1 min-h-0">
-              {stats?.keywords && stats.keywords.length > 0 ? (
-                stats.keywords.map((kw) => (
-                  <div
-                    key={kw.keyword}
-                    className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/3 border border-white/5"
-                  >
-                    <span className="flex items-center gap-1 shrink-0">
-                      {(kw.platforms ?? []).map((p) => (
-                        <PlatformIcon key={p} platform={p} size={9} />
-                      ))}
-                    </span>
-                    <span className="text-[10px] text-white/50 truncate flex-1">
-                      {kw.keyword}
-                    </span>
-                    <span className="text-[9px] text-white/25 shrink-0">
-                      {kw.mention_count} hits
-                    </span>
-                  </div>
-                ))
-              ) : (
-                <p className="text-[10px] text-white/20">No keywords yet</p>
-              )}
-            </div>
-          </div>
+          ) : (
+            <div className="sp-mix-none">No hot leads this week yet</div>
+          )}
+          <span className="sp-kf">
+            {data.topPlatform
+              ? `Most from ${PLATFORM_LABELS[data.topPlatform]}`
+              : "Keep scanning"}
+          </span>
         </div>
       </div>
 
-      <div className="flex flex-col flex-4 gap-4 min-h-0 min-w-0">
-        <div className="flex-1 rounded-xl auth-panel p-5 flex flex-col min-h-0 min-w-0 overflow-hidden">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm font-semibold text-white">Hunt Board</h2>
-              {totalHunted > 0 && (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/8 text-white/40 font-semibold">
-                  {totalHunted} leads
-                </span>
-              )}
+      <div className="sp-card b-scan">
+        <div className="sp-c-h">
+          <b>Scanner</b>
+          <span className="meta">
+            {stats?.autoScan === false ? "manual only" : "every 6h"}
+          </span>
+        </div>
+        <div className="sp-src">
+          {(stats?.sources ?? []).map((src) => (
+            <div key={src.platform}>
+              <span className="sp-pi">
+                <PlatformIcon platform={src.platform} size={15} />
+              </span>
+              {PLATFORM_LABELS[src.platform]}
+              <em className={src.active ? "" : "off"}>
+                {src.active ? "ACTIVE" : "NOT CONNECTED"}
+              </em>
             </div>
-            <a
-              href="/dashboard/hunt-board"
-              className="flex items-center gap-1 text-[10px] text-white/25 hover:text-white/50 transition-colors"
-            >
-              Open board <ArrowUpRight size={10} />
-            </a>
+          ))}
+          <div>
+            <span className="sp-pi" style={{ color: "var(--r1)" }}>
+              <Sparkles size={15} />
+            </span>
+            AI intent scoring<em>ON</em>
           </div>
+        </div>
+        <div className="sp-scan">
+          <div className="sp-scan-m">
+            <span>Last scan</span>
+            <b>
+              {stats?.lastScannedAt ? timeAgo(stats.lastScannedAt) : "never"}
+            </b>
+          </div>
+          <button
+            className={`sp-btn ${scanning ? "spin" : ""}`}
+            onClick={scan}
+            disabled={scanning}
+          >
+            <i className="pg" ref={progressRef} />
+            <span>
+              <RefreshCw />
+              {scanning ? "Scanning…" : "Scan now"}
+            </span>
+          </button>
+        </div>
+      </div>
 
-          <div className="grid grid-cols-2 gap-2 mb-4">
-            {huntColumns.map(({ key, label, color, dot }) => (
-              <div
-                key={key}
-                className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-white/3 border border-white/5"
+      <div className="sp-card b-sig">
+        <div className="sp-c-h">
+          <b>Recent signals</b>
+          <Link className="more" href="/dashboard/signals">
+            View all <ArrowUpRight />
+          </Link>
+        </div>
+        {data.recent.length ? (
+          <div className="sp-rows">
+            {data.recent.map((m) => (
+              <Link
+                key={m.id}
+                href="/dashboard/signals"
+                className="sp-sr"
+                style={
+                  { "--pc": platformVar(m.platform) } as React.CSSProperties
+                }
               >
-                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dot}`} />
-                <span className={`text-xs font-medium flex-1 ${color}`}>
-                  {label}
+                <span className="sp-pi" title={PLATFORM_LABELS[m.platform]}>
+                  <PlatformIcon platform={m.platform} size={16} />
                 </span>
-                <span className="text-sm font-bold text-white">
-                  {stats ? stats.huntCounts[key] : "—"}
-                </span>
-              </div>
+                <span className="t">{m.title}</span>
+                <span className="sp-kwt">{m.keyword}</span>
+                <ScoreArc score={m.score} delay={0.35} />
+                <span className="sp-ago">{shortAgo(m.createdAt)}</span>
+              </Link>
             ))}
           </div>
+        ) : (
+          <div className="sp-nodata">
+            No signals yet — add a keyword and run a scan.
+          </div>
+        )}
+      </div>
 
-          {stats?.huntLeads && stats.huntLeads.length > 0 ? (
-            <div className="flex flex-col gap-1.5 flex-1 min-h-0 overflow-y-auto">
-              {stats.huntLeads.map((lead) => (
-                <SignalPill key={lead.id} s={lead} status={lead.status} />
-              ))}
-              <a
-                href="/dashboard/hunt-board"
-                className="flex items-center justify-center gap-2 py-2 rounded-lg border border-white/8 text-xs text-white/30 hover:text-white/60 hover:border-white/15 transition-colors mt-auto"
-              >
-                Manage leads <ArrowUpRight size={11} />
-              </a>
-            </div>
+      <div className="sp-card b-hunt">
+        <div className="sp-c-h">
+          <b>Hunt Board</b>
+          <Link className="more" href="/dashboard/hunt-board">
+            Open board <ArrowUpRight />
+          </Link>
+        </div>
+        <div className="sp-pipe">
+          {huntSum > 0 ? (
+            STAGES.map((s) =>
+              huntCounts[s.key] ? (
+                <i
+                  key={s.key}
+                  style={{
+                    flex: huntCounts[s.key] / huntSum,
+                    background: s.color,
+                  }}
+                />
+              ) : null,
+            )
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-white/3 flex items-center justify-center">
-                <Target size={14} className="text-white/15" />
+            <i style={{ flex: 1, background: "rgba(255,255,255,.07)" }} />
+          )}
+        </div>
+        <div className="sp-stg">
+          {STAGES.map((s) => (
+            <Link
+              key={s.key}
+              href="/dashboard/hunt-board"
+              style={{ "--sc": s.color } as React.CSSProperties}
+            >
+              <span className="sp-dot" />
+              {s.label}
+              <b>
+                <CountUp value={huntCounts[s.key]} />
+              </b>
+            </Link>
+          ))}
+        </div>
+        <div className="sp-next">
+          <small>FOLLOW UP</small>
+          {data.followUp ? (
+            <Link href="/dashboard/hunt-board">
+              <span className="sp-pi">
+                <PlatformIcon platform={data.followUp.platform} size={16} />
+              </span>
+              <span className="t">
+                {data.followUp.notes || data.followUp.title}
+              </span>
+              <ScoreArc score={data.followUp.score} />
+            </Link>
+          ) : (
+            <span style={{ fontSize: 13, color: "var(--ink-3)" }}>
+              Nothing waiting on you.
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="sp-card b-pulse">
+        <div className="sp-c-h">
+          <b>Last 24 hours</b>
+          <span className="meta">Higher = stronger buying intent</span>
+          <Link className="more" href="/dashboard/signals">
+            All signals <ArrowUpRight />
+          </Link>
+        </div>
+        <div className="sp-pulse" ref={pulseRef}>
+          <div className="sp-plot" ref={plotRef}>
+            <div className="sp-band">
+              <span className="sp-thr" style={{ color: "var(--r1)" }}>
+                HOT 8+
+              </span>
+            </div>
+            <div className="sp-midline">
+              <span className="sp-thr" style={{ color: "var(--ink-3)" }}>
+                WARM 5+
+              </span>
+            </div>
+            <div className="sp-now" />
+            <div className="sp-sweep" />
+            {data.pulse.map((m) => {
+              const age = now - new Date(m.createdAt).getTime();
+              return (
+                <Link
+                  key={m.id}
+                  href="/dashboard/signals"
+                  className={`sp-dt ${scoreTier(m.score)}`}
+                  aria-label={m.title}
+                  style={
+                    {
+                      "--dc": scoreColor(m.score),
+                      left: `${100 - (age / DAY) * 100}%`,
+                      top: `${100 - (m.score ?? 0) * 10}%`,
+                    } as React.CSSProperties
+                  }
+                  onMouseEnter={(e) => showTip(m, e.currentTarget)}
+                  onMouseLeave={() => setTip(null)}
+                />
+              );
+            })}
+            {data.pulse.length === 0 && (
+              <div className="sp-pulse-empty">
+                No mentions in the last 24 hours
               </div>
-              <p className="text-xs text-white/25">No leads yet</p>
-              <p className="text-[10px] text-white/15">
-                Add signals to the Hunt Board
-              </p>
+            )}
+          </div>
+          <div className="sp-xax">
+            <span>24h ago</span>
+            <span>18h</span>
+            <span>12h</span>
+            <span>6h</span>
+            <span>Now</span>
+          </div>
+          {tip && (
+            <div className="sp-tip" style={{ left: tip.left, top: tip.top }}>
+              <b>{tip.mention.title}</b>
+              <span>
+                {PLATFORM_LABELS[tip.mention.platform]} · {tip.mention.source} ·{" "}
+                {timeAgo(tip.mention.createdAt)} · intent{" "}
+                {tip.mention.score ?? "–"}
+              </span>
             </div>
           )}
         </div>
+      </div>
 
-        <div className="flex flex-col gap-4 px-5 py-4 rounded-xl card">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-white">Last Scanned</p>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <Clock size={11} className="text-white/20" />
-                <p className="text-xs text-white/25">
-                  {stats?.lastScannedAt
-                    ? timeAgo(stats.lastScannedAt)
-                    : "Never"}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              {sources.map(({ label, icon: Icon, active }) => (
-                <div key={label} className="flex items-center gap-1.5">
-                  <Icon
-                    size={13}
-                    className={active ? "text-white/40" : "text-white/15"}
-                  />
-                  <Circle
-                    size={5}
-                    className={
-                      active
-                        ? "fill-green-400 text-green-400"
-                        : "fill-white/20 text-white/20"
-                    }
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-          <button
-            onClick={scan}
-            disabled={scanning}
-            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-md text-white text-sm font-medium transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{
-              background: scanning
-                ? "rgba(255,255,255,0.06)"
-                : "rgba(255,255,255,0.08)",
-              border: "1px solid rgba(255,255,255,0.12)",
-            }}
-            onMouseEnter={(e) => {
-              if (!scanning) {
-                (e.currentTarget as HTMLButtonElement).style.background =
-                  "rgba(255,255,255,0.12)";
-                (e.currentTarget as HTMLButtonElement).style.borderColor =
-                  "rgba(255,255,255,0.2)";
-              }
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background =
-                "rgba(255,255,255,0.08)";
-              (e.currentTarget as HTMLButtonElement).style.borderColor =
-                "rgba(255,255,255,0.12)";
-            }}
-          >
-            <ScanLine size={15} className={scanning ? "animate-spin" : ""} />
-            {scanning ? SCAN_STEPS[Math.min(scanPhase ?? 0, 2)] : "Scan Now"}
-          </button>
-
-          <AnimatePresence>
-            {scanPhase !== null && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.2 }}
-                className="flex flex-col gap-1.5 overflow-hidden pt-1"
-              >
-                {SCAN_STEPS.map((step, i) => {
-                  const done = scanPhase > i;
-                  const active = scanPhase === i;
-                  return (
-                    <motion.div
-                      key={step}
-                      initial={{ opacity: 0, x: -6 }}
-                      animate={{ opacity: scanPhase < i ? 0.2 : 1, x: 0 }}
-                      transition={{ delay: i * 0.05 }}
-                      className="flex items-center gap-2"
-                    >
-                      {done ? (
-                        <Check
-                          size={11}
-                          className="text-emerald-400 shrink-0"
-                        />
-                      ) : active ? (
-                        <Loader
-                          size={11}
-                          className="text-red-400 animate-spin shrink-0"
-                        />
-                      ) : (
-                        <div className="w-2.75 h-2.75 rounded-full border border-white/15 shrink-0" />
-                      )}
-                      <span
-                        className={`text-[11px] ${done ? "text-emerald-400/60" : active ? "text-white/60" : "text-white/20"}`}
-                      >
-                        {step}
-                      </span>
-                    </motion.div>
-                  );
-                })}
-              </motion.div>
-            )}
-          </AnimatePresence>
+      <div className="sp-card b-kw">
+        <div className="sp-c-h">
+          <b>Keywords</b>
+          <span className="meta">7-day hits</span>
+          <Link className="more" href="/dashboard/keywords">
+            Manage <ArrowUpRight />
+          </Link>
         </div>
+        {data.keywordHits.length ? (
+          data.keywordHits.map((k) => (
+            <div key={k.keyword} className={`sp-kwrow ${k.hits ? "" : "zero"}`}>
+              <div className="n">
+                <span className="icons">
+                  {k.platforms.map((p) => (
+                    <PlatformIcon key={p} platform={p} size={12} />
+                  ))}
+                </span>
+                <span>{k.keyword}</span>
+              </div>
+              <div className="sp-bar">
+                <i
+                  style={{
+                    width: `${(k.hits / data.maxHits) * 100}%`,
+                    background: k.hits ? undefined : "transparent",
+                  }}
+                />
+              </div>
+              <span className="c">{k.hits}</span>
+            </div>
+          ))
+        ) : (
+          <div className="sp-nodata">
+            <Link href="/dashboard/keywords">Add your first keyword →</Link>
+          </div>
+        )}
       </div>
     </div>
   );
