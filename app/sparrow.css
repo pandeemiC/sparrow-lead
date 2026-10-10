@@ -445,7 +445,7 @@
   flex: 1;
   min-height: 0;
   overflow: auto;
-  padding: clamp(12px, 1.6vw, 24px) clamp(14px, 2.2vw, 32px) 32px;
+  padding: clamp(12px, 1.4vw, 20px) clamp(12px, 1.4vw, 20px) 28px;
 }
 
 /* ---------- buttons ---------- */
@@ -836,8 +836,6 @@
 
 /* ---------- dashboard ---------- */
 .sp-dash {
-  max-width: 1560px;
-  margin: 0 auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(300px, clamp(300px, 30%, 400px));
   grid-template-areas: "kpi scan" "sig hunt" "pul kw";
@@ -1429,7 +1427,6 @@
 
 /* ---------- signals ---------- */
 .sp-sig-wrap {
-  max-width: 1480px;
   display: grid;
   grid-template-columns: 232px minmax(0, 1fr);
   gap: 24px;
@@ -1870,9 +1867,6 @@
 }
 
 /* ---------- keywords ---------- */
-.sp-kw-wrap {
-  max-width: 1480px;
-}
 .sp-kw-wrap .sp-head {
   margin-bottom: 20px;
 }
