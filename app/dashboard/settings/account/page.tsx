@@ -6,6 +6,8 @@ import { MoreHorizontal } from "lucide-react";
 import { usePlan } from "@/components/dashboard/PlanContext";
 import { useToastStore } from "@/store/toastStore";
 import type { AccountSession } from "@/types";
+import { SettingsCard } from "@/components/ui/SettingsUI";
+import { GhostButton, SectionTitle } from "@/components/sp/ui";
 
 function SessionMenu({ onTerminate }: { onTerminate: () => void }) {
   const [open, setOpen] = useState(false);
@@ -151,8 +153,8 @@ export default function SettingsAccount() {
 
   return (
     <div className="space-y-4">
-      <div className="sp-card">
-        <h2 className="sp-section">Account</h2>
+      <SettingsCard>
+        <SectionTitle>Account</SectionTitle>
         <div className="space-y-5">
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1 space-y-1.5">
@@ -180,24 +182,17 @@ export default function SettingsAccount() {
 
             {editingName ? (
               <div className="flex gap-2 shrink-0">
-                <button
-                  onClick={() => setEditingName(false)}
-                  className="sp-ghost"
-                >
+                <GhostButton onClick={() => setEditingName(false)}>
                   Cancel
-                </button>
-                <button
-                  onClick={saveDisplayName}
-                  disabled={saving}
-                  className="sp-ghost"
-                >
+                </GhostButton>
+                <GhostButton onClick={saveDisplayName} disabled={saving}>
                   {saving ? "Saving..." : "Save"}
-                </button>
+                </GhostButton>
               </div>
             ) : (
-              <button onClick={editName} className="sp-ghost shrink-0">
+              <GhostButton onClick={editName} className="shrink-0">
                 Edit
-              </button>
+              </GhostButton>
             )}
           </div>
           <div className="h-px bg-white/5" />
@@ -206,24 +201,24 @@ export default function SettingsAccount() {
               <p className="text-sm font-medium text-white">Email</p>
               <p className="text-sm text-white/35 truncate max-w-xs">{email}</p>
             </div>
-            {!isOAuthUser && <button className="sp-ghost">Change</button>}
+            {!isOAuthUser && <GhostButton>Change</GhostButton>}
           </div>
         </div>
-      </div>
+      </SettingsCard>
 
-      <div className="sp-card">
-        <h2 className="sp-section">Password</h2>
+      <SettingsCard>
+        <SectionTitle>Password</SectionTitle>
         <div className="flex items-center justify-between">
           <div className="space-y-1.5">
             <p className="text-sm font-medium text-white">Change Password</p>
             <p className="text-sm text-white/35">••••••••••••</p>
           </div>
-          {!isOAuthUser && <button className="sp-ghost">Change</button>}
+          {!isOAuthUser && <GhostButton>Change</GhostButton>}
         </div>
-      </div>
+      </SettingsCard>
 
-      <div className="sp-card">
-        <h2 className="sp-section">Sessions</h2>
+      <SettingsCard>
+        <SectionTitle>Sessions</SectionTitle>
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-sm font-medium text-white">
@@ -233,14 +228,12 @@ export default function SettingsAccount() {
               Revokes all active sessions across every device
             </p>
           </div>
-          <button onClick={logOutEverywhere} className="sp-ghost">
-            Log Out All
-          </button>
+          <GhostButton onClick={logOutEverywhere}>Log Out All</GhostButton>
         </div>
-      </div>
+      </SettingsCard>
 
-      <div className="sp-card">
-        <h2 className="sp-section">Danger Zone</h2>
+      <SettingsCard>
+        <SectionTitle>Danger Zone</SectionTitle>
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-sm font-medium text-white">
@@ -266,10 +259,10 @@ export default function SettingsAccount() {
             Delete Account
           </button>
         </div>
-      </div>
+      </SettingsCard>
 
-      <div className="sp-card">
-        <h2 className="sp-section">Active Sessions</h2>
+      <SettingsCard>
+        <SectionTitle>Active Sessions</SectionTitle>
         <div className="space-y-1">
           <div className="grid grid-cols-[1fr_1fr_1fr_auto] gap-4 px-3 py-2">
             <span className="text-xs text-white/25 uppercase tracking-wider">
@@ -302,7 +295,7 @@ export default function SettingsAccount() {
             </div>
           ))}
         </div>
-      </div>
+      </SettingsCard>
     </div>
   );
 }

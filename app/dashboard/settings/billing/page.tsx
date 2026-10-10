@@ -2,6 +2,8 @@
 
 import { CreditCard } from "lucide-react";
 import { GrCodeSandbox } from "react-icons/gr";
+import { SettingsCard } from "@/components/ui/SettingsUI";
+import { GhostButton, SectionTitle } from "@/components/sp/ui";
 
 const currentPlan = "free";
 const isPaid = currentPlan !== "free";
@@ -32,10 +34,10 @@ export default function SettingsBilling() {
 
   return (
     <div className="space-y-4">
-      <div className="sp-card">
+      <SettingsCard>
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="p-2.5 rounded-lg sp-chip">
+            <div className="p-2.5 rounded-lg bg-panel-2 border border-line-2">
               <GrCodeSandbox size={50} className="text-white/50" />
             </div>
             <div className="space-y-1">
@@ -55,16 +57,16 @@ export default function SettingsBilling() {
             </div>
           </div>
           {isPaid ? (
-            <button className="sp-ghost shrink-0">Adjust Plan</button>
+            <GhostButton className="shrink-0">Adjust Plan</GhostButton>
           ) : (
-            <button className="sp-ghost shrink-0">Upgrade</button>
+            <GhostButton className="shrink-0">Upgrade</GhostButton>
           )}
         </div>
-      </div>
+      </SettingsCard>
 
-      <div className="sp-card flex items-center justify-between gap-4">
+      <SettingsCard className="flex items-center justify-between gap-4">
         <div className="space-y-4">
-          <h2 className="sp-section !mb-0">Payment</h2>
+          <SectionTitle className="mb-0">Payment</SectionTitle>
           {isPaid ? (
             <div className="flex items-center gap-3">
               <CreditCard size={18} className="text-white/40 shrink-0" />
@@ -74,11 +76,11 @@ export default function SettingsBilling() {
             <p className="text-sm text-white/35">No payment method on file.</p>
           )}
         </div>
-        {isPaid && <button className="sp-ghost">Update</button>}
-      </div>
+        {isPaid && <GhostButton>Update</GhostButton>}
+      </SettingsCard>
 
-      <div className="sp-card">
-        <h2 className="sp-section">Invoices</h2>
+      <SettingsCard>
+        <SectionTitle>Invoices</SectionTitle>
         {isPaid ? (
           <div className="space-y-1">
             <div className="grid grid-cols-[1fr_1fr_1fr_auto] gap-4 px-3 py-2">
@@ -113,12 +115,14 @@ export default function SettingsBilling() {
         ) : (
           <p className="text-sm text-white/35">No invoices yet.</p>
         )}
-      </div>
+      </SettingsCard>
 
       {isPaid && (
-        <div className="sp-card flex items-center justify-between gap-4">
+        <SettingsCard className="flex items-center justify-between gap-4">
           <div className="space-y-4">
-            <h2 className="sp-section !mb-0">Danger Zone — Cancellation</h2>
+            <SectionTitle className="mb-0">
+              Danger Zone — Cancellation
+            </SectionTitle>
             <div className="space-y-3">
               <p className="text-sm font-medium text-white">Cancel plan</p>
               <p className="text-sm text-white/35">
@@ -130,7 +134,7 @@ export default function SettingsBilling() {
           <button className="text-sm px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all shrink-0">
             Cancel
           </button>
-        </div>
+        </SettingsCard>
       )}
     </div>
   );

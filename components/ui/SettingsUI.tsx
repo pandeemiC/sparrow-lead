@@ -2,6 +2,16 @@
 
 import { useState, useEffect, useRef } from "react";
 import { ChevronDown } from "lucide-react";
+import type { ComponentProps } from "react";
+import { cn } from "@/lib/utils";
+import { Card, GhostButton, Switch } from "@/components/sp/ui";
+
+// data-card is what the settings layout animates in
+export function SettingsCard({ className, ...props }: ComponentProps<"div">) {
+  return (
+    <Card data-card className={cn("px-6 py-[22px]", className)} {...props} />
+  );
+}
 
 export function Toggle({
   enabled,
@@ -10,17 +20,7 @@ export function Toggle({
   enabled: boolean;
   onChange: (val: boolean) => void;
 }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={enabled}
-      onClick={() => onChange(!enabled)}
-      className={`sp-switch ${enabled ? "on" : ""}`}
-    >
-      <i />
-    </button>
-  );
+  return <Switch on={enabled} onClick={() => onChange(!enabled)} />;
 }
 
 export function Row({
@@ -35,12 +35,8 @@ export function Row({
   return (
     <div className="flex items-center justify-between gap-6">
       <div className="space-y-1">
-        <p className="text-sm font-medium" style={{ color: "var(--ink)" }}>
-          {title}
-        </p>
-        <p className="text-sm" style={{ color: "var(--ink-3)" }}>
-          {description}
-        </p>
+        <p className="text-sm font-medium text-ink">{title}</p>
+        <p className="text-sm text-ink-3">{description}</p>
       </div>
       {right}
     </div>
@@ -72,36 +68,22 @@ export function Select({
 
   return (
     <div ref={ref} className="relative shrink-0">
-      <button
+      <GhostButton
         type="button"
         onClick={() => setOpen(!open)}
-        className="sp-ghost"
-        style={{
-          minWidth: 150,
-          justifyContent: "space-between",
-          color: "var(--ink)",
-        }}
+        className="min-w-[150px] justify-between text-ink"
       >
         <span>{selected?.label ?? "Select…"}</span>
         <ChevronDown
           size={13}
-          style={{
-            transform: open ? "rotate(180deg)" : undefined,
-            transition: "transform .2s",
-          }}
+          className={cn(
+            "transition-transform duration-200",
+            open && "rotate-180",
+          )}
         />
-      </button>
+      </GhostButton>
       {open && (
-        <div
-          className="absolute right-0 top-full mt-1 z-50 overflow-hidden min-w-40"
-          style={{
-            background: "rgba(22,11,13,.96)",
-            border: "1px solid var(--line-2)",
-            borderRadius: 12,
-            boxShadow: "0 24px 60px rgba(0,0,0,.5)",
-            padding: 4,
-          }}
-        >
+        <div className="absolute top-full right-0 z-50 mt-1 min-w-40 overflow-hidden rounded-xl border border-line-2 bg-[rgba(22,11,13,0.96)] p-1 shadow-[0_24px_60px_rgba(0,0,0,0.5)]">
           {options.map((opt) => (
             <button
               type="button"
@@ -110,10 +92,10 @@ export function Select({
                 onChange(opt.value);
                 setOpen(false);
               }}
-              className="w-full text-left px-3 py-2 text-sm rounded-lg transition-colors hover:bg-white/5"
-              style={{
-                color: opt.value === value ? "var(--ink)" : "var(--ink-2)",
-              }}
+              className={cn(
+                "w-full rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-white/5",
+                opt.value === value ? "text-ink" : "text-ink-2",
+              )}
             >
               {opt.label}
             </button>

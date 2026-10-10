@@ -6,6 +6,8 @@ import { Shield } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePlan } from "@/components/dashboard/PlanContext";
 import { SiGoogle, SiGithub } from "react-icons/si";
+import { SettingsCard } from "@/components/ui/SettingsUI";
+import { GhostButton, SectionTitle } from "@/components/sp/ui";
 
 const themes = [
   { label: "Light", value: "light" },
@@ -63,8 +65,8 @@ export default function SettingsOverview() {
     <div className="space-y-4">
       <div className="grid grid-cols-6 gap-4 items-stretch">
         <div className="col-span-4 flex flex-col gap-4">
-          <div className="sp-card">
-            <h2 className="sp-section">Profile</h2>
+          <SettingsCard>
+            <SectionTitle>Profile</SectionTitle>
             <div className="flex items-center gap-5">
               {user.imageUrl ? (
                 <Image
@@ -94,10 +96,10 @@ export default function SettingsOverview() {
                 )}
               </div>
             </div>
-          </div>
+          </SettingsCard>
 
-          <div className="sp-card flex-1">
-            <h2 className="sp-section">Appearance</h2>
+          <SettingsCard className="flex-1">
+            <SectionTitle>Appearance</SectionTitle>
             <div className="flex gap-3">
               {themes.map((t) => (
                 <button
@@ -110,11 +112,11 @@ export default function SettingsOverview() {
                 </button>
               ))}
             </div>
-          </div>
+          </SettingsCard>
         </div>
 
-        <div className="col-span-2 sp-card flex flex-col gap-6">
-          <h2 className="sp-section !mb-0">Plan</h2>
+        <SettingsCard className="col-span-2 flex flex-col gap-6">
+          <SectionTitle className="mb-0">Plan</SectionTitle>
           <div className="flex items-start justify-between gap-3">
             <div className="space-y-1.5">
               <p className="text-base font-semibold text-white">{plan}</p>
@@ -122,7 +124,7 @@ export default function SettingsOverview() {
                 {limits.keywords} keywords · {limits.signals} signals/mo
               </p>
             </div>
-            <button className="sp-ghost">Upgrade</button>
+            <GhostButton>Upgrade</GhostButton>
           </div>
           <div className="flex gap-4 justify-center flex-1 items-center">
             <div className="flex-1 flex flex-col items-center gap-3">
@@ -188,11 +190,11 @@ export default function SettingsOverview() {
               </p>
             </div>
           </div>
-        </div>
+        </SettingsCard>
       </div>
 
-      <div className="sp-card">
-        <h2 className="sp-section">Connected Accounts</h2>
+      <SettingsCard>
+        <SectionTitle>Connected Accounts</SectionTitle>
         <div className="space-y-5">
           {providers.map(({ key, label, icon: Icon }, i) => {
             const connected = connectedProviders.includes(key);
@@ -209,15 +211,15 @@ export default function SettingsOverview() {
                       </p>
                     </div>
                   </div>
-                  <button className="sp-ghost">
+                  <GhostButton>
                     {connected ? "Disconnect" : "Connect"}
-                  </button>
+                  </GhostButton>
                 </div>
               </div>
             );
           })}
         </div>
-      </div>
+      </SettingsCard>
     </div>
   );
 }

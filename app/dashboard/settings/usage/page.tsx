@@ -6,6 +6,8 @@ import { useState, useEffect } from "react";
 import { apiFetch } from "@/lib/apiFetch";
 import { useToastStore } from "@/store/toastStore";
 import type { Stats } from "@/types";
+import { SettingsCard } from "@/components/ui/SettingsUI";
+import { SectionTitle } from "@/components/sp/ui";
 
 function UsageBar({
   label,
@@ -73,9 +75,9 @@ export default function SettingsUsage() {
 
   return (
     <div className="space-y-4">
-      <div className="sp-card flex items-center justify-between gap-4">
+      <SettingsCard className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="p-2.5 rounded-lg sp-chip">
+          <div className="p-2.5 rounded-lg bg-panel-2 border border-line-2">
             <BarChart2 size={22} className="text-white/50" />
           </div>
           <div className="space-y-1">
@@ -88,10 +90,10 @@ export default function SettingsUsage() {
         <span className="text-xs px-2.5 py-1 rounded-full border border-white/10 text-white/40 shrink-0">
           Current period
         </span>
-      </div>
+      </SettingsCard>
 
-      <div className="sp-card">
-        <h2 className="sp-section">This Period</h2>
+      <SettingsCard>
+        <SectionTitle>This Period</SectionTitle>
         <div className="space-y-6">
           <UsageBar
             label="Keywords"
@@ -105,7 +107,7 @@ export default function SettingsUsage() {
             limit={limits.signals}
           />
         </div>
-      </div>
+      </SettingsCard>
     </div>
   );
 }

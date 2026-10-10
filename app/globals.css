@@ -48,11 +48,18 @@
   --color-line: var(--line);
   --color-line-2: var(--line-2);
   --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
   --color-amber: var(--amber);
   --color-green: var(--green);
   --color-rd: var(--rd);
   --color-hn: var(--hn);
   --color-bs: var(--bs);
+
+  /* font-display = playfair, font-body = inter, font-mono = jetbrains
+     (font-serif/font-sans stay default for the landing page) */
+  --font-display: var(--serif);
+  --font-body: var(--sans);
+  --font-mono: var(--mono);
 }
 
 body {
@@ -2837,87 +2844,6 @@ body {
 }
 .sp-dr-f .grow {
   flex: 1;
-}
-
-/* ---------- settings ---------- */
-.sp-settings {
-  display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: 28px;
-  max-width: 1080px;
-  align-items: start;
-}
-.sp-settings-nav {
-  position: sticky;
-  top: 0;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  background: var(--panel);
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.sp-settings-nav a {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  border-radius: 9px;
-  font-size: 13px;
-  color: var(--ink-2);
-  transition:
-    background 0.15s,
-    color 0.15s;
-}
-.sp-settings-nav a:hover {
-  background: var(--panel-2);
-  color: var(--ink);
-}
-.sp-settings-nav a.on {
-  background: rgba(255, 36, 56, 0.1);
-  color: var(--ink);
-  box-shadow: inset 0 0 0 1px rgba(255, 36, 56, 0.22);
-}
-.sp-settings-nav a.on svg {
-  color: var(--r1);
-}
-.sp-settings-nav svg {
-  width: 15px;
-  height: 15px;
-  flex: none;
-}
-.sp-settings .sp-card {
-  padding: 22px 24px;
-}
-.sp-section {
-  font: 500 10px var(--mono);
-  letter-spacing: 0.18em;
-  color: var(--ink-3);
-  text-transform: uppercase;
-  margin: 0 0 18px;
-}
-.sp-chip {
-  background: var(--panel-2);
-  border: 1px solid var(--line-2);
-}
-.sp-settings-title {
-  font: 400 clamp(28px, 2.6vw, 38px) / 1 var(--serif);
-  letter-spacing: -0.02em;
-  margin: 4px 0 22px;
-}
-.sp-settings-content > * + * {
-  margin-top: 0;
-}
-@media (max-width: 860px) {
-  .sp-settings {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .sp-settings-nav {
-    position: static;
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
 }
 
 /* ---------- auth / onboarding (aurora) ---------- */

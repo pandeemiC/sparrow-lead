@@ -1,8 +1,9 @@
 "use client";
 
-import { Toggle, Row, Select } from "@/components/ui/SettingsUI";
+import { SettingsCard, Toggle, Row, Select } from "@/components/ui/SettingsUI";
 import { useSettings } from "@/hooks/useSettings";
 import { ALERT_SCORE_OPTIONS } from "@/lib/constants";
+import { SectionTitle } from "@/components/sp/ui";
 
 export default function SettingsNotifications() {
   const { settings, save } = useSettings();
@@ -13,8 +14,8 @@ export default function SettingsNotifications() {
 
   return (
     <div className="space-y-4">
-      <div className="sp-card">
-        <h2 className="sp-section">Lead Alerts</h2>
+      <SettingsCard>
+        <SectionTitle>Lead Alerts</SectionTitle>
         <div className="space-y-5">
           <Row
             title="Hot Lead Emails"
@@ -39,7 +40,7 @@ export default function SettingsNotifications() {
             }
           />
         </div>
-      </div>
+      </SettingsCard>
     </div>
   );
 }

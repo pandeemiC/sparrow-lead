@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { RiShieldKeyholeLine } from "react-icons/ri";
-import { Row } from "@/components/ui/SettingsUI";
+import { SettingsCard, Row } from "@/components/ui/SettingsUI";
 import { useToastStore } from "@/store/toastStore";
+import { GhostButton, SectionTitle } from "@/components/sp/ui";
 
 export default function SettingsPrivacy() {
   const [exporting, setExporting] = useState(false);
@@ -31,25 +32,21 @@ export default function SettingsPrivacy() {
 
   return (
     <div className="space-y-4">
-      <div className="sp-card">
-        <div className="flex items-center gap-3 mb-6 sp-chip rounded-lg px-3 py-2 w-fit">
+      <SettingsCard>
+        <div className="flex items-center gap-3 mb-6 bg-panel-2 border border-line-2 rounded-lg px-3 py-2 w-fit">
           <RiShieldKeyholeLine size={20} className="text-white/40 shrink-0" />
-          <h2 className="sp-section !mb-0">Privacy</h2>
+          <SectionTitle className="mb-0">Privacy</SectionTitle>
         </div>
         <Row
           title="Export Your Data"
           description="Download a JSON file with your account settings, keywords, and signals"
           right={
-            <button
-              onClick={exportData}
-              disabled={exporting}
-              className="sp-ghost disabled:opacity-35 disabled:cursor-not-allowed"
-            >
+            <GhostButton onClick={exportData} disabled={exporting}>
               {exporting ? "Exporting…" : "Export"}
-            </button>
+            </GhostButton>
           }
         />
-      </div>
+      </SettingsCard>
     </div>
   );
 }

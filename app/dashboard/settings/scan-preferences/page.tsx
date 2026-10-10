@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Toggle, Row, Select } from "@/components/ui/SettingsUI";
+import { SettingsCard, Toggle, Row, Select } from "@/components/ui/SettingsUI";
 import { useSettings } from "@/hooks/useSettings";
 import { useToastStore } from "@/store/toastStore";
 import { ROLE_OPTIONS } from "@/lib/constants";
 import type { UserSettings } from "@/types";
+import { GhostButton, SectionTitle } from "@/components/sp/ui";
 
 const textareaClass =
   "w-full px-3.5 py-3 rounded-lg bg-white/3 border border-white/8 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20 resize-none";
@@ -75,13 +76,9 @@ function ScanProfileForm({
         />
       </div>
       <div className="flex justify-end">
-        <button
-          onClick={saveProfile}
-          disabled={!changed || saving}
-          className="sp-ghost disabled:opacity-35 disabled:cursor-not-allowed"
-        >
+        <GhostButton onClick={saveProfile} disabled={!changed || saving}>
           {saving ? "Saving…" : "Save profile"}
-        </button>
+        </GhostButton>
       </div>
     </div>
   );
@@ -96,8 +93,8 @@ export default function SettingsScanPreferences() {
 
   return (
     <div className="space-y-4">
-      <div className="sp-card">
-        <h2 className="sp-section">Scan Schedule</h2>
+      <SettingsCard>
+        <SectionTitle>Scan Schedule</SectionTitle>
         <Row
           title="Automatic Scanning"
           description="Scan your active keywords every 6 hours. Manual scans always work."
@@ -108,16 +105,16 @@ export default function SettingsScanPreferences() {
             />
           }
         />
-      </div>
+      </SettingsCard>
 
-      <div className="sp-card">
-        <h2 className="sp-section !mb-2">Scan Profile</h2>
+      <SettingsCard>
+        <SectionTitle className="mb-2">Scan Profile</SectionTitle>
         <p className="text-sm text-white/35 mb-6">
           The AI reads this when scoring every signal. The more specific, the
           better your scores.
         </p>
         <ScanProfileForm initial={settings} onSave={save} />
-      </div>
+      </SettingsCard>
     </div>
   );
 }

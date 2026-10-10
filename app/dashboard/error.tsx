@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { GhostButton } from "@/components/sp/ui";
 
 export default function DashboardError({
   error,
@@ -18,9 +19,7 @@ export default function DashboardError({
       <p className="text-sm text-white/70">
         Something went wrong loading this page.
       </p>
-      <button onClick={() => unstable_retry()} className="sp-ghost">
-        Try again
-      </button>
+      <GhostButton onClick={() => unstable_retry()}>Try again</GhostButton>
     </div>
   );
 }
