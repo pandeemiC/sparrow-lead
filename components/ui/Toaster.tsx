@@ -1,22 +1,36 @@
 "use client";
 
+import { useRef } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import { useToastStore } from "@/store/toastStore";
 
 export default function Toaster() {
   const toasts = useToastStore((s) => s.toasts);
   const dismiss = useToastStore((s) => s.dismiss);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useGSAP(
+    () => {
+      const last = ref.current?.lastElementChild;
+      if (last) {
+        gsap.fromTo(
+          last,
+          { opacity: 0, y: 16 },
+          { opacity: 1, y: 0, duration: 0.25, ease: "power2.out" },
+        );
+      }
+    },
+    { scope: ref, dependencies: [toasts.length] },
+  );
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2">
+    <div className="sp-toasts" ref={ref}>
       {toasts.map((t) => (
         <button
           key={t.id}
           onClick={() => dismiss(t.id)}
-          className={`px-4 py-2 rounded-full text-sm border backdrop-blur cursor-pointer ${
-            t.kind === "error"
-              ? "bg-red-950/80 border-red-500/40 text-red-100"
-              : "bg-white/10 border-white/15 text-white"
-          }`}
+          className={`sp-toast ${t.kind}`}
         >
           {t.message}
         </button>

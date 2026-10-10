@@ -1,17 +1,37 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, Search, Target } from "lucide-react";
 import Image from "next/image";
-import Sidebar from "./Sidebar";
-import { useUser } from "@clerk/nextjs";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { useClerk, useUser } from "@clerk/nextjs";
+import {
+  ChevronLeft,
+  ChevronRight,
+  LogOut,
+  Settings,
+  Target,
+} from "lucide-react";
+import { SiDiscord, SiGithub, SiInstagram } from "react-icons/si";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import sparrowLogo from "@/public/sparrow-no-text-logo.png";
+import { navItems } from "@/lib/constants";
 import { usePlan } from "./PlanContext";
-import { useEffect, useState } from "react";
+import { useScanStore } from "@/store/scanStore";
+import { useStatsStore } from "@/store/statsStore";
 
 type UserData = {
   name: string;
   email: string;
   imageUrl: string;
+};
+
+const CRUMBS: Record<string, string> = {
+  "/dashboard": "Dashboard",
+  "/dashboard/signals": "Signals",
+  "/dashboard/keywords": "Keywords",
+  "/dashboard/hunt-board": "Hunt Board",
 };
 
 export default function DashboardShell({
@@ -21,121 +41,214 @@ export default function DashboardShell({
   children: React.ReactNode;
   user: UserData;
 }) {
+  const pathname = usePathname();
   const { user: clerkUser } = useUser();
-  const { limits } = usePlan();
-
-  const [stats, setStats] = useState({ keywordsTracked: 0, totalSignals: 0 });
+  const { signOut } = useClerk();
+  const { plan, limits } = usePlan();
+  const { newSignalsCount, clearNewSignals } = useScanStore();
+  const stats = useStatsStore((s) => s.stats);
+  const refreshStats = useStatsStore((s) => s.refresh);
+  const [rail, setRail] = useState(false);
+  const sideRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    fetch("/api/stats")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.keywordsTracked !== undefined) {
-          setStats({
-            keywordsTracked: data.keywordsTracked,
-            totalSignals: data.totalSignals,
-          });
-        }
-      });
-  }, []);
+    refreshStats();
+  }, [pathname, refreshStats]);
+
+  useGSAP(
+    () => {
+      gsap.fromTo(
+        ".sp-nav a, .sp-nav button",
+        { opacity: 0, x: -8 },
+        { opacity: 1, x: 0, duration: 0.3, stagger: 0.04, ease: "power2.out" },
+      );
+    },
+    { scope: sideRef },
+  );
 
   const displayName = clerkUser?.firstName
     ? `${clerkUser.firstName} ${clerkUser.lastName ?? ""}`.trim()
-    : (clerkUser?.emailAddresses[0]?.emailAddress ?? user.name);
+    : user.name;
+  const email = clerkUser?.emailAddresses[0]?.emailAddress ?? user.email;
+  const imageUrl = clerkUser?.imageUrl ?? user.imageUrl;
 
-  const keyPercent = Math.min(
-    (stats.keywordsTracked / limits.keywords) * 100,
-    100,
-  );
-  const sigPercent = Math.min((stats.totalSignals / limits.signals) * 100, 100);
+  const keywordsTracked = stats?.keywordsTracked ?? 0;
+  const signalsThisMonth = stats?.signalsThisMonth ?? 0;
+  const activeLeads = stats
+    ? stats.huntCounts.hunting +
+      stats.huntCounts.interested +
+      stats.huntCounts.engaged
+    : 0;
+  const sigPct = Math.min((signalsThisMonth / limits.signals) * 100, 100);
+  const kwPct = Math.min((keywordsTracked / limits.keywords) * 100, 100);
+  const settingsActive = pathname.startsWith("/dashboard/settings");
+  const crumb = settingsActive ? "Settings" : (CRUMBS[pathname] ?? "Dashboard");
+
+  function badgeFor(href: string) {
+    if (href === "/dashboard/signals" && newSignalsCount > 0) {
+      return (
+        <span className="ct hot">
+          {newSignalsCount > 9 ? "9+" : newSignalsCount}
+        </span>
+      );
+    }
+    if (href === "/dashboard/keywords" && stats) {
+      return <span className="ct">{keywordsTracked}</span>;
+    }
+    if (href === "/dashboard/hunt-board" && stats && activeLeads > 0) {
+      return <span className="ct">{activeLeads}</span>;
+    }
+    return null;
+  }
+
   return (
-    <div className="flex h-screen bg-[#080204] overflow-hidden">
-      <Sidebar />
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <header className="flex items-center h-14 shrink-0 px-6 gap-4 border-b border-white/6">
-          {user.imageUrl ? (
-            <Image
-              src={user.imageUrl}
-              alt={user.name}
-              width={28}
-              height={28}
-              className="rounded-full shrink-0 ring-1 ring-white/10"
-            />
-          ) : (
-            <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center shrink-0 text-white text-xs font-medium">
-              {user.name.charAt(0).toUpperCase()}
-            </div>
-          )}
+    <div className="sp">
+      <div className="sp-glow">
+        <i />
+        <i />
+      </div>
+      <div className="sp-grid" />
+      <div className={`sp-app ${rail ? "rail" : ""}`}>
+        <div className="sp-side-wrap">
+          <aside className="sp-side" ref={sideRef}>
+            <Link href="/dashboard" className="sp-logo">
+              <Image
+                src={sparrowLogo}
+                alt="Sparrow"
+                width={20}
+                height={20}
+                style={{
+                  width: "auto",
+                  height: "auto",
+                  filter:
+                    "drop-shadow(0 0 7px rgba(210,18,18,0.6)) brightness(1.1)",
+                }}
+              />
+              <span>SPARROW</span>
+            </Link>
 
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-white leading-tight truncate">
-              {displayName}
-            </p>
-            <p className="text-[11px] text-white/30 leading-tight truncate">
-              {user.email}
-            </p>
-          </div>
+            <nav className="sp-nav">
+              {navItems.map(({ label, href, icon: Icon }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  data-tip={label}
+                  className={pathname === href ? "on" : ""}
+                  onClick={
+                    href === "/dashboard/signals" ? clearNewSignals : undefined
+                  }
+                >
+                  <Icon />
+                  <span className="lbl">{label}</span>
+                  {badgeFor(href)}
+                </Link>
+              ))}
+            </nav>
 
-          <div className="w-px h-5 bg-white/6 mx-1" />
+            <div className="sp-side-sep">ACCOUNT</div>
+            <nav className="sp-nav">
+              <Link
+                href="/dashboard/settings/overview"
+                data-tip="Settings"
+                className={settingsActive ? "on" : ""}
+              >
+                <Settings />
+                <span className="lbl">Settings</span>
+              </Link>
+            </nav>
 
-          <div className="flex items-center gap-2">
-            <div className="flex flex-col gap-1.5 px-3 py-1.5 rounded-md border border-white/6 bg-white/2 min-w-28">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-[10px] font-medium text-white/30 uppercase tracking-widest">
-                  Signals
-                </p>
-                <span className="text-[10px] text-white/20 tabular-nums">
-                  {stats.totalSignals} / {limits.signals}
-                </span>
+            <div className="sp-plan">
+              <h6>
+                {plan} plan<span>BETA</span>
+              </h6>
+              <div className="sp-meter">
+                <div>
+                  Signals this month
+                  <b>
+                    {signalsThisMonth} / {limits.signals}
+                  </b>
+                </div>
+                <div className="sp-bar">
+                  <i style={{ width: `${sigPct}%` }} />
+                </div>
               </div>
-              <div className="h-px rounded-full bg-white/6 overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-red-600/80"
-                  style={{ width: `${sigPercent}%` }}
-                />
-              </div>
-            </div>
-            <div className="flex flex-col gap-1.5 px-3 py-1.5 rounded-md border border-white/6 bg-white/2 min-w-28">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-[10px] font-medium text-white/30 uppercase tracking-widest">
+              <div className="sp-meter">
+                <div>
                   Keywords
-                </p>
-                <span className="text-[10px] text-white/20 tabular-nums">
-                  {stats.keywordsTracked} / {limits.keywords}
-                </span>
+                  <b>
+                    {keywordsTracked} / {limits.keywords}
+                  </b>
+                </div>
+                <div className="sp-bar">
+                  <i style={{ width: `${kwPct}%` }} />
+                </div>
               </div>
-              <div className="h-px rounded-full bg-white/6 overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-red-600/80"
-                  style={{ width: `${keyPercent}%` }}
-                />
-              </div>
+              {plan === "free" && (
+                <Link href="/dashboard/settings/billing" className="sp-upg">
+                  Upgrade for more →
+                </Link>
+              )}
             </div>
-          </div>
 
-          <div className="flex-1" />
+            <div className="sp-me">
+              <span className="sp-av">
+                {imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={imageUrl} alt={displayName} />
+                ) : (
+                  displayName.charAt(0).toUpperCase()
+                )}
+              </span>
+              <div className="who">
+                <b>{displayName}</b>
+                <small>{email}</small>
+              </div>
+              <button
+                className="sp-icon-btn"
+                title="Log out"
+                onClick={() => signOut({ redirectUrl: "/sign-in" })}
+              >
+                <LogOut />
+              </button>
+            </div>
 
-          <button className="p-1.5 text-white/25 hover:text-white/60 transition-colors rounded-md hover:bg-white/4 cursor-pointer">
-            <Search size={16} />
-          </button>
-          <button className="relative p-1.5 text-white/25 hover:text-white/60 transition-colors rounded-md hover:bg-white/4 cursor-pointer">
-            <Bell size={16} />
-            <span className="absolute top-1.5 right-1.5 w-1 h-1 bg-white/60 rounded-full" />
-          </button>
-          <Link
-            href="/dashboard/hunt-board"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-white/10 bg-white/4 text-white text-sm font-medium hover:bg-white/7 hover:border-white/16 transition-all"
+            <div className="sp-socials">
+              <a href="#" aria-label="Discord">
+                <SiDiscord size={12} />
+              </a>
+              <a href="#" aria-label="Instagram">
+                <SiInstagram size={12} />
+              </a>
+              <a href="#" aria-label="GitHub">
+                <SiGithub size={12} />
+              </a>
+            </div>
+          </aside>
+          <button
+            className="sp-rail-toggle"
+            onClick={() => setRail((r) => !r)}
+            title={rail ? "Expand sidebar" : "Collapse sidebar"}
           >
-            <Target size={13} />
-            Hunt
-          </Link>
-        </header>
+            {rail ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
+          </button>
+        </div>
 
-        <main
-          className="flex-1 overflow-y-auto"
-          style={{ background: "#080204" }}
-        >
-          {children}
+        <main className="sp-main">
+          <div className="sp-top">
+            <div className="sp-crumb">
+              {crumb !== "Dashboard" && (
+                <>
+                  Dashboard<span>/</span>
+                </>
+              )}
+              <b>{crumb}</b>
+            </div>
+            <Link href="/dashboard/hunt-board" className="sp-btn pri">
+              <Target />
+              Hunt
+            </Link>
+          </div>
+          <div className="sp-body">{children}</div>
         </main>
       </div>
     </div>
