@@ -1,440 +1,278 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { useEffect, useRef, useState } from "react";
 import {
-  Radio,
-  Sparkles,
   ExternalLink,
-  XCircle,
-  Target,
   SlidersHorizontal,
-  ChevronDown,
-  Copy,
-  Check,
+  Sparkles,
+  Target,
+  X,
 } from "lucide-react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import PlatformIcon from "@/components/ui/PlatformIcon";
-import Fire from "@/public/animations/fire.json";
-import Lottie from "lottie-react";
-import type { Signal, SignalType, SignalFilters } from "@/types";
-import {
-  SIGNAL_TYPE_LABELS,
-  SIGNAL_TYPE_TAG_CLASS,
-  PLATFORMS,
-} from "@/lib/constants";
-import { timeAgo, extractSub } from "@/lib/utils";
-import { useScanStore } from "@/store/scanStore";
+import ScoreArc from "@/components/sp/ScoreArc";
 import { apiFetch } from "@/lib/apiFetch";
-import { useToastStore } from "@/store/toastStore";
+import { toMentionRow } from "@/lib/mentions";
+import { platformVar, scoreTier, shortAgo, type ScoreTier } from "@/lib/score";
 import {
-  TopSpotlight,
-  BottomSpotlight,
-  LeftSpotlight,
-  RightSpotlight,
-} from "@/components/ui/Spotlights";
+  PLATFORMS,
+  PLATFORM_LABELS,
+  SIGNAL_TYPE_LABELS,
+} from "@/lib/constants";
+import { useScanStore } from "@/store/scanStore";
+import { useStatsStore } from "@/store/statsStore";
+import { useToastStore } from "@/store/toastStore";
+import type { MentionRow, SignalPlatform, SignalType } from "@/types";
 
-type Variant = "hot" | "warm" | "cold" | "unscored";
+type Filters = {
+  platform: "all" | SignalPlatform;
+  intent: "all" | ScoreTier;
+  type: "all" | SignalType;
+  keyword: string;
+  newOnly: boolean;
+};
 
-function scoreVariant(score: number | null): Variant {
-  if (score === null) return "unscored";
-  if (score >= 8) return "hot";
-  if (score >= 5) return "warm";
-  return "cold";
-}
+type Group = "platform" | "intent" | "type" | "keyword";
 
-function ScoreBadge({ score }: { score: number | null }) {
-  const v = scoreVariant(score);
+const EMPTY_FILTERS: Filters = {
+  platform: "all",
+  intent: "all",
+  type: "all",
+  keyword: "all",
+  newOnly: false,
+};
 
-  if (v === "unscored") {
-    return (
-      <span className="animate-pulse inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border badge-cold">
-        <span className="w-12 h-2 rounded bg-white/10" />
-      </span>
-    );
-  }
+const INTENT_OPTIONS: { value: ScoreTier; label: string; color: string }[] = [
+  { value: "hi", label: "High · 8+", color: "var(--r1)" },
+  { value: "md", label: "Medium · 5–7", color: "var(--amber)" },
+  { value: "lo", label: "Low · <5", color: "rgba(255,255,255,.35)" },
+];
 
-  const base =
-    "relative overflow-hidden inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border";
-  if (v === "hot")
-    return (
-      <span className={`${base} gap-1 badge-hot`}>
-        <TopSpotlight variant="hot" />
-        <BottomSpotlight variant="hot" />
-        <LeftSpotlight variant="hot" />
-        <RightSpotlight variant="hot" />
-        <span className="relative z-10 flex items-center gap-1">
-          <Lottie animationData={Fire} loop style={{ width: 16, height: 16 }} />
-          {score}/10 HOT
-        </span>
-      </span>
-    );
-  if (v === "warm")
-    return (
-      <span className={`${base} gap-1.5 badge-warm`}>
-        <TopSpotlight variant="warm" />
-        <BottomSpotlight variant="warm" />
-        <LeftSpotlight variant="warm" />
-        <RightSpotlight variant="warm" />
-        <span className="relative z-10">{score}/10 WARM</span>
-      </span>
-    );
-  return (
-    <span className={`${base} gap-1.5 badge-cold`}>
-      <TopSpotlight variant="cold" />
-      <BottomSpotlight variant="cold" />
-      <LeftSpotlight variant="cold" />
-      <RightSpotlight variant="cold" />
-      <span className="relative z-10">{score}/10 COLD</span>
-    </span>
-  );
-}
+const HUNTED = ["hunting", "interested", "engaged", "hunted"];
 
-function TypeTag({ type }: { type: SignalType }) {
-  return (
-    <span
-      className={`inline-flex px-2.5 py-1 rounded-md text-xs font-medium border ${SIGNAL_TYPE_TAG_CLASS[type]}`}
-    >
-      {SIGNAL_TYPE_LABELS[type]}
-    </span>
-  );
-}
-
-function PlatformPill({
-  platform,
-  source,
+function SignalCard({
+  mention,
+  isNew,
+  onHunt,
+  onDismiss,
 }: {
-  platform: Signal["platform"];
-  source: string;
+  mention: MentionRow;
+  isNew: boolean;
+  onHunt: (m: MentionRow) => void;
+  onDismiss: (m: MentionRow, el: HTMLElement) => void;
 }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-xs font-medium text-white/70 bg-white/4 border-white/10">
-      <PlatformIcon platform={platform} size={11} /> {source}
-    </span>
-  );
-}
-
-function FilterSection({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  const [open, setOpen] = useState(true);
-  return (
-    <div className="border-b border-white/5 pb-4 last:border-0 last:pb-0">
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex items-center justify-between w-full mb-3 cursor-pointer"
-      >
-        <span className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">
-          {label}
-        </span>
-        <ChevronDown
-          size={12}
-          className={`text-white/30 transition-transform ${open ? "" : "-rotate-90"}`}
-        />
-      </button>
-      {open && children}
-    </div>
-  );
-}
-
-function RadioGroup<T extends string>({
-  options,
-  value,
-  onChange,
-}: {
-  options: { label: string; value: T }[];
-  value: T;
-  onChange: (v: T) => void;
-}) {
-  return (
-    <div className="flex flex-col gap-1">
-      {options.map((opt) => (
-        <button
-          key={opt.value}
-          onClick={() => onChange(opt.value)}
-          className={`text-left text-sm px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer ${
-            value === opt.value
-              ? "bg-white/8 text-white border border-white/16"
-              : "text-white/35 hover:text-white/60 hover:bg-white/4"
-          }`}
-        >
-          {opt.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function ReplyModal({
-  reply,
-  loading,
-  onClose,
-}: {
-  reply: string;
-  loading: boolean;
-  onClose: () => void;
-}) {
-  const [copied, setCopied] = useState(false);
-
-  function copyReply() {
-    navigator.clipboard.writeText(reply);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.7)" }}
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-md rounded-2xl border border-white/10 p-6 flex flex-col gap-5"
-        style={{ background: "#111111" }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Sparkles size={14} className="text-white/50" />
-            <span className="text-sm font-semibold text-white">
-              AI Suggested Reply
-            </span>
-          </div>
-          <button
-            onClick={onClose}
-            className="text-white/30 hover:text-white/70 transition-colors"
-          >
-            <XCircle size={16} />
-          </button>
-        </div>
-
-        {loading ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-8">
-            <Sparkles size={20} className="text-white/40 animate-pulse" />
-            <p className="text-sm text-white/40">Generating reply...</p>
-          </div>
-        ) : (
-          <>
-            <p className="text-sm text-white/70 leading-relaxed">{reply}</p>
-            <button
-              onClick={copyReply}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold border border-white/10 bg-white/5 hover:bg-white/8 hover:text-white text-white/60 transition-colors"
-            >
-              {copied ? <Check size={13} /> : <Copy size={13} />}
-              {copied ? "Copied!" : "Copy Reply"}
-            </button>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function SignalCard({ signal, isNew }: { signal: Signal; isNew?: boolean }) {
-  const [dismissed, setDismissed] = useState(false);
-  const [hunting, setHunting] = useState(signal.status === "hunting");
-  const [replyOpen, setReplyOpen] = useState(false);
-  const [reply, setReply] = useState("");
-  const [replyLoading, setReplyLoading] = useState(false);
-  const [showNewBadge, setShowNewBadge] = useState(isNew ?? false);
-  const variant = scoreVariant(signal.aiScore);
   const toast = useToastStore((s) => s.show);
+  const ref = useRef<HTMLElement>(null);
+  const draftRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLTextAreaElement>(null);
+  const [expanded, setExpanded] = useState(false);
+  const [draftOpen, setDraftOpen] = useState(false);
+  const [draftState, setDraftState] = useState<"idle" | "writing" | "ready">(
+    "idle",
+  );
+  const [reply, setReply] = useState(mention.reply ?? "");
+  const onBoard = HUNTED.includes(mention.status);
+  const long = mention.body.length > 140;
 
-  async function addToHuntBoard() {
-    setHunting(true);
-    try {
-      await apiFetch(`/api/mentions/${signal.id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ status: "hunting" }),
+  async function toggleDraft() {
+    if (draftOpen) {
+      gsap.to(draftRef.current, {
+        height: 0,
+        opacity: 0,
+        duration: 0.3,
+        ease: "power2.in",
+        onComplete: () => setDraftOpen(false),
       });
-    } catch (err) {
-      setHunting(false);
-      toast(err instanceof Error ? err.message : "Couldn't add to Hunt Board");
+      return;
     }
-  }
-
-  async function getReply() {
-    setReplyOpen(true);
-    if (reply) return;
-    setReplyLoading(true);
+    setDraftOpen(true);
+    if (draftState === "ready") return;
+    setDraftState("writing");
     try {
       const data = await apiFetch<{ reply?: string }>("/api/ai/reply", {
         method: "POST",
-        body: JSON.stringify({ mentionId: signal.id }),
+        body: JSON.stringify({ mentionId: mention.id }),
       });
-      setReply(data.reply ?? "Could not generate a reply.");
+      const text = (data.reply ?? "").trim() || "Could not generate a reply.";
+      const typing = { n: 0 };
+      gsap.to(typing, {
+        n: text.length,
+        duration: Math.min(2.2, text.length / 110),
+        ease: "none",
+        onUpdate: () => setReply(text.slice(0, Math.round(typing.n))),
+        onComplete: () => setDraftState("ready"),
+      });
     } catch (err) {
-      setReplyOpen(false);
+      setDraftOpen(false);
+      setDraftState("idle");
       toast(err instanceof Error ? err.message : "Couldn't generate a reply");
-    } finally {
-      setReplyLoading(false);
     }
   }
 
-  if (dismissed) return null;
+  useGSAP(
+    () => {
+      if (draftOpen && draftRef.current) {
+        gsap.fromTo(
+          draftRef.current,
+          { height: 0, opacity: 0 },
+          { height: "auto", opacity: 1, duration: 0.45, ease: "power3.out" },
+        );
+      }
+    },
+    { dependencies: [draftOpen] },
+  );
+
+  async function copyReply() {
+    try {
+      await navigator.clipboard.writeText(textRef.current?.value ?? reply);
+      toast("Reply copied", "success");
+    } catch {
+      toast("Couldn't copy — select the text and copy it manually");
+    }
+  }
 
   return (
-    <>
-      {replyOpen && (
-        <ReplyModal
-          reply={reply}
-          loading={replyLoading}
-          onClose={() => setReplyOpen(false)}
-        />
-      )}
-      <div
-        className="card text-xs rounded-xl p-5 flex flex-col gap-4"
-        onMouseEnter={() => setShowNewBadge(false)}
-      >
-        <RightSpotlight variant={variant} />
-        <AnimatePresence>
-          {showNewBadge && (
-            <motion.span
-              initial={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.4 }}
-              className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-red-500/15 text-red-400 border border-red-500/20 self-start"
-            >
-              New
-            </motion.span>
-          )}
-        </AnimatePresence>
-
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-2 flex-wrap">
-            <PlatformPill platform={signal.platform} source={signal.source} />
-            <span className="text-white/20 text-xs">·</span>
-            <span className="text-xs text-white/30">{signal.timeAgo}</span>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="text-[10px] px-2 py-0.5 rounded-md border keyword-tag font-medium">
-              {signal.keyword}
-            </span>
-            <button
-              onClick={() => setDismissed(true)}
-              className="text-white/20 hover:text-white/60 transition-colors"
-            >
-              <XCircle size={13} />
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <p className="text-sm font-semibold text-white leading-snug mb-1.5">
-            {signal.title}
-          </p>
-          {signal.body && (
-            <p className="text-sm text-white/55 leading-relaxed line-clamp-2">
-              {signal.body}
-            </p>
-          )}
-        </div>
-
-        <div
-          className={`ai-snake rounded-lg border p-3.5 flex flex-col gap-2.5 ai-block-${variant === "unscored" ? "cold" : variant}`}
-        >
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5">
-              <Sparkles size={12} className="sparkle-rgb" />
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
-                AI Analysis
-              </span>
-            </div>
-            <ScoreBadge score={signal.aiScore} />
-          </div>
-          {signal.aiScore !== null ? (
-            <div className="flex items-start gap-2 flex-wrap">
-              <p className="text-xs text-white/55 leading-relaxed flex-1 min-w-0">
-                {signal.aiReason}
-              </p>
-              {signal.aiType && <TypeTag type={signal.aiType} />}
-            </div>
-          ) : (
-            <p className="text-xs text-white/30 italic">
-              Scoring this signal...
-            </p>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2 flex-wrap">
-          <button
-            onClick={addToHuntBoard}
-            disabled={hunting}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-              hunting
-                ? "bg-red-500/10 text-white border border-red-500/50 cursor-default"
-                : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/8 hover:text-white hover:border-white/20 cursor-pointer"
-            }`}
-          >
-            <Target size={12} className={hunting ? "text-red-400" : ""} />
-            {hunting ? "In Hunt Board" : "+ Hunt Board"}
-          </button>
-
-          <button
-            onClick={getReply}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/4 text-white/70 border border-white/10 hover:bg-white/7 hover:text-white hover:border-white/18 transition-colors cursor-pointer"
-          >
-            <Sparkles className="sparkle-rgb" size={12} />
-            Get Reply
-          </button>
-
-          <a
-            href={signal.postUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/5 text-white/50 border border-white/10 hover:text-white hover:border-white/20 transition-colors"
-          >
-            <ExternalLink size={12} />
-            View
-          </a>
-        </div>
+    <article
+      ref={ref}
+      className="sp-scard"
+      style={{ "--pc": platformVar(mention.platform) } as React.CSSProperties}
+    >
+      <div className="sp-wm">
+        <PlatformIcon platform={mention.platform} size={168} plain />
       </div>
-    </>
+
+      <div className="sp-c-top">
+        <span className="src">
+          <PlatformIcon platform={mention.platform} size={15} />
+          {PLATFORM_LABELS[mention.platform]}
+          <span>· {mention.source}</span>
+        </span>
+        <span>{shortAgo(mention.createdAt)} ago</span>
+        {isNew && <span className="sp-new" title="New since your last visit" />}
+        <span className="sp-kwt" title="Matched keyword">
+          {mention.keyword}
+        </span>
+      </div>
+
+      <div className="sp-c-main">
+        <div>
+          <h3>{mention.title}</h3>
+          {mention.body && (
+            <>
+              <p className={`sp-ex ${expanded ? "open" : ""}`}>
+                {mention.body}
+              </p>
+              {long && (
+                <button
+                  className="sp-more"
+                  onClick={() => setExpanded((v) => !v)}
+                >
+                  {expanded ? "Show less" : "Show more"}
+                </button>
+              )}
+            </>
+          )}
+        </div>
+        <ScoreArc score={mention.score} size="dial" delay={0.2} />
+      </div>
+
+      {mention.reason && (
+        <div className="sp-ai">
+          <div className="sp-ai-l">
+            <Sparkles />
+            AI READ
+          </div>
+          <p>
+            {mention.type && (
+              <span className={`sp-type ${mention.type}`}>
+                {SIGNAL_TYPE_LABELS[mention.type]}
+              </span>
+            )}
+            {mention.reason}
+          </p>
+        </div>
+      )}
+
+      <div className="sp-c-act">
+        <button
+          className={`sp-ghost ${onBoard ? "done" : ""}`}
+          onClick={() => !onBoard && onHunt(mention)}
+          disabled={onBoard}
+        >
+          <Target />
+          {onBoard ? "On Hunt Board" : "Hunt Board"}
+        </button>
+        <button className="sp-ghost" onClick={toggleDraft}>
+          <Sparkles />
+          {draftOpen ? "Hide reply" : "Draft reply"}
+        </button>
+        <a
+          className="sp-ghost"
+          href={mention.url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <ExternalLink />
+          Open
+        </a>
+        <span className="grow" />
+        <button
+          className="sp-ghost x"
+          onClick={() => ref.current && onDismiss(mention, ref.current)}
+          title="Dismiss"
+        >
+          <X />
+          Dismiss
+        </button>
+      </div>
+
+      {draftOpen && (
+        <div className="sp-draft" ref={draftRef}>
+          <div className="sp-draft-in">
+            <div className="sp-draft-h">
+              <span>
+                DRAFT REPLY · {PLATFORM_LABELS[mention.platform].toUpperCase()}
+              </span>
+              <span>{draftState === "writing" ? "WRITING…" : "EDITABLE"}</span>
+            </div>
+            <textarea
+              ref={textRef}
+              value={reply}
+              readOnly={draftState !== "ready"}
+              onChange={(e) => setReply(e.target.value)}
+            />
+            <div className="sp-draft-f">
+              <button
+                className="sp-btn sm pri"
+                onClick={copyReply}
+                disabled={draftState !== "ready"}
+              >
+                Copy reply
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </article>
   );
 }
 
-function toSignal(row: Record<string, unknown>): Signal {
-  return {
-    id: row.id as string,
-    platform: row.platform as Signal["platform"],
-    source: extractSub(row.platform as string, row.post_url as string),
-    author: (row.author as string) ?? "unknown",
-    timeAgo: timeAgo(row.created_at as string),
-    keyword: row.keyword as string,
-    title: (row.post_title as string) ?? "(no title)",
-    body: row.post_body as string,
-    postUrl: row.post_url as string,
-    aiScore: row.ai_score as number | null,
-    aiReason: row.ai_reason as string | null,
-    createdAt: row.created_at as string,
-    aiType: row.ai_type as Signal["aiType"],
-    status: (row.status as Signal["status"]) ?? "new",
-  };
-}
-
 export default function SignalsPage() {
-  const [filters, setFilters] = useState<SignalFilters>({
-    platform: "all",
-    intent: "all",
-    sort: "score",
-    type: "all",
-  });
-  const [signals, setSignals] = useState<Signal[]>([]);
-  const [loading, setLoading] = useState(true);
-  const clearNewSignals = useScanStore((s) => s.clearNewSignals);
   const toast = useToastStore((s) => s.show);
+  const clearNewSignals = useScanStore((s) => s.clearNewSignals);
+  const refreshStats = useStatsStore((s) => s.refresh);
+
+  const [mentions, setMentions] = useState<MentionRow[] | null>(null);
+  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+  const [sort, setSort] = useState<"intent" | "newest">("intent");
+  const [railOpen, setRailOpen] = useState(false);
   const [lastVisitedAt] = useState<Date | null>(() => {
     if (typeof window === "undefined") return null;
     const prev = localStorage.getItem("signals_lastVisitedAt");
     return prev ? new Date(prev) : null;
   });
-  const [showNew, setShowNew] = useState(false);
-
-  const set = <K extends keyof SignalFilters>(key: K, val: SignalFilters[K]) =>
-    setFilters((f) => ({ ...f, [key]: val }));
+  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     localStorage.setItem("signals_lastVisitedAt", new Date().toISOString());
@@ -442,160 +280,382 @@ export default function SignalsPage() {
   }, [clearNewSignals]);
 
   useEffect(() => {
-    const params = new URLSearchParams(filters);
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
+    async function load() {
       try {
         const rows = await apiFetch<Record<string, unknown>[]>(
-          `/api/mentions?${params}`,
+          "/api/mentions?limit=500&sort=newest",
         );
-        if (!cancelled) setSignals(rows.map(toSignal));
+        setMentions(rows.map(toMentionRow));
       } catch (err) {
-        if (!cancelled) {
-          toast(err instanceof Error ? err.message : "Couldn't load signals");
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
+        toast(err instanceof Error ? err.message : "Couldn't load signals");
+        setMentions([]);
       }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [filters, toast]);
+    }
+    load();
+  }, [toast]);
 
-  const hotCount = signals.filter(
-    (s) => s.aiScore !== null && s.aiScore >= 8,
-  ).length;
+  const isNew = (m: MentionRow) =>
+    !!lastVisitedAt && new Date(m.createdAt) > lastVisitedAt;
 
-  const displayed =
-    showNew && lastVisitedAt
-      ? signals.filter((s) => new Date(s.createdAt) > lastVisitedAt)
-      : signals;
+  function passes(m: MentionRow, skip?: Group) {
+    if (
+      skip !== "platform" &&
+      filters.platform !== "all" &&
+      m.platform !== filters.platform
+    )
+      return false;
+    if (
+      skip !== "intent" &&
+      filters.intent !== "all" &&
+      scoreTier(m.score) !== filters.intent
+    )
+      return false;
+    if (skip !== "type" && filters.type !== "all" && m.type !== filters.type)
+      return false;
+    if (
+      skip !== "keyword" &&
+      filters.keyword !== "all" &&
+      m.keyword !== filters.keyword
+    )
+      return false;
+    if (filters.newOnly && !isNew(m)) return false;
+    return true;
+  }
+
+  const all = mentions ?? [];
+  const visible = all
+    .filter((m) => passes(m))
+    .sort((a, b) =>
+      sort === "intent"
+        ? (b.score ?? 0) - (a.score ?? 0) ||
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+  const keywordOptions = [...new Set(all.map((m) => m.keyword))].sort();
+  const hotCount = all.filter((m) => (m.score ?? 0) >= 8).length;
+  const newCount = all.filter(isNew).length;
+
+  function count(group: Group, match: (m: MentionRow) => boolean) {
+    return all.filter((m) => passes(m, group) && match(m)).length;
+  }
+
+  function setFilter<K extends keyof Filters>(key: K, value: Filters[K]) {
+    setFilters((f) => ({ ...f, [key]: value }));
+  }
+
+  const listKey = `${JSON.stringify(filters)}-${sort}-${mentions === null ? "x" : "ok"}`;
+  useGSAP(
+    () => {
+      const cards = listRef.current?.querySelectorAll(".sp-scard");
+      if (!cards?.length) return;
+      gsap.fromTo(
+        cards,
+        { opacity: 0, y: 14 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.45,
+          stagger: 0.05,
+          ease: "power2.out",
+          clearProps: "transform",
+        },
+      );
+      gsap.fromTo(
+        listRef.current!.querySelectorAll(".sp-wm"),
+        { rotate: -30, opacity: 0, x: -10 },
+        {
+          rotate: -16,
+          opacity: 0.12,
+          x: 0,
+          duration: 0.9,
+          stagger: 0.05,
+          delay: 0.1,
+          ease: "power3.out",
+          clearProps: "transform,opacity",
+        },
+      );
+    },
+    { dependencies: [listKey] },
+  );
+
+  async function hunt(m: MentionRow) {
+    setMentions(
+      (prev) =>
+        prev?.map((x) => (x.id === m.id ? { ...x, status: "hunting" } : x)) ??
+        prev,
+    );
+    try {
+      await apiFetch(`/api/mentions/${m.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: "hunting" }),
+      });
+      toast("Added to Hunt Board", "success");
+      refreshStats();
+    } catch (err) {
+      setMentions(
+        (prev) =>
+          prev?.map((x) => (x.id === m.id ? { ...x, status: m.status } : x)) ??
+          prev,
+      );
+      toast(err instanceof Error ? err.message : "Couldn't add to Hunt Board");
+    }
+  }
+
+  function dismiss(m: MentionRow, el: HTMLElement) {
+    gsap.to(el, {
+      opacity: 0,
+      x: 40,
+      duration: 0.25,
+      ease: "power2.in",
+      onComplete: async () => {
+        setMentions((prev) => prev?.filter((x) => x.id !== m.id) ?? prev);
+        try {
+          await apiFetch(`/api/mentions/${m.id}`, {
+            method: "PATCH",
+            body: JSON.stringify({ status: "dismissed" }),
+          });
+          toast("Dismissed");
+        } catch (err) {
+          setMentions((prev) => (prev ? [...prev, m] : prev));
+          toast(err instanceof Error ? err.message : "Couldn't dismiss");
+        }
+      },
+    });
+  }
+
+  const chips: { key: keyof Filters; label: string }[] = [];
+  if (filters.platform !== "all")
+    chips.push({ key: "platform", label: PLATFORM_LABELS[filters.platform] });
+  if (filters.intent !== "all")
+    chips.push({
+      key: "intent",
+      label: INTENT_OPTIONS.find((o) => o.value === filters.intent)!.label,
+    });
+  if (filters.type !== "all")
+    chips.push({ key: "type", label: SIGNAL_TYPE_LABELS[filters.type] });
+  if (filters.keyword !== "all")
+    chips.push({ key: "keyword", label: filters.keyword });
+  if (filters.newOnly) chips.push({ key: "newOnly", label: "New only" });
+
+  function clearChip(key: keyof Filters) {
+    setFilters((f) => ({ ...f, [key]: key === "newOnly" ? false : "all" }));
+  }
+
+  if (mentions === null) {
+    return <div className="sp-loading">LOADING SIGNALS…</div>;
+  }
 
   return (
-    <div className="p-5 h-full flex gap-4 min-h-0">
-      <div className="w-70 rounded-xl glass-red border border-white/5 p-5 flex flex-col gap-4 min-h-0 overflow-y-auto shrink-0">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-white">Filters</h2>
-          <SlidersHorizontal size={14} className="text-white/20" />
+    <div className="sp-sig-wrap">
+      <div className="sp-head">
+        <div>
+          <div className="sp-sub">
+            <span>
+              {all.length} signals{newCount > 0 && ` · ${newCount} new`}
+            </span>
+            <span>·</span>
+            <span className="hot">{hotCount} hot leads</span>
+          </div>
         </div>
-        <div className="flex flex-col gap-4">
-          <FilterSection label="New Signals">
+        <div className="sp-head-r">
+          <button
+            className="sp-btn sm sp-fbtn"
+            onClick={() => setRailOpen((v) => !v)}
+          >
+            <SlidersHorizontal />
+            Filters
+          </button>
+          <div className="sp-seg">
             <button
-              onClick={() => setShowNew((v) => !v)}
-              className={`text-left text-sm px-2.5 py-1.5 rounded-lg transition-colors w-full cursor-pointer ${
-                showNew
-                  ? "bg-white/8 text-white border border-white/16"
-                  : "text-white/35 hover:text-white/60 hover:bg-white/4"
-              }`}
+              className={sort === "intent" ? "on" : ""}
+              onClick={() => setSort("intent")}
             >
-              Show New Only
+              Highest intent
             </button>
-          </FilterSection>
-          <FilterSection label="Platform">
-            <RadioGroup
-              value={filters.platform}
-              onChange={(v) => set("platform", v)}
-              options={[{ label: "All Platforms", value: "all" }, ...PLATFORMS]}
-            />
-          </FilterSection>
-          <FilterSection label="Intent Score">
-            <RadioGroup
-              value={filters.intent}
-              onChange={(v) => set("intent", v)}
-              options={[
-                { label: "All", value: "all" },
-                { label: "High  8+", value: "high" },
-                { label: "Medium  5–7", value: "medium" },
-                { label: "Low  <5", value: "low" },
-              ]}
-            />
-          </FilterSection>
-          <FilterSection label="Signal Type">
-            <RadioGroup
-              value={filters.type}
-              onChange={(v) => set("type", v)}
-              options={[
-                { label: "All Types", value: "all" },
-                { label: "Seeking Rec", value: "seeking_recommendation" },
-                { label: "Pain Point", value: "pain_point" },
-                { label: "Competitor", value: "competitor_complaint" },
-                { label: "Question", value: "question" },
-                { label: "General", value: "general" },
-              ]}
-            />
-          </FilterSection>
-          <FilterSection label="Sort By">
-            <RadioGroup
-              value={filters.sort}
-              onChange={(v) => set("sort", v)}
-              options={[
-                { label: "AI Score", value: "score" },
-                { label: "Newest", value: "newest" },
-                { label: "Oldest", value: "oldest" },
-              ]}
-            />
-          </FilterSection>
+            <button
+              className={sort === "newest" ? "on" : ""}
+              onClick={() => setSort("newest")}
+            >
+              Newest
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="flex-8 flex flex-col gap-4 min-h-0 min-w-0">
-        <div className="rounded-xl glass-red border border-white/5 px-5 py-3.5 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <Radio size={14} className="text-white/50" />
-            <h2 className="text-sm font-semibold text-white">Signals Inbox</h2>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/40 font-semibold">
-              {loading ? "—" : `${signals.length} signals`}
-            </span>
-          </div>
-          {hotCount > 0 && (
-            <div className="flex items-center gap-1.5">
-              <Lottie
-                animationData={Fire}
-                loop
-                style={{ width: 16, height: 16 }}
-              />
-              <span className="text-[11px] font-medium tracking-wide text-white/50">
-                {hotCount} hot lead{hotCount !== 1 ? "s" : ""}
-              </span>
-            </div>
-          )}
+      <aside className={`sp-rail ${railOpen ? "show" : ""}`}>
+        <div className="sp-rail-h">
+          <b>Filters</b>
+          <button className="sp-clr" onClick={() => setFilters(EMPTY_FILTERS)}>
+            Clear all
+          </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto min-h-0 flex flex-col gap-3 pr-0.5">
-          {loading ? (
-            <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center py-24">
-              <div className="w-12 h-12 rounded-full bg-white/3 flex items-center justify-center">
-                <Radio size={20} className="text-white/15 animate-pulse" />
-              </div>
-              <p className="text-sm text-white/25">Loading signals...</p>
-            </div>
-          ) : displayed.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center py-24">
-              <div className="w-12 h-12 rounded-full bg-white/3 flex items-center justify-center">
-                <Radio size={20} className="text-white/15" />
-              </div>
-              <p className="text-sm text-white/25">
-                No signals match your filters
-              </p>
-              <p className="text-xs text-white/15">
-                Try adjusting or clearing the filters
-              </p>
-            </div>
-          ) : (
-            displayed.map((signal) => (
+        <div className="sp-fg">
+          <div className="sp-tg">
+            New since last visit
+            <button
+              className={`sp-switch ${filters.newOnly ? "on" : ""}`}
+              onClick={() => setFilter("newOnly", !filters.newOnly)}
+              aria-label="New since last visit"
+            >
+              <i />
+            </button>
+          </div>
+        </div>
+
+        <div className="sp-fg">
+          <h6>PLATFORM</h6>
+          {[
+            { value: "all" as const, label: "All platforms" },
+            ...PLATFORMS,
+          ].map((p) => {
+            const c = count(
+              "platform",
+              (m) => p.value === "all" || m.platform === p.value,
+            );
+            return (
+              <button
+                key={p.value}
+                className={`sp-fo ${filters.platform === p.value ? "on" : ""} ${c ? "" : "zero"}`}
+                onClick={() => setFilter("platform", p.value)}
+              >
+                {p.value !== "all" && (
+                  <span className="ic">
+                    <PlatformIcon platform={p.value} size={13} />
+                  </span>
+                )}
+                <span className="lbl">{p.label}</span>
+                <span className="c">{c}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="sp-fg">
+          <h6>INTENT</h6>
+          <button
+            className={`sp-fo ${filters.intent === "all" ? "on" : ""}`}
+            onClick={() => setFilter("intent", "all")}
+          >
+            <span className="lbl">Any intent</span>
+            <span className="c">{count("intent", () => true)}</span>
+          </button>
+          {INTENT_OPTIONS.map((o) => {
+            const c = count("intent", (m) => scoreTier(m.score) === o.value);
+            return (
+              <button
+                key={o.value}
+                className={`sp-fo ${filters.intent === o.value ? "on" : ""} ${c ? "" : "zero"}`}
+                onClick={() => setFilter("intent", o.value)}
+              >
+                <span className="dot" style={{ background: o.color }} />
+                <span className="lbl">{o.label}</span>
+                <span className="c">{c}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="sp-fg">
+          <h6>SIGNAL TYPE</h6>
+          <button
+            className={`sp-fo ${filters.type === "all" ? "on" : ""}`}
+            onClick={() => setFilter("type", "all")}
+          >
+            <span className="lbl">All types</span>
+            <span className="c">{count("type", () => true)}</span>
+          </button>
+          {(Object.keys(SIGNAL_TYPE_LABELS) as SignalType[]).map((t) => {
+            const c = count("type", (m) => m.type === t);
+            return (
+              <button
+                key={t}
+                className={`sp-fo ${filters.type === t ? "on" : ""} ${c ? "" : "zero"}`}
+                onClick={() => setFilter("type", t)}
+              >
+                <span className="lbl">{SIGNAL_TYPE_LABELS[t]}</span>
+                <span className="c">{c}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {keywordOptions.length > 0 && (
+          <div className="sp-fg">
+            <h6>KEYWORD</h6>
+            <button
+              className={`sp-fo ${filters.keyword === "all" ? "on" : ""}`}
+              onClick={() => setFilter("keyword", "all")}
+            >
+              <span className="lbl">All keywords</span>
+              <span className="c">{count("keyword", () => true)}</span>
+            </button>
+            {keywordOptions.map((k) => {
+              const c = count("keyword", (m) => m.keyword === k);
+              return (
+                <button
+                  key={k}
+                  className={`sp-fo ${filters.keyword === k ? "on" : ""} ${c ? "" : "zero"}`}
+                  onClick={() => setFilter("keyword", k)}
+                >
+                  <span className="lbl">{k}</span>
+                  <span className="c">{c}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </aside>
+
+      <section className="sp-feed">
+        <div className="sp-feed-bar">
+          <span>Showing {visible.length}</span>
+          {chips.map((c) => (
+            <button
+              key={c.key}
+              className="sp-pillf"
+              onClick={() => clearChip(c.key)}
+            >
+              {c.label}
+              <X />
+            </button>
+          ))}
+        </div>
+        <div
+          ref={listRef}
+          style={{ display: "flex", flexDirection: "column", gap: 14 }}
+        >
+          {visible.length ? (
+            visible.map((m) => (
               <SignalCard
-                key={signal.id}
-                signal={signal}
-                isNew={
-                  !!lastVisitedAt && new Date(signal.createdAt) > lastVisitedAt
-                }
+                key={m.id}
+                mention={m}
+                isNew={isNew(m)}
+                onHunt={hunt}
+                onDismiss={dismiss}
               />
             ))
+          ) : (
+            <div className="sp-empty">
+              <h4>{all.length ? "Nothing here yet." : "No signals yet."}</h4>
+              {all.length ? (
+                <>
+                  No signals match these filters.{" "}
+                  <button
+                    className="sp-clr"
+                    style={{ color: "var(--r1)" }}
+                    onClick={() => setFilters(EMPTY_FILTERS)}
+                  >
+                    Clear filters
+                  </button>
+                </>
+              ) : (
+                "Add a keyword and run a scan — scored posts land here."
+              )}
+            </div>
           )}
         </div>
-      </div>
+      </section>
     </div>
   );
 }
