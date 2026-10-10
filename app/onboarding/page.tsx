@@ -121,7 +121,7 @@ export default function OnboardingPage() {
       <GlassHead
         title={current.title}
         sub={`Step ${step} of 3`}
-        titleClassName="text-[26px]"
+        titleClassName="text-[26px] leading-none"
       />
       <Hint className="-mt-3 mb-5">{current.hint}</Hint>
 

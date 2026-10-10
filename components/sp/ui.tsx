@@ -212,10 +212,19 @@ export function NoData({ className, ...props }: ComponentProps<"div">) {
 }
 
 // glowing colored dot for hunt board stages
-export function StageDot({ color }: { color: string }) {
+export function StageDot({
+  color,
+  className,
+}: {
+  color: string;
+  className?: string;
+}) {
   return (
     <span
-      className="size-[7px] flex-none rounded-full bg-(--sc) shadow-[0_0_8px_color-mix(in_oklab,var(--sc)_70%,transparent)]"
+      className={cn(
+        "size-[7px] flex-none rounded-full bg-(--sc) shadow-[0_0_8px_color-mix(in_oklab,var(--sc)_70%,transparent)]",
+        className,
+      )}
       style={{ "--sc": color } as React.CSSProperties}
     />
   );

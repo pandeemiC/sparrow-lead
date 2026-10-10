@@ -20,6 +20,19 @@ import { platformVar, shortAgo } from "@/lib/score";
 import { PLATFORMS, PLATFORM_LABELS } from "@/lib/constants";
 import { useStatsStore } from "@/store/statsStore";
 import { useToastStore } from "@/store/toastStore";
+import { cn } from "@/lib/utils";
+import {
+  GhostButton,
+  IconButton,
+  KwTag,
+  Label,
+  Loading,
+  Seg,
+  SegButton,
+  StageDot,
+  Watermark,
+  ghostClass,
+} from "@/components/sp/ui";
 import type { HuntStatus, MentionRow, SignalPlatform } from "@/types";
 
 gsap.registerPlugin(Flip);
@@ -120,12 +133,12 @@ export default function HuntBoardPage() {
     () => {
       if (!leads) return;
       gsap.fromTo(
-        ".sp-col",
+        "[data-col]",
         { opacity: 0, y: 12 },
         { opacity: 1, y: 0, duration: 0.5, stagger: 0.07, ease: "power2.out" },
       );
       gsap.fromTo(
-        ".sp-lead",
+        "[data-lead]",
         { opacity: 0, y: 10 },
         {
           opacity: 1,
@@ -137,7 +150,7 @@ export default function HuntBoardPage() {
         },
       );
       gsap.fromTo(
-        ".sp-lead .sp-wm",
+        "[data-lead] [data-wm]",
         { rotate: -32, opacity: 0 },
         {
           rotate: -16,
@@ -154,7 +167,7 @@ export default function HuntBoardPage() {
   );
 
   function captureFlip() {
-    flipState.current = Flip.getState(".sp-lead");
+    flipState.current = Flip.getState("[data-lead]");
   }
 
   async function move(id: string, status: HuntStatus) {
@@ -225,7 +238,7 @@ export default function HuntBoardPage() {
       ease: "power2.in",
       onComplete: () => setOpenId(null),
     });
-    gsap.to(".sp-scrim", { opacity: 0, duration: 0.25 });
+    gsap.to("[data-scrim]", { opacity: 0, duration: 0.25 });
   }
 
   useEffect(() => {
@@ -240,14 +253,18 @@ export default function HuntBoardPage() {
   useGSAP(
     () => {
       if (!openId || !drawerRef.current) return;
-      gsap.fromTo(".sp-scrim", { opacity: 0 }, { opacity: 1, duration: 0.25 });
+      gsap.fromTo(
+        "[data-scrim]",
+        { opacity: 0 },
+        { opacity: 1, duration: 0.25 },
+      );
       gsap.fromTo(
         drawerRef.current,
         { x: "110%" },
         { x: "0%", duration: 0.5, ease: "power3.out" },
       );
       gsap.fromTo(
-        drawerRef.current.querySelectorAll(".sp-dr-b > div"),
+        drawerRef.current.querySelectorAll("[data-drawer-body] > div"),
         { opacity: 0, y: 10 },
         {
           opacity: 1,
@@ -288,7 +305,7 @@ export default function HuntBoardPage() {
   }
 
   if (leads === null) {
-    return <div className="sp-loading">LOADING YOUR PIPELINE…</div>;
+    return <Loading>LOADING YOUR PIPELINE…</Loading>;
   }
 
   const visible = leads.filter(
@@ -298,22 +315,20 @@ export default function HuntBoardPage() {
   const open = leads.find((l) => l.id === openId) ?? null;
 
   return (
-    <div className="sp-hunt-body">
-      <div className="sp-head">
-        <div className="sp-sub">
+    <div className="flex h-full min-h-0 flex-col gap-[18px]">
+      <div className="flex flex-wrap items-end justify-between gap-6">
+        <div className="flex flex-wrap items-center gap-3 text-[13.5px] text-ink-2">
           <span>
             {leads.length} lead{leads.length === 1 ? "" : "s"} in pipeline
           </span>
           <span>·</span>
-          <span style={{ color: "#7be3a0", fontWeight: 500 }}>
-            {won} hunted
-          </span>
+          <span className="font-medium text-[#7be3a0]">{won} hunted</span>
         </div>
-        <div className="sp-seg">
+        <Seg>
           {[{ value: "all" as const, label: "All" }, ...PLATFORMS].map((p) => (
-            <button
+            <SegButton
               key={p.value}
-              className={platform === p.value ? "on" : ""}
+              active={platform === p.value}
               onClick={() => {
                 captureFlip();
                 setPlatform(p.value);
@@ -323,19 +338,27 @@ export default function HuntBoardPage() {
                 <PlatformIcon platform={p.value} size={13} />
               )}
               {p.label}
-            </button>
+            </SegButton>
           ))}
-        </div>
+        </Seg>
       </div>
 
-      <div className="sp-board" ref={boardRef}>
+      <div
+        className="grid min-h-0 flex-1 grid-cols-[repeat(4,minmax(250px,1fr))] gap-3.5 overflow-x-auto pb-1"
+        ref={boardRef}
+      >
         {STAGES.map((stage, i) => {
           const items = visible.filter((l) => l.status === stage.key);
           const next = STAGES[i + 1];
           return (
             <section
               key={stage.key}
-              className={`sp-col ${overCol === stage.key ? "over" : ""}`}
+              data-col
+              className={cn(
+                "flex min-h-0 flex-col rounded-[18px] border border-line bg-white/1.5 transition-[border-color,background-color] duration-200",
+                overCol === stage.key &&
+                  "border-[color-mix(in_oklab,var(--sc)_55%,transparent)] bg-[color-mix(in_oklab,var(--sc)_5%,transparent)]",
+              )}
               style={{ "--sc": stage.color } as React.CSSProperties}
               onDragOver={(e) => {
                 if (!dragId) return;
@@ -353,20 +376,24 @@ export default function HuntBoardPage() {
                 setDragId(null);
               }}
             >
-              <div className="sp-col-h">
-                <span className="sp-dot" />
-                <b>{stage.label}</b>
-                <small>{stage.hint}</small>
-                <span className="n">
+              <div className="flex flex-none items-center gap-2.5 border-b border-line px-4 pt-3.5 pb-3">
+                <StageDot color={stage.color} className="size-2" />
+                <b className="text-[14px] font-medium">{stage.label}</b>
+                <small className="text-[12px] text-ink-3">{stage.hint}</small>
+                <span className="ml-auto grid h-[22px] min-w-6 place-items-center rounded-full border border-line-2 px-[7px] font-mono text-[11px] leading-[normal] font-medium text-ink-2">
                   {leads.filter((l) => l.status === stage.key).length}
                 </span>
               </div>
-              <div className="sp-col-b">
+              <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto p-2.5">
                 {items.length ? (
                   items.map((lead) => (
                     <article
                       key={lead.id}
-                      className={`sp-lead ${dragId === lead.id ? "dragging" : ""}`}
+                      data-lead
+                      className={cn(
+                        "group relative flex-none cursor-grab overflow-hidden rounded-[14px] border border-line bg-linear-to-b from-white/4 to-white/1.5 px-3.5 pt-3.5 pb-3 transition-[border-color] duration-200 select-none hover:border-line-2 [&>*:not([data-wm])]:relative before:pointer-events-none before:absolute before:-top-[70px] before:-left-[60px] before:size-[190px] before:rounded-full before:bg-[radial-gradient(circle,color-mix(in_oklab,var(--pc)_22%,transparent),transparent_65%)]",
+                        dragId === lead.id && "opacity-35",
+                      )}
                       data-flip-id={lead.id}
                       draggable
                       onDragStart={(e) => {
@@ -385,32 +412,33 @@ export default function HuntBoardPage() {
                         } as React.CSSProperties
                       }
                     >
-                      <div className="sp-wm">
-                        <PlatformIcon
-                          platform={lead.platform}
-                          size={104}
-                          plain
-                        />
-                      </div>
-                      <div className="sp-l-top">
-                        <span className="src">
+                      <Watermark
+                        platform={lead.platform}
+                        className="-top-[26px] -left-[22px] size-[104px] opacity-11 drop-shadow-[0_0_10px_currentColor] group-hover:opacity-16 group-hover:[transform:rotate(-12deg)_scale(1.04)]"
+                      />
+                      <div className="flex min-h-[34px] items-center gap-2 pl-[34px] text-[12px] text-ink-3">
+                        <span className="min-w-0 truncate text-ink-2">
                           {PLATFORM_LABELS[lead.platform]} · {lead.source}
                         </span>
-                        <ScoreArc score={lead.score} />
+                        <ScoreArc score={lead.score} className="ml-auto" />
                       </div>
-                      <h4>{lead.title}</h4>
-                      <span className="sp-kwt">{lead.keyword}</span>
+                      <h4 className="mt-2 mb-2.5 line-clamp-3 text-[14px] leading-[1.4] font-medium text-pretty wrap-anywhere">
+                        {lead.title}
+                      </h4>
+                      <KwTag className="inline-block max-w-full">
+                        {lead.keyword}
+                      </KwTag>
                       {lead.notes && (
-                        <div className="sp-l-note">
+                        <div className="mt-2.5 flex items-start gap-1.5 text-[12px] leading-[1.45] text-ink-2 [&_svg]:mt-[3px] [&_svg]:size-3 [&_svg]:flex-none [&_svg]:text-ink-3">
                           <StickyNote />
                           <span>{lead.notes}</span>
                         </div>
                       )}
-                      <div className="sp-l-f">
+                      <div className="mt-3 flex items-center gap-2 border-t border-line pt-2.5 text-[11.5px] text-ink-3">
                         <span>found {shortAgo(lead.createdAt)} ago</span>
                         {next ? (
                           <button
-                            className="sp-adv first"
+                            className="ml-auto inline-flex h-[26px] items-center gap-[5px] rounded-full border border-line-2 bg-transparent px-2.5 text-[11.5px] whitespace-nowrap text-ink-2 transition-all duration-150 hover:border-[color-mix(in_oklab,var(--nc)_70%,transparent)] hover:bg-[color-mix(in_oklab,var(--nc)_10%,transparent)] hover:text-ink [&_svg]:size-[11px]"
                             style={
                               { "--nc": next.color } as React.CSSProperties
                             }
@@ -423,7 +451,7 @@ export default function HuntBoardPage() {
                             <ArrowRight />
                           </button>
                         ) : (
-                          <span className="sp-won">
+                          <span className="ml-auto inline-flex items-center gap-[5px] font-mono text-[10.5px] leading-[normal] font-medium tracking-[0.12em] text-[#7be3a0] [&_svg]:size-3">
                             <Check />
                             HUNTED
                           </span>
@@ -432,7 +460,7 @@ export default function HuntBoardPage() {
                     </article>
                   ))
                 ) : (
-                  <div className="sp-col-empty">
+                  <div className="grid min-h-[140px] flex-1 place-items-center rounded-[14px] border border-dashed border-line-2 p-[18px] text-center text-[12.5px] text-ink-3 [&_svg]:mx-auto [&_svg]:mb-2 [&_svg]:block [&_svg]:size-[22px] [&_svg]:opacity-60">
                     <div>
                       <Target />
                       {platform !== "all" ? "No matching leads" : stage.empty}
@@ -447,73 +475,99 @@ export default function HuntBoardPage() {
 
       {open && (
         <>
-          <div className="sp-scrim" onClick={closeDrawer} />
+          <div
+            data-scrim
+            className="fixed inset-0 z-30 bg-[rgba(5,2,3,0.5)] backdrop-blur-[2px]"
+            onClick={closeDrawer}
+          />
           <aside
-            className="sp-drawer"
             ref={drawerRef}
+            className="fixed top-3 right-3 bottom-3 z-31 flex w-[min(440px,calc(100vw-24px))] flex-col overflow-hidden rounded-[20px] border border-line-2 bg-[rgba(18,9,11,0.96)] shadow-[0_30px_80px_rgba(0,0,0,0.6)] backdrop-blur-[20px]"
             style={
               { "--pc": platformVar(open.platform) } as React.CSSProperties
             }
           >
-            <div className="sp-dr-h">
-              <div className="sp-wm">
-                <PlatformIcon platform={open.platform} size={150} plain />
-              </div>
-              <div className="sp-dr-top">
+            <div className="relative overflow-hidden border-b border-line px-5 pt-5 pb-4 [&>*:not([data-wm])]:relative before:pointer-events-none before:absolute before:-top-[90px] before:-left-20 before:size-[260px] before:rounded-full before:bg-[radial-gradient(circle,color-mix(in_oklab,var(--pc)_22%,transparent),transparent_65%)]">
+              <Watermark
+                platform={open.platform}
+                className="-top-9 -left-[30px] size-[150px]"
+              />
+              <div className="flex min-h-8 items-center gap-2 pl-[46px] text-[12.5px] text-ink-3">
                 <span>
                   {PLATFORM_LABELS[open.platform]} · {open.source}
                 </span>
-                <button
-                  className="sp-icon-btn"
+                <IconButton
+                  className="ml-auto"
                   onClick={closeDrawer}
                   title="Close"
                 >
                   <X />
-                </button>
+                </IconButton>
               </div>
-              <h3>{open.title}</h3>
-              <span className="sp-kwt">{open.keyword}</span>
+              <h3 className="mt-3.5 mb-2 font-display text-[22px] leading-[1.25] font-normal tracking-[-0.01em] text-pretty wrap-anywhere">
+                {open.title}
+              </h3>
+              <KwTag>{open.keyword}</KwTag>
             </div>
-            <div className="sp-dr-b">
+            <div
+              data-drawer-body
+              className="flex flex-1 flex-col gap-5 overflow-y-auto px-5 py-[18px]"
+            >
               <div>
-                <div className="sp-label">Stage</div>
-                <div className="sp-stages">
-                  {STAGES.map((s) => (
-                    <button
-                      key={s.key}
-                      className={open.status === s.key ? "on" : ""}
-                      style={{ "--sc": s.color } as React.CSSProperties}
-                      onClick={() => move(open.id, s.key)}
-                    >
-                      <i />
-                      {s.label}
-                    </button>
-                  ))}
+                <Label className="mb-2">Stage</Label>
+                <div className="grid grid-cols-4 gap-1 rounded-xl border border-line bg-white/4 p-[3px]">
+                  {STAGES.map((s) => {
+                    const on = open.status === s.key;
+                    return (
+                      <button
+                        key={s.key}
+                        className={cn(
+                          "flex flex-col items-center gap-[5px] rounded-[9px] border-0 bg-transparent px-1 py-2 text-[12px] text-ink-3",
+                          on &&
+                            "bg-[color-mix(in_oklab,var(--sc)_14%,transparent)] text-ink shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--sc)_40%,transparent)]",
+                        )}
+                        style={{ "--sc": s.color } as React.CSSProperties}
+                        onClick={() => move(open.id, s.key)}
+                      >
+                        <i
+                          className={cn(
+                            "size-[7px] rounded-full bg-(--sc) opacity-40",
+                            on && "opacity-100 shadow-[0_0_8px_var(--sc)]",
+                          )}
+                        />
+                        {s.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
               {open.body && (
                 <div>
-                  <div className="sp-label">Post</div>
-                  <p>{open.body}</p>
+                  <Label className="mb-2">Post</Label>
+                  <p className="m-0 text-[13.5px] leading-[1.6] text-pretty wrap-anywhere text-ink-2">
+                    {open.body}
+                  </p>
                 </div>
               )}
               {open.reason && (
                 <div>
-                  <div className="sp-label">
+                  <Label className="mb-2">
                     AI read · intent {open.score ?? "–"}/10
+                  </Label>
+                  <div className="rounded-xl border border-line bg-black/30 px-3.5 py-3 text-[13px] leading-[1.55] text-ink-2">
+                    {open.reason}
                   </div>
-                  <div className="sp-dr-ai">{open.reason}</div>
                 </div>
               )}
               <div>
-                <div className="sp-label">Notes</div>
+                <Label className="mb-2">Notes</Label>
                 <textarea
-                  className="sp-note"
+                  className="min-h-24 w-full resize-y rounded-xl border border-line bg-black/30 p-3 font-body text-[13.5px] leading-[1.55] text-ink outline-0 focus:border-r1/45"
                   value={noteDraft}
                   onChange={(e) => onNoteChange(e.target.value)}
                   placeholder="Next step, contact details, what you sent…"
                 />
-                <div className="sp-note-st">
+                <div className="mt-1.5 font-mono text-[10px] leading-[normal] font-medium tracking-[0.14em] text-ink-3">
                   {noteState === "saving"
                     ? "SAVING…"
                     : noteState === "saved"
@@ -522,9 +576,9 @@ export default function HuntBoardPage() {
                 </div>
               </div>
             </div>
-            <div className="sp-dr-f">
+            <div className="flex gap-2 border-t border-line px-5 py-3.5">
               <a
-                className="sp-ghost"
+                className={ghostClass()}
                 href={open.url}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -532,14 +586,14 @@ export default function HuntBoardPage() {
                 <ExternalLink />
                 Open post
               </a>
-              <span className="grow" />
-              <button
-                className="sp-ghost x"
+              <span className="flex-1" />
+              <GhostButton
+                tone="danger"
                 onClick={() => removeFromBoard(open.id)}
               >
                 <X />
                 Remove
-              </button>
+              </GhostButton>
             </div>
           </aside>
         </>
