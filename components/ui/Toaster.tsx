@@ -4,6 +4,7 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { useToastStore } from "@/store/toastStore";
+import { cn } from "@/lib/utils";
 
 export default function Toaster() {
   const toasts = useToastStore((s) => s.toasts);
@@ -25,12 +26,19 @@ export default function Toaster() {
   );
 
   return (
-    <div className="sp-toasts" ref={ref}>
+    <div
+      ref={ref}
+      className="fixed bottom-6 left-1/2 z-60 flex -translate-x-1/2 flex-col items-center gap-2"
+    >
       {toasts.map((t) => (
         <button
           key={t.id}
           onClick={() => dismiss(t.id)}
-          className={`sp-toast ${t.kind}`}
+          className={cn(
+            "cursor-pointer rounded-full border border-line-2 bg-[#1a0f10] px-4 py-2.5 font-body text-[13px] leading-[normal] text-ink shadow-[0_16px_40px_rgba(0,0,0,0.5)]",
+            t.kind === "error" && "border-r1/45",
+            t.kind === "success" && "border-green/35",
+          )}
         >
           {t.message}
         </button>

@@ -166,6 +166,33 @@ export function Loading({ children }: { children: React.ReactNode }) {
   );
 }
 
+// thin progress bar, the <i> is the fill (gsap animates it on some pages)
+export function Bar({
+  pct,
+  className,
+  fillClassName,
+  fillStyle,
+}: {
+  pct: number;
+  className?: string;
+  fillClassName?: string;
+  fillStyle?: React.CSSProperties;
+}) {
+  return (
+    <div
+      className={cn("h-1 overflow-hidden rounded-[9px] bg-white/7", className)}
+    >
+      <i
+        className={cn(
+          "block h-full origin-left rounded-[9px] bg-linear-to-r from-r2 to-r1",
+          fillClassName,
+        )}
+        style={{ width: `${pct}%`, ...fillStyle }}
+      />
+    </div>
+  );
+}
+
 export function Switch({
   on,
   className,
