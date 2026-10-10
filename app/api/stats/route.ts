@@ -2,6 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { getDb } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { handler } from "@/lib/api";
+import { redditConfigured } from "@/lib/reddit";
+import { blueSkyConfigured } from "@/lib/bluesky";
 
 export const GET = handler(async () => {
   const { userId } = await auth();
@@ -24,8 +26,19 @@ export const GET = handler(async () => {
   const [kwRow] = await sql`
     SELECT COUNT(*)::int AS keywords_tracked
     FROM keywords
-    WHERE user_id = ${userId}
+    WHERE user_id = ${userId} AND active = true
   `;
+
+  const [monthRow] = await sql`
+    SELECT COUNT(*)::int AS signals_this_month
+    FROM mentions m
+    JOIN keywords k ON m.keyword_id = k.id
+    WHERE k.user_id = ${userId}
+      AND m.created_at >= date_trunc('month', NOW())
+  `;
+
+  const [userRow] =
+    await sql`SELECT auto_scan FROM users WHERE user_id = ${userId}`;
 
   const huntRows = await sql`
     SELECT m.status, COUNT(*)::int AS count
@@ -89,5 +102,12 @@ export const GET = handler(async () => {
     recentSignals,
     keywords,
     huntLeads,
+    signalsThisMonth: monthRow.signals_this_month,
+    sources: [
+      { platform: "reddit", active: redditConfigured() },
+      { platform: "hackernews", active: true },
+      { platform: "bluesky", active: blueSkyConfigured() },
+    ],
+    autoScan: userRow?.auto_scan ?? true,
   });
 });

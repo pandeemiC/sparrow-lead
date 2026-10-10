@@ -155,6 +155,29 @@ export type SignalFilters = {
   type: "all" | SignalType;
 };
 
+export type MentionRow = {
+  id: string;
+  platform: SignalPlatform;
+  source: string;
+  author: string;
+  keyword: string;
+  title: string;
+  body: string;
+  url: string;
+  score: number | null;
+  reason: string | null;
+  type: SignalType | null;
+  reply: string | null;
+  status: string;
+  notes: string | null;
+  createdAt: string;
+};
+
+export type SourceStatus = {
+  platform: SignalPlatform;
+  active: boolean;
+};
+
 export type HuntStatus = "hunting" | "interested" | "engaged" | "hunted";
 
 export type Lead = {
@@ -212,4 +235,7 @@ export type Stats = {
   topSignals: SignalPreview[];
   keywords: KeywordStat[];
   huntLeads: HuntLeadPreview[];
+  signalsThisMonth: number;
+  sources: SourceStatus[];
+  autoScan: boolean;
 };
