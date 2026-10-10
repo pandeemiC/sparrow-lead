@@ -1,7 +1,7 @@
 "use client";
 
-import { useClerk, useAuth } from "@clerk/nextjs";
-import { useEffect } from "react";
+import { useClerk, useSignIn, useSignUp } from "@clerk/nextjs";
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
 import sparrowLogo from "@/public/sparrow-no-text-logo.png";
@@ -9,26 +9,70 @@ import AuroraBackground from "@/components/sp/AuroraBackground";
 
 const LETTERS = "SIGNING YOU IN".split("");
 
+// hard navs so the middleware sees the fresh session cookie
+function goTo(url: string) {
+  window.location.href = url;
+}
+
 export default function SSOCallback() {
-  const { handleRedirectCallback } = useClerk();
-  const { isSignedIn, isLoaded } = useAuth();
+  const clerk = useClerk();
+  const { signIn } = useSignIn();
+  const { signUp } = useSignUp();
+  const hasRun = useRef(false);
 
+  // same steps as clerk's HandleSSOCallback (not exported in our @clerk/nextjs version yet)
   useEffect(() => {
-    handleRedirectCallback({}, async () => {
-      window.location.href = "/dashboard";
-    }).catch(() => {
-      window.location.href = "/sign-in";
-    });
-  }, [handleRedirectCallback]);
+    if (!clerk.loaded || hasRun.current) return;
+    hasRun.current = true;
 
-  useEffect(() => {
-    if (isLoaded && isSignedIn) {
-      window.location.href = "/dashboard";
-    }
-  }, [isLoaded, isSignedIn]);
+    const toApp = {
+      navigate: async ({
+        decorateUrl,
+      }: {
+        decorateUrl: (url: string) => string;
+      }) => goTo(decorateUrl("/dashboard")),
+    };
+
+    // a function so ts re-reads status after an await (the transfer mutates signIn/signUp)
+    const signInDone = () => signIn.status === "complete";
+    const signUpDone = () => signUp.status === "complete";
+
+    (async () => {
+      // existing user signed in with google/github
+      if (signInDone()) return signIn.finalize(toApp);
+
+      // signed up with an account that already exists -> turn it into a sign in
+      if (signUp.isTransferable) {
+        await signIn.create({ transfer: true });
+        if (signInDone()) return signIn.finalize(toApp);
+        return goTo("/sign-in");
+      }
+
+      // signed in with an account that doesn't exist yet -> turn it into a sign up
+      if (signIn.isTransferable) {
+        await signUp.create({ transfer: true });
+        if (signUpDone()) return signUp.finalize(toApp);
+        return goTo("/sign-up");
+      }
+
+      if (signUpDone()) return signUp.finalize(toApp);
+
+      const sessionId =
+        signIn.existingSession?.sessionId || signUp.existingSession?.sessionId;
+      if (sessionId) {
+        return clerk.setActive({
+          session: sessionId,
+          navigate: toApp.navigate,
+        });
+      }
+
+      goTo("/sign-in");
+    })().catch(() => goTo("/sign-in"));
+  }, [clerk, clerk.loaded, signIn, signUp]);
 
   return (
     <div className="sp-auth" style={{ display: "grid", placeItems: "center" }}>
+      <div id="clerk-captcha" />
       <AuroraBackground />
       <div
         style={{

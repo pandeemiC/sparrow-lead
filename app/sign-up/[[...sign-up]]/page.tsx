@@ -132,8 +132,8 @@ export default function SignUpPage() {
   async function handleOAuth(strategy: "oauth_google" | "oauth_github") {
     await signUp.sso({
       strategy,
-      redirectUrl: `${window.location.origin}/sso-callback`,
-      redirectCallbackUrl: "/dashboard",
+      redirectUrl: "/dashboard",
+      redirectCallbackUrl: "/sso-callback",
     });
   }
 

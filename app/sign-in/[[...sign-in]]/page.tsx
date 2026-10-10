@@ -79,8 +79,8 @@ export default function SignInPage() {
   async function handleOAuth(strategy: "oauth_google" | "oauth_github") {
     await signIn.sso({
       strategy,
-      redirectUrl: `${window.location.origin}/sso-callback`,
-      redirectCallbackUrl: "/dashboard",
+      redirectUrl: "/dashboard",
+      redirectCallbackUrl: "/sso-callback",
     });
   }
 
