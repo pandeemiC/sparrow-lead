@@ -23,6 +23,18 @@ import {
 import { useScanStore } from "@/store/scanStore";
 import { useStatsStore } from "@/store/statsStore";
 import { useToastStore } from "@/store/toastStore";
+import { cn } from "@/lib/utils";
+import {
+  Button,
+  GhostButton,
+  KwTag,
+  Loading,
+  Seg,
+  SegButton,
+  Switch,
+  Watermark,
+  ghostClass,
+} from "@/components/sp/ui";
 import type { MentionRow, SignalPlatform, SignalType } from "@/types";
 
 type Filters = {
@@ -50,6 +62,78 @@ const INTENT_OPTIONS: { value: ScoreTier; label: string; color: string }[] = [
 ];
 
 const HUNTED = ["hunting", "interested", "engaged", "hunted"];
+
+const TYPE_TAG: Record<SignalType, string> = {
+  seeking_recommendation: "bg-r1/13 text-[#ff7a86]",
+  pain_point: "bg-amber/12 text-amber",
+  competitor_complaint: "bg-[rgba(181,140,255,0.13)] text-[#c8adff]",
+  question: "bg-white/7 text-ink-2",
+  general: "bg-white/4 text-ink-3",
+};
+
+// the card sections line up after the 56px watermark gutter (none on mobile)
+const gutter = "ml-14 max-[700px]:ml-0";
+const gutterPad = "pl-14 max-[700px]:pl-0";
+
+// one row in the filter rail
+function FilterOption({
+  active,
+  zero = false,
+  count,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  zero?: boolean;
+  count: number;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "flex w-full items-center gap-[9px] rounded-lg border-0 bg-transparent px-2 py-[7px] text-left text-[13px] text-ink-2 transition-colors hover:bg-panel-2 hover:text-ink",
+        active &&
+          "bg-r1/10 text-ink shadow-[inset_0_0_0_1px_rgba(255,36,56,0.22)] hover:bg-r1/10",
+        zero && "opacity-40",
+      )}
+    >
+      {children}
+      <span
+        className={cn(
+          "ml-auto font-mono text-[11px] leading-[normal] font-medium",
+          active ? "text-r1" : "text-ink-3",
+        )}
+      >
+        {count}
+      </span>
+    </button>
+  );
+}
+
+function FilterGroup({
+  title,
+  children,
+}: {
+  title?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="border-t border-line px-2 pt-2.5 pb-3">
+      {title && (
+        <h6 className="mb-1.5 px-2 font-mono text-[10px] leading-[normal] font-medium tracking-[0.18em] text-ink-3">
+          {title}
+        </h6>
+      )}
+      {children}
+    </div>
+  );
+}
+
+const optionLabel = "min-w-0 truncate";
+const clearClass =
+  "border-0 bg-transparent p-0 text-[12px] text-ink-3 hover:text-r1";
 
 function SignalCard({
   mention,
@@ -135,37 +219,62 @@ function SignalCard({
   return (
     <article
       ref={ref}
-      className="sp-scard"
+      className="group relative overflow-hidden rounded-[18px] border border-line bg-linear-to-b from-white/3.5 to-white/1.5 px-[22px] pt-5 pb-[18px] transition-[border-color,background-color] duration-200 hover:border-line-2 [&>*:not([data-wm])]:relative before:pointer-events-none before:absolute before:-top-[100px] before:-left-[90px] before:size-[300px] before:rounded-full before:bg-[radial-gradient(circle,color-mix(in_oklab,var(--pc)_26%,transparent)_0%,color-mix(in_oklab,var(--pc)_8%,transparent)_40%,transparent_68%)] before:opacity-85 before:[transition:opacity_0.3s,transform_0.5s] hover:before:scale-108 hover:before:opacity-100"
       style={{ "--pc": platformVar(mention.platform) } as React.CSSProperties}
     >
-      <div className="sp-wm">
-        <PlatformIcon platform={mention.platform} size={168} plain />
-      </div>
+      <Watermark
+        platform={mention.platform}
+        className="group-hover:opacity-17 group-hover:[transform:rotate(-12deg)_scale(1.04)]"
+      />
 
-      <div className="sp-c-top">
-        <span className="src">
+      <div
+        className={cn(
+          "flex min-h-7 items-center gap-2.5 text-[12.5px] text-ink-3",
+          gutterPad,
+        )}
+      >
+        <span className="inline-flex min-w-0 items-center gap-[7px] font-medium text-ink">
           <PlatformIcon platform={mention.platform} size={15} />
           {PLATFORM_LABELS[mention.platform]}
-          <span>· {mention.source}</span>
+          <span className="truncate font-normal text-ink-3">
+            · {mention.source}
+          </span>
         </span>
         <span>{shortAgo(mention.createdAt)} ago</span>
-        {isNew && <span className="sp-new" title="New since your last visit" />}
-        <span className="sp-kwt" title="Matched keyword">
+        {isNew && (
+          <span
+            className="size-[7px] flex-none rounded-full bg-r1 shadow-[0_0_8px_var(--r1)]"
+            title="New since your last visit"
+          />
+        )}
+        <KwTag className="ml-auto" title="Matched keyword">
           {mention.keyword}
-        </span>
+        </KwTag>
       </div>
 
-      <div className="sp-c-main">
+      <div
+        className={cn(
+          "mt-3.5 grid grid-cols-[minmax(0,1fr)_80px] gap-6 max-[700px]:grid-cols-[minmax(0,1fr)_64px] max-[700px]:gap-3.5",
+          gutterPad,
+        )}
+      >
         <div>
-          <h3>{mention.title}</h3>
+          <h3 className="mt-0 mb-2 text-[16.5px] leading-[1.4] font-medium tracking-[-0.005em] text-pretty wrap-anywhere">
+            {mention.title}
+          </h3>
           {mention.body && (
             <>
-              <p className={`sp-ex ${expanded ? "open" : ""}`}>
+              <p
+                className={cn(
+                  "m-0 text-[13.5px] leading-[1.6] text-pretty wrap-anywhere text-ink-2",
+                  !expanded && "line-clamp-2",
+                )}
+              >
                 {mention.body}
               </p>
               {long && (
                 <button
-                  className="sp-more"
+                  className="mt-1 border-0 bg-transparent p-0 text-[12px] text-ink-3 hover:text-ink"
                   onClick={() => setExpanded((v) => !v)}
                 >
                   {expanded ? "Show less" : "Show more"}
@@ -178,14 +287,24 @@ function SignalCard({
       </div>
 
       {mention.reason && (
-        <div className="sp-ai">
-          <div className="sp-ai-l">
+        <div
+          className={cn(
+            "mt-4 grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 rounded-xl border border-line bg-black/28 px-3.5 py-3",
+            gutter,
+          )}
+        >
+          <div className="flex items-center gap-1.5 pt-0.5 font-mono text-[10px] leading-[normal] font-medium tracking-[0.16em] whitespace-nowrap text-ink-3 [&_svg]:size-3 [&_svg]:text-r1">
             <Sparkles />
             AI READ
           </div>
-          <p>
+          <p className="m-0 text-[13px] leading-[1.55] text-pretty text-ink-2">
             {mention.type && (
-              <span className={`sp-type ${mention.type}`}>
+              <span
+                className={cn(
+                  "mr-2 inline-block rounded-md px-2 py-0.5 align-[1px] font-mono text-[10.5px] leading-[normal] font-medium tracking-[0.06em]",
+                  TYPE_TAG[mention.type],
+                )}
+              >
                 {SIGNAL_TYPE_LABELS[mention.type]}
               </span>
             )}
@@ -194,21 +313,21 @@ function SignalCard({
         </div>
       )}
 
-      <div className="sp-c-act">
-        <button
-          className={`sp-ghost ${onBoard ? "done" : ""}`}
+      <div className={cn("mt-4 flex flex-wrap items-center gap-2", gutter)}>
+        <GhostButton
+          tone={onBoard ? "done" : "default"}
           onClick={() => !onBoard && onHunt(mention)}
           disabled={onBoard}
         >
           <Target />
           {onBoard ? "On Hunt Board" : "Hunt Board"}
-        </button>
-        <button className="sp-ghost" onClick={toggleDraft}>
+        </GhostButton>
+        <GhostButton onClick={toggleDraft}>
           <Sparkles />
           {draftOpen ? "Hide reply" : "Draft reply"}
-        </button>
+        </GhostButton>
         <a
-          className="sp-ghost"
+          className={ghostClass()}
           href={mention.url}
           target="_blank"
           rel="noopener noreferrer"
@@ -216,21 +335,21 @@ function SignalCard({
           <ExternalLink />
           Open
         </a>
-        <span className="grow" />
-        <button
-          className="sp-ghost x"
+        <span className="flex-1" />
+        <GhostButton
+          tone="danger"
           onClick={() => ref.current && onDismiss(mention, ref.current)}
           title="Dismiss"
         >
           <X />
           Dismiss
-        </button>
+        </GhostButton>
       </div>
 
       {draftOpen && (
-        <div className="sp-draft" ref={draftRef}>
-          <div className="sp-draft-in">
-            <div className="sp-draft-h">
+        <div className={cn("mt-3 overflow-hidden", gutter)} ref={draftRef}>
+          <div className="rounded-xl border border-r1/25 bg-r1/4 p-3.5">
+            <div className="mb-2 flex items-center justify-between font-mono text-[10px] leading-[normal] font-medium tracking-[0.16em] text-ink-3">
               <span>
                 DRAFT REPLY · {PLATFORM_LABELS[mention.platform].toUpperCase()}
               </span>
@@ -241,15 +360,17 @@ function SignalCard({
               value={reply}
               readOnly={draftState !== "ready"}
               onChange={(e) => setReply(e.target.value)}
+              className="min-h-24 w-full resize-y border-0 bg-transparent p-0 font-body text-[13.5px] leading-[1.6] text-ink outline-0"
             />
-            <div className="sp-draft-f">
-              <button
-                className="sp-btn sm pri"
+            <div className="mt-2 flex justify-end gap-2">
+              <Button
+                variant="primary"
+                size="sm"
                 onClick={copyReply}
                 disabled={draftState !== "ready"}
               >
                 Copy reply
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -346,7 +467,7 @@ export default function SignalsPage() {
   const listKey = `${JSON.stringify(filters)}-${sort}-${mentions === null ? "x" : "ok"}`;
   useGSAP(
     () => {
-      const cards = listRef.current?.querySelectorAll(".sp-scard");
+      const cards = listRef.current?.querySelectorAll("article");
       if (!cards?.length) return;
       gsap.fromTo(
         cards,
@@ -361,7 +482,7 @@ export default function SignalsPage() {
         },
       );
       gsap.fromTo(
-        listRef.current!.querySelectorAll(".sp-wm"),
+        listRef.current!.querySelectorAll("[data-wm]"),
         { rotate: -30, opacity: 0, x: -10 },
         {
           rotate: -16,
@@ -442,69 +563,75 @@ export default function SignalsPage() {
   }
 
   if (mentions === null) {
-    return <div className="sp-loading">LOADING SIGNALS…</div>;
+    return <Loading>LOADING SIGNALS…</Loading>;
   }
 
   return (
-    <div className="sp-sig-wrap">
-      <div className="sp-head">
+    <div className="grid grid-cols-[232px_minmax(0,1fr)] items-start gap-6 max-[1100px]:grid-cols-[minmax(0,1fr)]">
+      <div className="col-span-full flex flex-wrap items-end justify-between gap-6">
         <div>
-          <div className="sp-sub">
+          <div className="flex flex-wrap items-center gap-3 text-[13.5px] text-ink-2">
             <span>
               {all.length} signals{newCount > 0 && ` · ${newCount} new`}
             </span>
             <span>·</span>
-            <span className="hot">{hotCount} hot leads</span>
+            <span className="font-medium text-r1">{hotCount} hot leads</span>
           </div>
         </div>
-        <div className="sp-head-r">
-          <button
-            className="sp-btn sm sp-fbtn"
+        <div className="flex items-center gap-2.5">
+          <Button
+            size="sm"
+            className="hidden max-[1100px]:inline-flex"
             onClick={() => setRailOpen((v) => !v)}
           >
             <SlidersHorizontal />
             Filters
-          </button>
-          <div className="sp-seg">
-            <button
-              className={sort === "intent" ? "on" : ""}
+          </Button>
+          <Seg>
+            <SegButton
+              active={sort === "intent"}
               onClick={() => setSort("intent")}
             >
               Highest intent
-            </button>
-            <button
-              className={sort === "newest" ? "on" : ""}
+            </SegButton>
+            <SegButton
+              active={sort === "newest"}
               onClick={() => setSort("newest")}
             >
               Newest
-            </button>
-          </div>
+            </SegButton>
+          </Seg>
         </div>
       </div>
 
-      <aside className={`sp-rail ${railOpen ? "show" : ""}`}>
-        <div className="sp-rail-h">
-          <b>Filters</b>
-          <button className="sp-clr" onClick={() => setFilters(EMPTY_FILTERS)}>
+      <aside
+        className={cn(
+          "sticky top-0 rounded-2xl border border-line bg-panel py-1.5 backdrop-blur-md max-[1100px]:static",
+          !railOpen && "max-[1100px]:hidden",
+        )}
+      >
+        <div className="flex items-center justify-between px-4 pt-3 pb-2">
+          <b className="text-[13.5px] font-medium">Filters</b>
+          <button
+            className={clearClass}
+            onClick={() => setFilters(EMPTY_FILTERS)}
+          >
             Clear all
           </button>
         </div>
 
-        <div className="sp-fg">
-          <div className="sp-tg">
+        <FilterGroup>
+          <div className="flex items-center justify-between px-2 py-1.5 text-[13px] text-ink-2">
             New since last visit
-            <button
-              className={`sp-switch ${filters.newOnly ? "on" : ""}`}
+            <Switch
+              on={filters.newOnly}
               onClick={() => setFilter("newOnly", !filters.newOnly)}
               aria-label="New since last visit"
-            >
-              <i />
-            </button>
+            />
           </div>
-        </div>
+        </FilterGroup>
 
-        <div className="sp-fg">
-          <h6>PLATFORM</h6>
+        <FilterGroup title="PLATFORM">
           {[
             { value: "all" as const, label: "All platforms" },
             ...PLATFORMS,
@@ -514,106 +641,110 @@ export default function SignalsPage() {
               (m) => p.value === "all" || m.platform === p.value,
             );
             return (
-              <button
+              <FilterOption
                 key={p.value}
-                className={`sp-fo ${filters.platform === p.value ? "on" : ""} ${c ? "" : "zero"}`}
+                active={filters.platform === p.value}
+                zero={!c}
+                count={c}
                 onClick={() => setFilter("platform", p.value)}
               >
                 {p.value !== "all" && (
-                  <span className="ic">
+                  <span className="grid size-3.5 flex-none place-items-center">
                     <PlatformIcon platform={p.value} size={13} />
                   </span>
                 )}
-                <span className="lbl">{p.label}</span>
-                <span className="c">{c}</span>
-              </button>
+                <span className={optionLabel}>{p.label}</span>
+              </FilterOption>
             );
           })}
-        </div>
+        </FilterGroup>
 
-        <div className="sp-fg">
-          <h6>INTENT</h6>
-          <button
-            className={`sp-fo ${filters.intent === "all" ? "on" : ""}`}
+        <FilterGroup title="INTENT">
+          <FilterOption
+            active={filters.intent === "all"}
+            count={count("intent", () => true)}
             onClick={() => setFilter("intent", "all")}
           >
-            <span className="lbl">Any intent</span>
-            <span className="c">{count("intent", () => true)}</span>
-          </button>
+            <span className={optionLabel}>Any intent</span>
+          </FilterOption>
           {INTENT_OPTIONS.map((o) => {
             const c = count("intent", (m) => scoreTier(m.score) === o.value);
             return (
-              <button
+              <FilterOption
                 key={o.value}
-                className={`sp-fo ${filters.intent === o.value ? "on" : ""} ${c ? "" : "zero"}`}
+                active={filters.intent === o.value}
+                zero={!c}
+                count={c}
                 onClick={() => setFilter("intent", o.value)}
               >
-                <span className="dot" style={{ background: o.color }} />
-                <span className="lbl">{o.label}</span>
-                <span className="c">{c}</span>
-              </button>
+                <span
+                  className="size-[7px] flex-none rounded-full"
+                  style={{ background: o.color }}
+                />
+                <span className={optionLabel}>{o.label}</span>
+              </FilterOption>
             );
           })}
-        </div>
+        </FilterGroup>
 
-        <div className="sp-fg">
-          <h6>SIGNAL TYPE</h6>
-          <button
-            className={`sp-fo ${filters.type === "all" ? "on" : ""}`}
+        <FilterGroup title="SIGNAL TYPE">
+          <FilterOption
+            active={filters.type === "all"}
+            count={count("type", () => true)}
             onClick={() => setFilter("type", "all")}
           >
-            <span className="lbl">All types</span>
-            <span className="c">{count("type", () => true)}</span>
-          </button>
+            <span className={optionLabel}>All types</span>
+          </FilterOption>
           {(Object.keys(SIGNAL_TYPE_LABELS) as SignalType[]).map((t) => {
             const c = count("type", (m) => m.type === t);
             return (
-              <button
+              <FilterOption
                 key={t}
-                className={`sp-fo ${filters.type === t ? "on" : ""} ${c ? "" : "zero"}`}
+                active={filters.type === t}
+                zero={!c}
+                count={c}
                 onClick={() => setFilter("type", t)}
               >
-                <span className="lbl">{SIGNAL_TYPE_LABELS[t]}</span>
-                <span className="c">{c}</span>
-              </button>
+                <span className={optionLabel}>{SIGNAL_TYPE_LABELS[t]}</span>
+              </FilterOption>
             );
           })}
-        </div>
+        </FilterGroup>
 
         {keywordOptions.length > 0 && (
-          <div className="sp-fg">
-            <h6>KEYWORD</h6>
-            <button
-              className={`sp-fo ${filters.keyword === "all" ? "on" : ""}`}
+          <FilterGroup title="KEYWORD">
+            <FilterOption
+              active={filters.keyword === "all"}
+              count={count("keyword", () => true)}
               onClick={() => setFilter("keyword", "all")}
             >
-              <span className="lbl">All keywords</span>
-              <span className="c">{count("keyword", () => true)}</span>
-            </button>
+              <span className={optionLabel}>All keywords</span>
+            </FilterOption>
             {keywordOptions.map((k) => {
               const c = count("keyword", (m) => m.keyword === k);
               return (
-                <button
+                <FilterOption
                   key={k}
-                  className={`sp-fo ${filters.keyword === k ? "on" : ""} ${c ? "" : "zero"}`}
+                  active={filters.keyword === k}
+                  zero={!c}
+                  count={c}
                   onClick={() => setFilter("keyword", k)}
                 >
-                  <span className="lbl">{k}</span>
-                  <span className="c">{c}</span>
-                </button>
+                  <span className={optionLabel}>{k}</span>
+                </FilterOption>
               );
             })}
-          </div>
+          </FilterGroup>
         )}
       </aside>
 
-      <section className="sp-feed">
-        <div className="sp-feed-bar">
+      <section className="flex min-w-0 flex-col gap-3.5">
+        <div className="flex min-h-7 flex-wrap items-center gap-2.5 text-[12.5px] text-ink-3">
           <span>Showing {visible.length}</span>
           {chips.map((c) => (
             <button
               key={c.key}
-              className="sp-pillf"
+              className="inline-flex items-center gap-1.5 rounded-full border border-line-2 bg-transparent py-[3px] pr-1.5 pl-2.5 text-[12px] text-ink-2 hover:border-r1 hover:text-ink [&_svg]:size-[11px]"
               onClick={() => clearChip(c.key)}
             >
               {c.label}
@@ -621,10 +752,7 @@ export default function SignalsPage() {
             </button>
           ))}
         </div>
-        <div
-          ref={listRef}
-          style={{ display: "flex", flexDirection: "column", gap: 14 }}
-        >
+        <div ref={listRef} className="flex flex-col gap-3.5">
           {visible.length ? (
             visible.map((m) => (
               <SignalCard
@@ -636,14 +764,15 @@ export default function SignalsPage() {
               />
             ))
           ) : (
-            <div className="sp-empty">
-              <h4>{all.length ? "Nothing here yet." : "No signals yet."}</h4>
+            <div className="rounded-[18px] border border-dashed border-line-2 px-6 py-12 text-center text-ink-3">
+              <h4 className="mt-0 mb-1.5 font-display text-[24px] leading-[normal] font-normal text-ink">
+                {all.length ? "Nothing here yet." : "No signals yet."}
+              </h4>
               {all.length ? (
                 <>
                   No signals match these filters.{" "}
                   <button
-                    className="sp-clr"
-                    style={{ color: "var(--r1)" }}
+                    className={cn(clearClass, "text-r1")}
                     onClick={() => setFilters(EMPTY_FILTERS)}
                   >
                     Clear filters

@@ -2,6 +2,7 @@ import type { ComponentProps } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import PlatformIcon from "@/components/ui/PlatformIcon";
 
 // small building blocks shared by the dashboard pages
 
@@ -60,23 +61,23 @@ const ghostTones = {
   danger: "not-disabled:hover:border-r1 not-disabled:hover:text-r1",
   accent: "not-disabled:hover:border-r1 not-disabled:hover:bg-r1/10",
 };
+type GhostTone = keyof typeof ghostTones;
+
+// exported so an <a> can look like a ghost button too
+export function ghostClass(tone: GhostTone = "default") {
+  return cn(
+    "inline-flex h-8 items-center gap-[7px] whitespace-nowrap rounded-full border border-line-2 bg-transparent px-3 text-[12.5px] text-ink-2 transition-all",
+    "not-disabled:hover:border-white/30 not-disabled:hover:text-ink disabled:cursor-not-allowed disabled:opacity-35 [&_svg]:size-3.5",
+    ghostTones[tone],
+  );
+}
 
 export function GhostButton({
-  tone = "default",
+  tone,
   className,
   ...props
-}: ComponentProps<"button"> & { tone?: keyof typeof ghostTones }) {
-  return (
-    <button
-      className={cn(
-        "inline-flex h-8 items-center gap-[7px] whitespace-nowrap rounded-full border border-line-2 bg-transparent px-3 text-[12.5px] text-ink-2 transition-all",
-        "not-disabled:hover:border-white/30 not-disabled:hover:text-ink disabled:cursor-not-allowed disabled:opacity-35 [&_svg]:size-3.5",
-        ghostTones[tone],
-        className,
-      )}
-      {...props}
-    />
-  );
+}: ComponentProps<"button"> & { tone?: GhostTone }) {
+  return <button className={cn(ghostClass(tone), className)} {...props} />;
 }
 
 export function IconButton({ className, ...props }: ComponentProps<"button">) {
@@ -217,6 +218,29 @@ export function StageDot({ color }: { color: string }) {
       className="size-[7px] flex-none rounded-full bg-(--sc) shadow-[0_0_8px_color-mix(in_oklab,var(--sc)_70%,transparent)]"
       style={{ "--sc": color } as React.CSSProperties}
     />
+  );
+}
+
+// big rotated platform logo in the corner of signal / lead cards.
+// uses transform (not tailwind's rotate) because gsap animates transform on it,
+// the parent card needs the "group" class for the hover tilt
+export function Watermark({
+  platform,
+  className,
+}: {
+  platform: string;
+  className?: string;
+}) {
+  return (
+    <div
+      data-wm
+      className={cn(
+        "pointer-events-none absolute -top-[38px] -left-[34px] size-[168px] text-(--pc) opacity-12 drop-shadow-[0_0_14px_currentColor] [transform:rotate(-16deg)] [transition:opacity_0.3s,transform_0.5s_cubic-bezier(0.2,0.8,0.2,1)] [&_svg]:size-full",
+        className,
+      )}
+    >
+      <PlatformIcon platform={platform} size={168} plain />
+    </div>
   );
 }
 
