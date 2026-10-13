@@ -1,18 +1,8 @@
 import type { Metadata } from "next";
-import {
-  Montserrat,
-  Playfair_Display,
-  Inter,
-  JetBrains_Mono,
-} from "next/font/google";
+import { Playfair_Display, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import Navbar from "@/components/Navbar";
-
-const montserrat = Montserrat({
-  variable: "--font-montserrat",
-  subsets: ["latin"],
-});
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -36,7 +26,7 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Sparrow",
   description:
-    "AI-Powered social listener that finds exactly what you are looking to share.",
+    "Sparrow reads Reddit, Hacker News and Bluesky for posts that match what you offer or what you're searching for, and scores how serious each one is.",
 };
 
 export default function RootLayout({
@@ -49,7 +39,7 @@ export default function RootLayout({
       <html
         lang="en"
         suppressHydrationWarning={true}
-        className={`${montserrat.variable} ${playfair.variable} ${inter.variable} ${jetbrains.variable} h-full antialiased`}
+        className={`${playfair.variable} ${inter.variable} ${jetbrains.variable} h-full antialiased`}
       >
         <body className="min-h-full flex flex-col">
           <Navbar />
