@@ -1,5 +1,6 @@
 import SmoothScroll from "@/components/home/SmoothScroll";
 import Hero from "@/components/home/Hero";
+import Problem from "@/components/home/Problem";
 
 export default function Home() {
   return (
@@ -7,6 +8,7 @@ export default function Home() {
       <SmoothScroll />
       <main>
         <Hero />
+        <Problem />
       </main>
     </div>
   );
