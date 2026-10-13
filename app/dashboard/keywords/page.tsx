@@ -143,6 +143,7 @@ export default function KeywordsPage() {
   const setNewSignalsCount = useScanStore((s) => s.setNewSignalsCount);
   const stats = useStatsStore((s) => s.stats);
   const refreshStats = useStatsStore((s) => s.refresh);
+  const adjustStats = useStatsStore((s) => s.adjust);
 
   const [rows, setRows] = useState<Row[] | null>(null);
   const [mentions, setMentions] = useState<MentionRow[]>([]);
@@ -367,6 +368,7 @@ export default function KeywordsPage() {
       setOpenId(created.id);
       setFeedFilter("all");
       toast(`Tracking “${keyword}” — run a scan to collect signals`, "success");
+      adjustStats("keywordsTracked", 1);
       refreshStats();
     } catch (err) {
       toast(err instanceof Error ? err.message : "Couldn't add keyword");
@@ -400,6 +402,7 @@ export default function KeywordsPage() {
         });
         toast("Resumed", "success");
       }
+      adjustStats("keywordsTracked", paused ? -1 : 1);
       refreshStats();
     } catch (err) {
       setRows(
@@ -482,7 +485,8 @@ export default function KeywordsPage() {
           ref={popRef}
         >
           <span>
-            {activeCount} of {limits.keywords} tracked
+            <CountUp value={activeCount} delay={0} /> of {limits.keywords}{" "}
+            tracked
           </span>
           <button
             className={cn(

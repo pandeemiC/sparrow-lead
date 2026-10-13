@@ -20,6 +20,7 @@ import { navItems } from "@/lib/constants";
 import { usePlan } from "./PlanContext";
 import { useScanStore } from "@/store/scanStore";
 import { useStatsStore } from "@/store/statsStore";
+import CountUp from "@/components/sp/CountUp";
 import { cn } from "@/lib/utils";
 import { Bar, buttonClass, IconButton } from "@/components/sp/ui";
 
@@ -65,7 +66,7 @@ function NavBadge({
         (hot || active) && rail && "bg-r1 text-white",
       )}
     >
-      {count}
+      {typeof count === "number" ? <CountUp value={count} delay={0} /> : count}
     </span>
   );
 }
@@ -241,19 +242,27 @@ export default function DashboardShell({
                   <div className="mb-1.25 flex justify-between text-[11.5px] text-ink-2">
                     Signals this month
                     <b className="font-mono text-[11px] leading-[normal] font-medium text-ink">
-                      {signalsThisMonth} / {limits.signals}
+                      <CountUp value={signalsThisMonth} delay={0} /> /{" "}
+                      {limits.signals}
                     </b>
                   </div>
-                  <Bar pct={sigPct} />
+                  <Bar
+                    pct={sigPct}
+                    fillClassName="transition-[width] duration-700 ease-out"
+                  />
                 </div>
                 <div className="mb-2.5">
                   <div className="mb-1.25 flex justify-between text-[11.5px] text-ink-2">
                     Keywords
                     <b className="font-mono text-[11px] leading-[normal] font-medium text-ink">
-                      {keywordsTracked} / {limits.keywords}
+                      <CountUp value={keywordsTracked} delay={0} /> /{" "}
+                      {limits.keywords}
                     </b>
                   </div>
-                  <Bar pct={kwPct} />
+                  <Bar
+                    pct={kwPct}
+                    fillClassName="transition-[width] duration-700 ease-out"
+                  />
                 </div>
                 {plan === "free" && (
                   <Link

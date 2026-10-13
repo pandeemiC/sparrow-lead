@@ -3,6 +3,8 @@ export async function apiFetch<T = unknown>(
   init?: RequestInit,
 ): Promise<T> {
   const res = await fetch(url, {
+    // always ask the server, never answer from a cache
+    cache: "no-store",
     ...init,
     headers: { "Content-Type": "application/json", ...init?.headers },
   });
