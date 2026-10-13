@@ -6,6 +6,7 @@ import HowItWorks from "@/components/home/HowItWorks";
 import BuyerPost from "@/components/home/BuyerPost";
 import IntentScore from "@/components/home/IntentScore";
 import Faq from "@/components/home/Faq";
+import Footer from "@/components/home/Footer";
 
 export default function Home() {
   return (
@@ -22,6 +23,7 @@ export default function Home() {
         </div>
         <Faq />
       </main>
+      <Footer />
     </div>
   );
 }
