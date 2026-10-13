@@ -3,6 +3,7 @@ import Hero from "@/components/home/Hero";
 import Problem from "@/components/home/Problem";
 import PowerDiagram from "@/components/home/PowerDiagram";
 import HowItWorks from "@/components/home/HowItWorks";
+import BuyerPost from "@/components/home/BuyerPost";
 
 export default function Home() {
   return (
@@ -13,6 +14,7 @@ export default function Home() {
         <Problem />
         <PowerDiagram />
         <HowItWorks />
+        <BuyerPost />
       </main>
     </div>
   );
