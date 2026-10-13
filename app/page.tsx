@@ -4,6 +4,7 @@ import Problem from "@/components/home/Problem";
 import PowerDiagram from "@/components/home/PowerDiagram";
 import HowItWorks from "@/components/home/HowItWorks";
 import BuyerPost from "@/components/home/BuyerPost";
+import IntentScore from "@/components/home/IntentScore";
 
 export default function Home() {
   return (
@@ -15,6 +16,9 @@ export default function Home() {
         <PowerDiagram />
         <HowItWorks />
         <BuyerPost />
+        <div id="intent">
+          <IntentScore />
+        </div>
       </main>
     </div>
   );
