@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { getDb } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { generateContent } from "@/lib/gemini";
+import { profileForReply, toHuntProfile } from "@/lib/huntProfile";
 
 export async function POST(req: Request) {
   const { userId } = await auth();
@@ -33,6 +34,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ reply: mention.ai_suggested_reply });
   }
 
+  const [userRow] = await sql`SELECT * FROM users WHERE user_id = ${userId}`;
+  const profile = userRow ? profileForReply(toHuntProfile(userRow)) : "";
+
   try {
     const response = await generateContent({
       model: "gemini-3.1-flash-lite",
@@ -44,7 +48,8 @@ export async function POST(req: Request) {
           Signal type: "${mention.ai_type ?? "general"}"
           Why this is a signal: "${mention.ai_reason ?? ""}"
   
-          Write a short, genuine reply (2-3 sentences). Do NOT be salesy or mention any product directly. Sound like a real person who has dealt with this problem. End with a helpful question or offer. Return only the reply text, no quotes, no labels.
+          ${profile ? `About the person replying:\n${profile}\n` : ""}
+          Write a short, genuine reply (2-3 sentences). Do NOT be salesy. Only mention what they offer if it genuinely helps, and never as a pitch. Sound like a real person who has dealt with this problem. End with a helpful question or offer. Return only the reply text, no quotes, no labels.
       `,
       config: {
         maxOutputTokens: 300,

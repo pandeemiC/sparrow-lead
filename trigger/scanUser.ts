@@ -1,6 +1,7 @@
 import { logger } from "@trigger.dev/sdk";
 import { getDb } from "@/lib/db";
 import { analyzePost } from "@/lib/analysis";
+import { profileForScoring, toHuntProfile } from "@/lib/huntProfile";
 import { searchReddit, searchHackerNews, searchBluesky } from "@/lib/search";
 import type {
   ScannedPost,
@@ -13,11 +14,12 @@ import type {
 export async function scanUser(userId: string): Promise<ScanResult> {
   const sql = getDb();
   const [userRow] =
-    await sql`SELECT listener_context, alert_min_score FROM users WHERE user_id = ${userId}`;
+    await sql`SELECT * FROM users WHERE user_id = ${userId}`;
   const keywords =
     (await sql`SELECT * FROM keywords WHERE user_id = ${userId} AND active = true`) as Keyword[];
 
   const alertMinScore: number = userRow?.alert_min_score ?? 7;
+  const profile = userRow ? profileForScoring(toHuntProfile(userRow)) : "";
   const hotSignals: HotSignal[] = [];
   let found = 0;
 
@@ -51,7 +53,7 @@ export async function scanUser(userId: string): Promise<ScanResult> {
           keyword: kw.keyword,
           title: post.post_title,
           body: post.post_body,
-          listenerContext: userRow?.listener_context ?? undefined,
+          profile: profile || undefined,
         });
 
         await sql`INSERT INTO mentions (keyword_id, platform, post_url, post_title, post_body, author, ai_score, ai_reason, ai_type, ai_scored_at)

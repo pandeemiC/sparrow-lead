@@ -56,8 +56,22 @@ export type AnalyzePostInput = {
   keyword: string;
   title: string;
   body: string;
-  listenerContext?: string;
+  // the user's hunt profile, already written out as text for the prompt
+  profile?: string;
 };
+
+export type HuntProfile = {
+  role: string;
+  offer: string;
+  lookingFor: string;
+  signals: string;
+  ignore: string;
+  replyTone: string;
+  updatedAt: string | null;
+};
+
+// what happens to existing data when the hunt profile is saved
+export type HuntProfileSaveMode = "keep" | "rescore" | "fresh";
 
 export type RedditPost = {
   data: {

@@ -5,14 +5,14 @@ export async function analyzePost({
   keyword,
   title,
   body,
-  listenerContext,
+  profile,
 }: AnalyzePostInput): Promise<{ score: number; reason: string; type: string }> {
   const response = await generateContent({
     model: "gemini-3.1-flash-lite",
     contents: `You are analyzing social media posts for buyer intent.
     Post: "${title} - ${body?.slice(0, 500)}"
     Keywords tracked: "${keyword}"
-    ${listenerContext ? `User context: "${listenerContext}" - use this to judge the given information specifically in relevance to the user` : ""}
+    ${profile ? `About the user (judge the post by how relevant it is to them):\n${profile}` : ""}
     Return JSON only, no other text:
     {
       "score": <number 1-10 buyer intent>,
@@ -51,7 +51,7 @@ export async function analyzePost({
 //         content: `You are analyzing social media posts for buyer intent.
 //         Post: "${title} - ${body?.slice(0, 500)}"
 //         Keyword tracked: "${keyword}"
-//         ${listenerContext ? `User context: "${listenerContext}" - use this to judge the given information specifically in relevance to the user` : ""}
+//         ${profile ? `About the user (judge the post by how relevant it is to them):\n${profile}` : ""}
 //         Return JSON only, no other text:
 //         {
 //           "score": <number 1-10 buyer intent>,
