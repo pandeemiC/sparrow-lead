@@ -1,4 +1,5 @@
 import {
+  Crosshair,
   LayoutDashboard,
   Radio,
   Tag,
@@ -29,6 +30,7 @@ export const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Signals", href: "/dashboard/signals", icon: Radio },
   { label: "Keywords", href: "/dashboard/keywords", icon: Tag },
+  { label: "Hunt Profile", href: "/dashboard/hunt-profile", icon: Crosshair },
   { label: "Hunt Board", href: "/dashboard/hunt-board", icon: Target },
 ];
 

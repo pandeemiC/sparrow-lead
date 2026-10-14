@@ -75,6 +75,7 @@ const CRUMBS: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/dashboard/signals": "Signals",
   "/dashboard/keywords": "Keywords",
+  "/dashboard/hunt-profile": "Hunt Profile",
   "/dashboard/hunt-board": "Hunt Board",
 };
 
