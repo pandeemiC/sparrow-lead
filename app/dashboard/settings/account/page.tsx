@@ -5,6 +5,7 @@ import { useUser, useClerk, useSession } from "@clerk/nextjs";
 import { MoreHorizontal } from "lucide-react";
 import { usePlan } from "@/components/dashboard/PlanContext";
 import { useToastStore } from "@/store/toastStore";
+import { apiFetch } from "@/lib/apiFetch";
 import type { AccountSession } from "@/types";
 import { SettingsCard } from "@/components/ui/SettingsUI";
 import { GhostButton, SectionTitle } from "@/components/sp/ui";
@@ -59,6 +60,8 @@ export default function SettingsAccount() {
   const [draftFirst, setDraftFirst] = useState("");
   const [draftLast, setDraftLast] = useState("");
   const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -126,6 +129,26 @@ export default function SettingsAccount() {
       toast("Couldn't sign out every device. Signing out here.");
     }
     await signOut({ redirectUrl: "/sign-in" });
+  }
+
+  // first click asks, second click deletes the data and the clerk user
+  async function deleteAccount() {
+    if (!confirmDelete) {
+      setConfirmDelete(true);
+      return;
+    }
+    setDeleting(true);
+    try {
+      await apiFetch("/api/account", { method: "DELETE" });
+      // the session is gone with the user, a full load clears clerk's state
+      window.location.href = "/";
+    } catch (err) {
+      toast(
+        err instanceof Error ? err.message : "Couldn't delete your account",
+      );
+      setDeleting(false);
+      setConfirmDelete(false);
+    }
   }
 
   function editName() {
@@ -244,6 +267,11 @@ export default function SettingsAccount() {
                 To delete your account, please cancel your{" "}
                 <span className="capitalize">{plan}</span> subscription first.
               </p>
+            ) : confirmDelete ? (
+              <p className="text-sm text-red-400">
+                This deletes your keywords, signals and Hunt Board for good.
+                Click again to confirm.
+              </p>
             ) : (
               <p className="text-sm text-white/35">
                 Permanently deletes your account and all data. This cannot be
@@ -252,11 +280,15 @@ export default function SettingsAccount() {
             )}
           </div>
           <button
-            disabled={isPaidPlan}
-            onClick={() => user.delete()}
+            disabled={isPaidPlan || deleting}
+            onClick={deleteAccount}
             className="text-sm cursor-pointer px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all shrink-0 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
           >
-            Delete Account
+            {deleting
+              ? "Deleting…"
+              : confirmDelete
+                ? "Yes, delete everything"
+                : "Delete Account"}
           </button>
         </div>
       </SettingsCard>
