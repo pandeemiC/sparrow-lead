@@ -11,6 +11,8 @@ import {
   MessageSquareOff,
   Radar,
   Send,
+  Check,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import SectionHead from "./SectionHead";
@@ -29,14 +31,14 @@ const TOP_Y = 150;
 const BOT_Y = 370;
 const pct = (y: number) => `${(y / H) * 100}%`;
 const PLAY_FROM = 27;
-const PLAY_TO = 96;
+const PLAY_TO = 95.5;
 
 // where each moment sits along the time axis (percent of the width)
 const STOPS = [
-  { x: 50, time: "Next scan" },
-  { x: 64, time: "Minutes later" },
-  { x: 78, time: "Same day" },
-  { x: 92, time: "Next day" },
+  { x: 45, time: "Next scan" },
+  { x: 58, time: "Minutes later" },
+  { x: 71, time: "Same day" },
+  { x: 84, time: "Next day" },
 ];
 
 type Moment = { icon: LucideIcon | null; title: string; body: string };
@@ -67,8 +69,8 @@ const WITHOUT: Moment[] = [
   { icon: null, title: "Gone", body: "They picked someone else" },
 ];
 
-const TOP_LANE = `M262 260 C 330 260, 330 ${TOP_Y}, 400 ${TOP_Y} L 990 ${TOP_Y}`;
-const BOT_LANE = `M262 260 C 330 260, 330 ${BOT_Y}, 400 ${BOT_Y} L 990 ${BOT_Y}`;
+const TOP_LANE = `M262 260 C 330 260, 330 ${TOP_Y}, 400 ${TOP_Y} L 955 ${TOP_Y}`;
+const BOT_LANE = `M262 260 C 330 260, 330 ${BOT_Y}, 400 ${BOT_Y} L 955 ${BOT_Y}`;
 
 function OriginPost() {
   return (
@@ -193,7 +195,17 @@ export default function BuyerPost() {
                 at,
               );
             });
-          tl.to("[data-endings]", { opacity: 1, duration: 0.3 }, T - 0.2);
+          tl.to("[data-playhead]", { opacity: 0, duration: 0.5 }, T)
+            .to(
+              "[data-end]",
+              { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2)" },
+              T - 0.1,
+            )
+            .to(
+              "[data-endings]",
+              { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
+              T,
+            );
         },
       );
 
@@ -218,7 +230,8 @@ export default function BuyerPost() {
 
       // reduced motion: just show how it ends
       mm.add("(prefers-reduced-motion: reduce)", () => {
-        gsap.set("[data-ev], [data-tick], [data-endings]", {
+        gsap.set("[data-playhead]", { opacity: 0 });
+        gsap.set("[data-ev], [data-tick], [data-end], [data-endings]", {
           opacity: 1,
           scale: 1,
           y: 0,
@@ -247,132 +260,203 @@ export default function BuyerPost() {
           intro="Someone needs exactly what you do. Follow their post with Sparrow listening, and without."
         />
 
-        {/* desktop fork */}
-        <div data-fork className="relative mt-14 hidden h-130 lg:block">
-          <svg
-            viewBox={`0 0 1000 ${H}`}
-            preserveAspectRatio="none"
-            className="pointer-events-none absolute inset-0 size-full overflow-visible"
-          >
-            <defs>
-              <linearGradient id="lane-good" x1="0" x2="1">
-                <stop offset="0" stopColor="#FF2438" stopOpacity="0.4" />
-                <stop offset="1" stopColor="#FF2438" />
-              </linearGradient>
-            </defs>
-            <path
-              d={TOP_LANE}
-              fill="none"
-              stroke="rgba(255,255,255,0.06)"
-              vectorEffect="non-scaling-stroke"
-            />
-            <path
-              d={BOT_LANE}
-              fill="none"
-              stroke="rgba(255,255,255,0.06)"
-              vectorEffect="non-scaling-stroke"
-            />
-            <path
-              data-lane
-              d={TOP_LANE}
-              fill="none"
-              stroke="url(#lane-good)"
-              strokeWidth="2"
-              pathLength={1}
-              strokeDasharray="1"
-              strokeDashoffset="1"
-              style={{ filter: "drop-shadow(0 0 6px rgba(255,36,56,0.8))" }}
-            />
-            <path
-              data-lane
-              d={BOT_LANE}
-              fill="none"
-              stroke="rgba(255,255,255,0.3)"
-              strokeWidth="1.5"
-              strokeDasharray="1"
-              pathLength={1}
-              strokeDashoffset="1"
-            />
-          </svg>
-
-          <div className="absolute top-1/2 left-0 w-[25%] -translate-y-1/2">
-            <OriginPost />
+        {/* desktop fork, framed like a chart */}
+        <div className="mt-14 hidden overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01))] shadow-[0_50px_120px_-70px_rgba(255,36,56,0.5)] lg:block">
+          <div className="flex items-center justify-between border-b border-white/7 px-7 py-4 text-[13px]">
+            <span className="text-ink-2">One post, followed for a day</span>
+            <div className="flex items-center gap-5 text-ink-3">
+              <span className="flex items-center gap-2">
+                <i className="h-0.5 w-5 rounded-full bg-r1 shadow-[0_0_8px_var(--r1)]" />
+                With Sparrow
+              </span>
+              <span className="flex items-center gap-2">
+                <i className="h-0 w-5 border-t border-dashed border-white/40" />
+                Without
+              </span>
+            </div>
           </div>
 
-          <span
-            className="absolute left-[32%] -translate-y-full pb-2 text-[13px] font-medium whitespace-nowrap text-r1"
-            style={{ top: pct(TOP_Y) }}
-          >
-            With Sparrow
-          </span>
-          <span
-            className="absolute left-[32%] pt-2 text-[13px] whitespace-nowrap text-ink-3"
-            style={{ top: pct(BOT_Y) }}
-          >
-            Without
-          </span>
+          <div className="relative bg-[radial-gradient(rgba(255,255,255,0.05)_1px,transparent_1px)] bg-size-[22px_22px] px-7">
+            <div data-fork className="relative h-130">
+              <svg
+                viewBox={`0 0 1000 ${H}`}
+                preserveAspectRatio="none"
+                className="pointer-events-none absolute inset-0 size-full overflow-visible"
+              >
+                <defs>
+                  <linearGradient id="lane-good" x1="0" x2="1">
+                    <stop offset="0" stopColor="#FF2438" stopOpacity="0.4" />
+                    <stop offset="1" stopColor="#FF2438" />
+                  </linearGradient>
+                  {/* the "without" lane dies out as it goes */}
+                  <linearGradient id="lane-bad" x1="0" x2="1">
+                    <stop offset="0" stopColor="#ffffff" stopOpacity="0.4" />
+                    <stop offset="1" stopColor="#ffffff" stopOpacity="0.08" />
+                  </linearGradient>
+                </defs>
+                {/* vertical guides through each moment */}
+                {STOPS.map((st) => (
+                  <line
+                    key={st.time}
+                    x1={st.x * 10}
+                    x2={st.x * 10}
+                    y1={60}
+                    y2={H - 60}
+                    stroke="rgba(255,255,255,0.06)"
+                    strokeDasharray="3 6"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                ))}
+                <path
+                  d={TOP_LANE}
+                  fill="none"
+                  stroke="rgba(255,255,255,0.06)"
+                  vectorEffect="non-scaling-stroke"
+                />
+                <path
+                  d={BOT_LANE}
+                  fill="none"
+                  stroke="rgba(255,255,255,0.06)"
+                  vectorEffect="non-scaling-stroke"
+                />
+                <path
+                  data-lane
+                  d={TOP_LANE}
+                  fill="none"
+                  stroke="url(#lane-good)"
+                  strokeWidth="2"
+                  pathLength={1}
+                  strokeDasharray="1"
+                  strokeDashoffset="1"
+                  style={{ filter: "drop-shadow(0 0 6px rgba(255,36,56,0.8))" }}
+                />
+                <path
+                  data-lane
+                  d={BOT_LANE}
+                  fill="none"
+                  stroke="url(#lane-bad)"
+                  strokeWidth="1.5"
+                  strokeDasharray="1"
+                  pathLength={1}
+                  strokeDashoffset="1"
+                />
+              </svg>
 
-          {STOPS.map((s, i) => (
-            <div
-              key={s.time}
-              data-col={s.x}
-              className="absolute inset-y-0"
-              style={{ left: `${s.x}%` }}
-            >
-              <span className="absolute top-1/2 left-0 -translate-1/2 rounded-full border border-white/8 bg-[#0f0709] px-2.5 py-1 text-[11.5px] whitespace-nowrap text-ink-3">
-                {s.time}
+              <div className="absolute top-1/2 left-0 w-[25%] -translate-y-1/2">
+                <OriginPost />
+              </div>
+
+              <span
+                className="absolute left-[29%] -translate-y-full pb-2 text-[13px] font-medium whitespace-nowrap text-r1"
+                style={{ top: pct(TOP_Y) }}
+              >
+                With Sparrow
               </span>
               <span
-                data-tick
-                className="absolute left-0 size-2.5 -translate-1/2 scale-0 rounded-full bg-r1 opacity-0 shadow-[0_0_12px_var(--r1)]"
-                style={{ top: pct(TOP_Y) }}
-              />
+                className="absolute left-[29%] pt-2 text-[13px] whitespace-nowrap text-ink-3"
+                style={{ top: pct(BOT_Y) }}
+              >
+                Without
+              </span>
+
+              {STOPS.map((st, i) => (
+                <div
+                  key={st.time}
+                  data-col={st.x}
+                  className="absolute inset-y-0"
+                  style={{ left: `${st.x}%` }}
+                >
+                  <span className="absolute top-1/2 left-0 -translate-1/2 rounded-full border border-white/8 bg-[#120a0c] px-2.5 py-1 text-[11.5px] whitespace-nowrap text-ink-3">
+                    {st.time}
+                  </span>
+                  <span
+                    data-tick
+                    className="absolute left-0 size-2.5 -translate-1/2 scale-0 rounded-full bg-r1 opacity-0 shadow-[0_0_12px_var(--r1)]"
+                    style={{ top: pct(TOP_Y) }}
+                  />
+                  <span
+                    data-tick
+                    className="absolute left-0 size-2 -translate-1/2 scale-0 rounded-full bg-white/40 opacity-0"
+                    style={{ top: pct(BOT_Y) }}
+                  />
+                  <div
+                    className="absolute left-0 w-34 -translate-x-1/2 pb-4"
+                    style={{ bottom: `calc(100% - ${pct(TOP_Y)})` }}
+                  >
+                    <Event item={WITH[i]} good className="translate-y-2" />
+                  </div>
+                  <div
+                    className="absolute left-0 w-34 -translate-x-1/2 pt-4"
+                    style={{ top: pct(BOT_Y) }}
+                  >
+                    <Event
+                      item={WITHOUT[i]}
+                      good={false}
+                      className="-translate-y-2"
+                    />
+                  </div>
+                </div>
+              ))}
+
+              {/* where each lane ends up */}
               <span
-                data-tick
-                className="absolute left-0 size-2 -translate-1/2 scale-0 rounded-full bg-white/40 opacity-0"
-                style={{ top: pct(BOT_Y) }}
+                data-end
+                className="absolute grid size-7 -translate-1/2 scale-0 place-items-center rounded-full border border-green/50 bg-green/15 text-green opacity-0 shadow-[0_0_18px_rgba(61,220,132,0.45)]"
+                style={{ left: `${PLAY_TO}%`, top: pct(TOP_Y) }}
+              >
+                <Check className="size-3.5" strokeWidth={3} />
+              </span>
+              <span
+                data-end
+                className="absolute grid size-6 -translate-1/2 scale-0 place-items-center rounded-full border border-white/15 bg-[#140b0d] text-ink-3 opacity-0"
+                style={{ left: `${PLAY_TO}%`, top: pct(BOT_Y) }}
+              >
+                <X className="size-3" strokeWidth={2.5} />
+              </span>
+
+              <div
+                data-playhead
+                className="pointer-events-none absolute inset-y-[4%] w-px bg-linear-to-b from-transparent via-white/45 to-transparent"
+                style={{ left: `${PLAY_FROM}%` }}
               />
-              {/* event above the top lane and below the bottom lane */}
-              <div
-                className="absolute left-0 w-37.5 -translate-x-1/2 pb-4"
-                style={{ bottom: `calc(100% - ${pct(TOP_Y)})` }}
-              >
-                <Event item={WITH[i]} good className="translate-y-2" />
-              </div>
-              <div
-                className="absolute left-0 w-37.5 -translate-x-1/2 pt-4"
-                style={{ top: pct(BOT_Y) }}
-              >
-                <Event
-                  item={WITHOUT[i]}
-                  good={false}
-                  className="-translate-y-2"
-                />
-              </div>
             </div>
-          ))}
+          </div>
 
-          <div
-            data-playhead
-            className="pointer-events-none absolute inset-y-[4%] w-px bg-linear-to-b from-transparent via-white/45 to-transparent"
-            style={{ left: `${PLAY_FROM}%` }}
-          />
-
+          {/* the two outcomes, side by side */}
           <div
             data-endings
-            className="absolute right-0 -bottom-4 left-[27%] flex justify-end gap-3 opacity-0"
+            className="grid translate-y-2 grid-cols-2 border-t border-white/7 opacity-0"
           >
-            <span className="rounded-full border border-green/35 bg-green/8 px-3 py-1.5 text-[12.5px] text-[#7be3a0]">
-              With Sparrow, you&apos;re in the conversation
-            </span>
-            <span className="rounded-full border border-white/10 px-3 py-1.5 text-[12.5px] text-ink-3">
-              Without, the lead is gone
-            </span>
+            <div className="flex items-center gap-3 border-r border-white/7 px-7 py-5">
+              <span className="grid size-8 flex-none place-items-center rounded-full bg-green/12 text-green">
+                <Check className="size-4" strokeWidth={2.5} />
+              </span>
+              <div>
+                <p className="text-[14.5px] text-ink">In the conversation</p>
+                <p className="text-[12.5px] text-ink-3">
+                  Seen on the next scan, replied the same day
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 px-7 py-5">
+              <span className="grid size-8 flex-none place-items-center rounded-full bg-white/6 text-ink-3">
+                <X className="size-4" strokeWidth={2.5} />
+              </span>
+              <div>
+                <p className="text-[14.5px] text-ink-2">Lead lost</p>
+                <p className="text-[12.5px] text-ink-3">
+                  Buried under 214 newer posts, no replies
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* phone version: the fork runs downward */}
-        <div data-mfork className="mt-12 lg:hidden">
+        <div
+          data-mfork
+          className="mt-12 rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01))] p-4 lg:hidden"
+        >
           <OriginPost />
           <svg
             viewBox="0 0 100 40"
