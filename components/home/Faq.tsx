@@ -9,35 +9,43 @@ import Backdrop, { Glow } from "./Backdrop";
 const QUESTIONS = [
   {
     q: "Who is Sparrow for?",
-    a: "Anyone who finds work, users or answers in public conversations: founders looking for early customers, freelancers looking for clients, and anyone searching for people who need what they have.",
+    a: "Anyone looking for people who need what they have, or who have what they need. Founders find customers, freelancers find clients, and anyone can find gigs, jobs or answers.",
+  },
+  {
+    q: "How is it different from searching myself?",
+    a: "Searching means checking every site by hand, one query at a time. Sparrow watches all three sources for your keywords, has AI read each new post, and ranks them by how relevant each post is, so you only open the ones worth answering.",
   },
   {
     q: "Which platforms does it watch?",
     a: "Reddit, Hacker News and Bluesky. Each keyword can listen on one, two or all three.",
   },
   {
-    q: "How often does it look for new posts?",
-    a: "Every 6 hours on its own, and any time you press scan. You can turn the automatic scan off in settings.",
+    q: "Do I need accounts on those platforms?",
+    a: "No. Sparrow only reads public posts, so there's nothing to connect or log into. When you find a post worth answering, you reply from your own account.",
   },
   {
-    q: "What does the intent score mean?",
-    a: "It's a 1 to 10 rating of how ready the person is to act, with a one-line reason and a type such as seeking a recommendation or complaining about a competitor. 8 and above is hot.",
+    q: "What makes a good keyword?",
+    a: "The words someone would actually write when they need you, like “looking for a CRM” or “recommend a logo designer”. Short, specific phrases beat single words. Start with three to five and pause the ones that bring noise.",
   },
   {
-    q: "Does it reply for me?",
-    a: "No. It drafts a reply you can edit and copy, and you post it yourself. Nothing is ever posted from your account.",
+    q: "Can I track my own brand or a competitor?",
+    a: "Yes, add the name as a keyword and you'll see new posts that mention it. Complaints about a competitor are flagged as their own type, and they're often the best leads you'll get.",
   },
   {
-    q: "What does it read and keep?",
-    a: "Only public posts that match your keywords. Matched posts and their scores are saved to your account, and you can export everything from settings.",
+    q: "How soon will I see results?",
+    a: "Right away. Press scan and new posts usually arrive within a minute. After that Sparrow checks again every 6 hours on its own, and can email you the best new leads if you turn that on.",
   },
   {
-    q: "Will it email me?",
-    a: "Only if you want it to. After automatic scans it can send the top new leads above a score you choose.",
+    q: "What does the intent score mean, and is it always right?",
+    a: "It's a 1 to 10 rating of how relevant the post is, with a one-line reason. It's AI, so it can misread sarcasm or a vague post. Use it to decide what to open first, not as a final verdict.",
   },
   {
-    q: "Is it free?",
-    a: "Yes. The free plan covers 5 keywords and 100 signals a month, which is plenty to see if it works for you.",
+    q: "Does it work in other languages?",
+    a: "Yes. Write a keyword in any language and Sparrow finds posts using those words. The AI reads and scores them too, and writes its short explanation in English.",
+  },
+  {
+    q: "Does it post anything for me?",
+    a: "Never. It drafts a reply you can edit and copy, and you post it yourself. Sparrow only reads public posts, and you can export everything it saved for you from settings.",
   },
 ];
 
