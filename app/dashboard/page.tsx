@@ -432,7 +432,10 @@ export default function DashboardPage() {
 
   return (
     <div className={gridClass} ref={rootRef}>
-      <Card data-card className={cn(cardClass, "[grid-area:kpi]")}>
+      <Card
+        data-card
+        className="grid min-w-0 grid-cols-3 [grid-area:kpi] @max-[640px]:grid-cols-1"
+      >
         <div className={kpiClass}>
           <small className={kpiLabelClass}>SIGNALS · {monthName}</small>
           <div className="mt-2.5 mb-3 flex items-baseline gap-2">
