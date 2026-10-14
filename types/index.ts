@@ -73,6 +73,14 @@ export type HuntProfile = {
 // what happens to existing data when the hunt profile is saved
 export type HuntProfileSaveMode = "keep" | "rescore" | "fresh";
 
+// how much existing data each save option would touch
+export type HuntProfileCounts = {
+  untouched: number;
+  removable: number;
+  onBoard: number;
+  keywords: number;
+};
+
 export type RedditPost = {
   data: {
     permalink: string;
