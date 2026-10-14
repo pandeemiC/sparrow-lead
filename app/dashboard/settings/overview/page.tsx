@@ -23,7 +23,6 @@ const providers = [
 export default function SettingsOverview() {
   const { user } = useUser();
   const { plan, limits } = usePlan();
-  const [theme, setTheme] = useState("dark");
   const [used, setUsed] = useState({ keywords: 0, signals: 0 });
 
   useEffect(() => {
@@ -100,13 +99,18 @@ export default function SettingsOverview() {
 
           <SettingsCard className="flex-1">
             <SectionTitle>Appearance</SectionTitle>
+            {/* sparrow is dark only for now, so the picker just shows that */}
             <div className="flex gap-3">
               {themes.map((t) => (
                 <button
                   key={t.value}
-                  onClick={() => setTheme(t.value)}
-                  className={`border-white/5 text-white/35 flex-1 py-3 cursor-not-allowed rounded-lg border text-sm font-medium transition-all 
-                  `}
+                  type="button"
+                  disabled
+                  className={`flex-1 cursor-not-allowed rounded-lg border py-3 text-sm font-medium ${
+                    t.value === "dark"
+                      ? "border-white/15 text-white/70"
+                      : "border-white/5 text-white/35"
+                  }`}
                 >
                   {t.label}
                 </button>
