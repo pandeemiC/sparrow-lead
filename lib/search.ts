@@ -71,10 +71,28 @@ export async function searchReddit(keyword: string): Promise<ScannedPost[]> {
   }));
 }
 
+// hacker news returns html in story and comment text
+function cleanHtml(html: string) {
+  return html
+    .replace(/<p>/gi, " ")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&gt;/g, ">")
+    .replace(/&lt;/g, "<")
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;/g, "'")
+    .replace(/&#x2F;/g, "/")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export async function searchHackerNews(
   keyword: string,
 ): Promise<ScannedPost[]> {
-  const url = `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(keyword)}&tags=(story,comment)&hitsPerPage=5`;
+  // newest first, and the keyword as an exact phrase so long comments
+  // that only contain the words scattered around don't match
+  const query = encodeURIComponent(`"${keyword}"`);
+  const url = `https://hn.algolia.com/api/v1/search_by_date?query=${query}&advancedSyntax=true&tags=(story,comment)&hitsPerPage=5`;
   const res = await fetch(url);
   if (!res.ok) {
     throw new Error(
@@ -82,11 +100,15 @@ export async function searchHackerNews(
     );
   }
   const data: HackerNewsResponse = await res.json();
-  return data.hits.map((hit) => ({
-    platform: "hackernews",
-    post_url: `https://news.ycombinator.com/item?id=${hit.objectID}`,
-    post_title: hit.title || hit.story_text?.slice(0, 80) || "(no title)",
-    post_body: hit.story_text?.slice(0, 500) || "",
-    author: hit.author,
-  }));
+  return data.hits.map((hit) => {
+    const text = cleanHtml(hit.comment_text ?? hit.story_text ?? "");
+    return {
+      platform: "hackernews",
+      post_url: `https://news.ycombinator.com/item?id=${hit.objectID}`,
+      // comments have no title, so their opening words stand in for one
+      post_title: hit.title || text.slice(0, 100) || "(no title)",
+      post_body: text.slice(0, 500),
+      author: hit.author,
+    };
+  });
 }

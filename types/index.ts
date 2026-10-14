@@ -119,8 +119,11 @@ export type BlueSkyToken = {
 export type HackerNewsHit = {
   url: string | null;
   objectID: string;
-  title: string;
+  title: string | null;
   story_text: string | null;
+  // comments have no title of their own, their text is here
+  comment_text?: string | null;
+  story_title?: string | null;
   author: string;
 };
 
