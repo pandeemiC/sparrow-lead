@@ -21,6 +21,7 @@ import { usePlan } from "./PlanContext";
 import { useScanStore } from "@/store/scanStore";
 import { useStatsStore } from "@/store/statsStore";
 import CountUp from "@/components/sp/CountUp";
+import Ambient from "./Ambient";
 import { cn } from "@/lib/utils";
 import { Bar, buttonClass, IconButton } from "@/components/sp/ui";
 
@@ -150,15 +151,11 @@ export default function DashboardShell({
   }
 
   return (
-    <div className="sp">
-      <div className="sp-glow">
-        <i />
-        <i />
-      </div>
-      <div className="sp-grid" />
+    <div className="sp bg-bg">
+      <Ambient />
       <div
         className={cn(
-          "relative z-1 grid h-screen bg-bg transition-[grid-template-columns] duration-[260ms] ease-[cubic-bezier(0.4,0,0.2,1)] max-[760px]:grid-cols-1",
+          "relative z-1 grid h-screen transition-[grid-template-columns] duration-[260ms] ease-[cubic-bezier(0.4,0,0.2,1)] max-[760px]:grid-cols-1",
           rail
             ? "grid-cols-[68px_minmax(0,1fr)]"
             : "grid-cols-[232px_minmax(0,1fr)]",

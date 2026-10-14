@@ -115,53 +115,6 @@ body {
   }
 }
 
-/* ---------- ambient background ---------- */
-.sp-glow {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
-}
-.sp-glow i {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(90px);
-  opacity: 0.28;
-  animation: sp-drift 22s ease-in-out infinite alternate;
-}
-.sp-glow i:nth-child(1) {
-  width: 46vmax;
-  height: 46vmax;
-  left: -12vmax;
-  top: -26vmax;
-  background: var(--r2);
-}
-.sp-glow i:nth-child(2) {
-  width: 38vmax;
-  height: 38vmax;
-  right: -10vmax;
-  top: -22vmax;
-  background: var(--r3);
-  animation-duration: 28s;
-}
-@keyframes sp-drift {
-  to {
-    transform: translate(8vmax, 5vmax) scale(1.15);
-  }
-}
-.sp-grid {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
-  background-size: 24px 24px;
-  mask-image: linear-gradient(to bottom, #000, transparent 60%);
-}
-
 /* ---------- auth background (aurora) ---------- */
 .sp-aurora {
   position: fixed;
@@ -256,7 +209,6 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sp-glow i,
   .sp-aurora .blob {
     animation: none;
   }
