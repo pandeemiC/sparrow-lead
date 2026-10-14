@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { getDb } from "@/lib/db";
 import { NextResponse } from "next/server";
 
@@ -7,6 +7,13 @@ export async function POST(req: Request) {
   const { userId } = await auth();
   if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const stripe = getStripe();
+  if (!stripe)
+    return NextResponse.json(
+      { error: "Paid plans are coming soon" },
+      { status: 503 },
+    );
 
   const { plan } = await req.json();
   const priceId =
@@ -26,7 +33,7 @@ export async function POST(req: Request) {
     mode: "subscription",
     payment_method_types: ["card"],
     line_items: [{ price: priceId, quantity: 1 }],
-    customer: user?.stripe.customer_id || undefined,
+    customer: user?.stripe_customer_id || undefined,
     customer_email: user?.stripe_customer_id ? undefined : user?.email,
     metadata: { userId, plan },
     success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings/billing?success=true`,
