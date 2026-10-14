@@ -12,7 +12,6 @@ import {
   Settings,
   Target,
 } from "lucide-react";
-import { SiDiscord, SiGithub, SiInstagram } from "react-icons/si";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import sparrowLogo from "@/public/sparrow-no-text-logo.png";
@@ -309,20 +308,6 @@ export default function DashboardShell({
                 <LogOut />
               </IconButton>
             </div>
-
-            {!rail && (
-              <div className="flex justify-center gap-4 pt-3.5 text-ink-3 [&>a]:opacity-50 [&>a]:transition-opacity [&>a:hover]:opacity-100">
-                <a href="#" aria-label="Discord">
-                  <SiDiscord size={12} />
-                </a>
-                <a href="#" aria-label="Instagram">
-                  <SiInstagram size={12} />
-                </a>
-                <a href="#" aria-label="GitHub">
-                  <SiGithub size={12} />
-                </a>
-              </div>
-            )}
           </aside>
           <button
             className="absolute top-1/2 -right-3 z-5 grid size-6 -translate-y-1/2 place-items-center rounded-full border border-line-2 bg-[#140a0c] text-ink-3 transition-colors hover:border-r1 hover:text-ink"
