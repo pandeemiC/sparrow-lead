@@ -3,8 +3,11 @@
 import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import { Shield } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { usePlan } from "@/components/dashboard/PlanContext";
 import { SiGoogle, SiGithub } from "react-icons/si";
+import { SettingsCard } from "@/components/ui/SettingsUI";
+import { GhostButton, SectionTitle } from "@/components/sp/ui";
 
 const themes = [
   { label: "Light", value: "light" },
@@ -19,7 +22,21 @@ const providers = [
 
 export default function SettingsOverview() {
   const { user } = useUser();
-  const [theme, setTheme] = useState("dark");
+  const { plan, limits } = usePlan();
+  const [used, setUsed] = useState({ keywords: 0, signals: 0 });
+
+  useEffect(() => {
+    fetch("/api/stats")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.keywordsTracked !== undefined) {
+          setUsed({
+            keywords: data.keywordsTracked,
+            signals: data.totalSignals,
+          });
+        }
+      });
+  }, []);
 
   const isOAuthUser = (user?.externalAccounts ?? []).length > 0;
   const provider = user?.externalAccounts?.[0]?.provider;
@@ -33,16 +50,22 @@ export default function SettingsOverview() {
     a.provider.toLowerCase(),
   );
 
+  const C = 94;
+
+  const kwPerc = Math.min((used.keywords / limits.keywords) * 100, 100);
+  const sigPerc = Math.min((used.signals / limits.signals) * 100, 100);
+
+  const kwFill = (kwPerc / 100) * C;
+  const sigFill = (sigPerc / 100) * C;
+
   if (!user) return null;
 
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-6 gap-4 items-stretch">
         <div className="col-span-4 flex flex-col gap-4">
-          <div className="rounded-xl glass-red border border-white/5 p-6 glow-right">
-            <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-6">
-              Profile
-            </h2>
+          <SettingsCard>
+            <SectionTitle>Profile</SectionTitle>
             <div className="flex items-center gap-5">
               {user.imageUrl ? (
                 <Image
@@ -72,39 +95,40 @@ export default function SettingsOverview() {
                 )}
               </div>
             </div>
-          </div>
+          </SettingsCard>
 
-          <div className="rounded-xl glass-red border border-white/5 p-6 glow-t-right flex-1">
-            <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-6">
-              Appearance
-            </h2>
+          <SettingsCard className="flex-1">
+            <SectionTitle>Appearance</SectionTitle>
+            {/* sparrow is dark only for now, so the picker just shows that */}
             <div className="flex gap-3">
               {themes.map((t) => (
                 <button
                   key={t.value}
-                  onClick={() => setTheme(t.value)}
-                  className={`border-white/5 text-white/35 flex-1 py-3 cursor-not-allowed rounded-lg border text-sm font-medium transition-all 
-                  `}
+                  type="button"
+                  disabled
+                  className={`flex-1 cursor-not-allowed rounded-lg border py-3 text-sm font-medium ${
+                    t.value === "dark"
+                      ? "border-white/15 text-white/70"
+                      : "border-white/5 text-white/35"
+                  }`}
                 >
                   {t.label}
                 </button>
               ))}
             </div>
-          </div>
+          </SettingsCard>
         </div>
 
-        <div className="col-span-2 rounded-xl glass-red glow-t-left border border-white/5 p-6 flex flex-col gap-6">
-          <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest">
-            Plan
-          </h2>
+        <SettingsCard className="col-span-2 flex flex-col gap-6">
+          <SectionTitle className="mb-0">Plan</SectionTitle>
           <div className="flex items-start justify-between gap-3">
             <div className="space-y-1.5">
-              <p className="text-base font-semibold text-white">Free</p>
+              <p className="text-base font-semibold text-white">{plan}</p>
               <p className="text-sm text-white/35">
-                5 keywords · 100 signals/mo
+                {limits.keywords} keywords · {limits.signals} signals/mo
               </p>
             </div>
-            <button className="edit-btn">Upgrade</button>
+            <GhostButton>Upgrade</GhostButton>
           </div>
           <div className="flex gap-4 justify-center flex-1 items-center">
             <div className="flex-1 flex flex-col items-center gap-3">
@@ -123,18 +147,20 @@ export default function SettingsOverview() {
                     cy="18"
                     r="15"
                     fill="none"
-                    stroke="rgba(255,255,255,0.35)"
+                    stroke="rgba(220, 38, 38, 0.8)"
                     strokeWidth="2.5"
-                    strokeDasharray="0 94"
+                    strokeDasharray={`${kwFill} ${C - kwFill}`}
                     strokeLinecap="round"
                   />
                 </svg>
                 <span className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-white">
-                  0%
+                  {Math.round(kwPerc)}%
                 </span>
               </div>
               <p className="text-sm text-white/40 text-center">Keywords</p>
-              <p className="text-xs text-white/25">0 / 5</p>
+              <p className="text-xs text-white/25">
+                {used.keywords} / {limits.keywords}
+              </p>
             </div>
             <div className="flex-1 flex flex-col items-center gap-3">
               <div className="relative w-28 h-28">
@@ -152,27 +178,27 @@ export default function SettingsOverview() {
                     cy="18"
                     r="15"
                     fill="none"
-                    stroke="rgba(255,255,255,0.35)"
+                    stroke="rgba(220, 38, 38, 0.8)"
                     strokeWidth="2.5"
-                    strokeDasharray="0 94"
+                    strokeDasharray={`${sigFill} ${C - sigFill}`}
                     strokeLinecap="round"
                   />
                 </svg>
                 <span className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-white">
-                  0%
+                  {Math.round(sigPerc)}%
                 </span>
               </div>
               <p className="text-sm text-white/40 text-center">Signals</p>
-              <p className="text-xs text-white/25">0 / 100</p>
+              <p className="text-xs text-white/25">
+                {used.signals} / {limits.signals}
+              </p>
             </div>
           </div>
-        </div>
+        </SettingsCard>
       </div>
 
-      <div className="rounded-xl glass-red border border-white/5 p-6">
-        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-6">
-          Connected Accounts
-        </h2>
+      <SettingsCard>
+        <SectionTitle>Connected Accounts</SectionTitle>
         <div className="space-y-5">
           {providers.map(({ key, label, icon: Icon }, i) => {
             const connected = connectedProviders.includes(key);
@@ -189,15 +215,15 @@ export default function SettingsOverview() {
                       </p>
                     </div>
                   </div>
-                  <button className="edit-btn">
+                  <GhostButton>
                     {connected ? "Disconnect" : "Connect"}
-                  </button>
+                  </GhostButton>
                 </div>
               </div>
             );
           })}
         </div>
-      </div>
+      </SettingsCard>
     </div>
   );
 }

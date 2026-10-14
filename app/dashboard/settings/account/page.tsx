@@ -1,25 +1,14 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useUser, useClerk } from "@clerk/nextjs";
+import { useUser, useClerk, useSession } from "@clerk/nextjs";
 import { MoreHorizontal } from "lucide-react";
-
-const currentPlan = "free";
-
-const mockSessions = [
-  {
-    id: "1",
-    device: "Chrome on macOS",
-    location: "Istanbul, TR",
-    created: "Mar 28, 2026",
-  },
-  {
-    id: "2",
-    device: "Safari on iPhone",
-    location: "Istanbul, TR",
-    created: "Mar 30, 2026",
-  },
-];
+import { usePlan } from "@/components/dashboard/PlanContext";
+import { useToastStore } from "@/store/toastStore";
+import { apiFetch } from "@/lib/apiFetch";
+import type { AccountSession } from "@/types";
+import { SettingsCard } from "@/components/ui/SettingsUI";
+import { GhostButton, SectionTitle } from "@/components/sp/ui";
 
 function SessionMenu({ onTerminate }: { onTerminate: () => void }) {
   const [open, setOpen] = useState(false);
@@ -61,13 +50,56 @@ function SessionMenu({ onTerminate }: { onTerminate: () => void }) {
 
 export default function SettingsAccount() {
   const { user } = useUser();
+  const { session: currentSession } = useSession();
   const { signOut } = useClerk();
-  const [sessions, setSessions] = useState(mockSessions);
+  const { plan } = usePlan();
+  const toast = useToastStore((s) => s.show);
+  const [sessions, setSessions] = useState<AccountSession[]>([]);
 
   const [editingName, setEditingName] = useState(false);
   const [draftFirst, setDraftFirst] = useState("");
   const [draftLast, setDraftLast] = useState("");
   const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    const clerkUser = user;
+
+    async function loadSessions() {
+      try {
+        const clerkSessions = await clerkUser.getSessions();
+        setSessions(
+          clerkSessions.map((cs) => {
+            const activity = cs.latestActivity;
+            const browser = activity?.browserName ?? "Unknown browser";
+            const device =
+              activity?.deviceType ??
+              (activity?.isMobile ? "Mobile" : "Desktop");
+            const location =
+              [activity?.city, activity?.country].filter(Boolean).join(", ") ||
+              "Unknown";
+            return {
+              id: cs.id,
+              device: `${browser} on ${device}`,
+              location,
+              lastActive: cs.lastActiveAt.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              }),
+              isCurrent: cs.id === currentSession?.id,
+              revoke: () => cs.revoke(),
+            };
+          }),
+        );
+      } catch {
+        toast("Couldn't load your active sessions");
+      }
+    }
+    loadSessions();
+  }, [user, currentSession?.id, toast]);
 
   if (!user) return null;
 
@@ -76,10 +108,47 @@ export default function SettingsAccount() {
     : (user.emailAddresses[0]?.emailAddress ?? "User");
   const email = user.emailAddresses[0]?.emailAddress ?? "";
   const isOAuthUser = (user.externalAccounts ?? []).length > 0;
-  const isPaidPlan = currentPlan !== "free";
+  const isPaidPlan = plan !== "free";
 
-  function terminateSession(id: string) {
-    setSessions((prev) => prev.filter((s) => s.id !== id));
+  async function terminateSession(session: AccountSession) {
+    try {
+      await session.revoke();
+      setSessions((prev) => prev.filter((s) => s.id !== session.id));
+      toast("Session signed out", "success");
+    } catch {
+      toast("Couldn't sign out that session");
+    }
+  }
+
+  async function logOutEverywhere() {
+    try {
+      for (const session of sessions) {
+        if (!session.isCurrent) await session.revoke();
+      }
+    } catch {
+      toast("Couldn't sign out every device. Signing out here.");
+    }
+    await signOut({ redirectUrl: "/sign-in" });
+  }
+
+  // first click asks, second click deletes the data and the clerk user
+  async function deleteAccount() {
+    if (!confirmDelete) {
+      setConfirmDelete(true);
+      return;
+    }
+    setDeleting(true);
+    try {
+      await apiFetch("/api/account", { method: "DELETE" });
+      // the session is gone with the user, a full load clears clerk's state
+      window.location.href = "/";
+    } catch (err) {
+      toast(
+        err instanceof Error ? err.message : "Couldn't delete your account",
+      );
+      setDeleting(false);
+      setConfirmDelete(false);
+    }
   }
 
   function editName() {
@@ -92,20 +161,23 @@ export default function SettingsAccount() {
   async function saveDisplayName() {
     if (!user) return;
     setSaving(true);
-    await user.update({
-      firstName: draftFirst,
-      lastName: draftLast || undefined,
-    });
-    setSaving(false);
-    setEditingName(false);
+    try {
+      await user.update({
+        firstName: draftFirst,
+        lastName: draftLast || undefined,
+      });
+      setEditingName(false);
+    } catch {
+      toast("Couldn't update your name");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl glass-red border border-white/5 p-6 glow-right">
-        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-6">
-          Account
-        </h2>
+      <SettingsCard>
+        <SectionTitle>Account</SectionTitle>
         <div className="space-y-5">
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1 space-y-1.5">
@@ -133,24 +205,17 @@ export default function SettingsAccount() {
 
             {editingName ? (
               <div className="flex gap-2 shrink-0">
-                <button
-                  onClick={() => setEditingName(false)}
-                  className="edit-btn"
-                >
+                <GhostButton onClick={() => setEditingName(false)}>
                   Cancel
-                </button>
-                <button
-                  onClick={saveDisplayName}
-                  disabled={saving}
-                  className="edit-btn"
-                >
+                </GhostButton>
+                <GhostButton onClick={saveDisplayName} disabled={saving}>
                   {saving ? "Saving..." : "Save"}
-                </button>
+                </GhostButton>
               </div>
             ) : (
-              <button onClick={editName} className="edit-btn shrink-0">
+              <GhostButton onClick={editName} className="shrink-0">
                 Edit
-              </button>
+              </GhostButton>
             )}
           </div>
           <div className="h-px bg-white/5" />
@@ -159,28 +224,24 @@ export default function SettingsAccount() {
               <p className="text-sm font-medium text-white">Email</p>
               <p className="text-sm text-white/35 truncate max-w-xs">{email}</p>
             </div>
-            {!isOAuthUser && <button className="edit-btn">Change</button>}
+            {!isOAuthUser && <GhostButton>Change</GhostButton>}
           </div>
         </div>
-      </div>
+      </SettingsCard>
 
-      <div className="rounded-xl glass-red border border-white/5 p-6 glow-t-right">
-        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-6">
-          Password
-        </h2>
+      <SettingsCard>
+        <SectionTitle>Password</SectionTitle>
         <div className="flex items-center justify-between">
           <div className="space-y-1.5">
             <p className="text-sm font-medium text-white">Change Password</p>
             <p className="text-sm text-white/35">••••••••••••</p>
           </div>
-          {!isOAuthUser && <button className="edit-btn">Change</button>}
+          {!isOAuthUser && <GhostButton>Change</GhostButton>}
         </div>
-      </div>
+      </SettingsCard>
 
-      <div className="rounded-xl glass-red border border-white/5 p-6">
-        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-6">
-          Sessions
-        </h2>
+      <SettingsCard>
+        <SectionTitle>Sessions</SectionTitle>
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-sm font-medium text-white">
@@ -190,19 +251,12 @@ export default function SettingsAccount() {
               Revokes all active sessions across every device
             </p>
           </div>
-          <button
-            onClick={() => signOut({ redirectUrl: "/sign-in" })}
-            className="edit-btn"
-          >
-            Log Out All
-          </button>
+          <GhostButton onClick={logOutEverywhere}>Log Out All</GhostButton>
         </div>
-      </div>
+      </SettingsCard>
 
-      <div className="rounded-xl glass-red border border-white/10 p-6">
-        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-6">
-          Danger Zone
-        </h2>
+      <SettingsCard>
+        <SectionTitle>Danger Zone</SectionTitle>
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-sm font-medium text-white">
@@ -211,8 +265,12 @@ export default function SettingsAccount() {
             {isPaidPlan ? (
               <p className="text-sm text-white/35">
                 To delete your account, please cancel your{" "}
-                <span className="capitalize">{currentPlan}</span> subscription
-                first.
+                <span className="capitalize">{plan}</span> subscription first.
+              </p>
+            ) : confirmDelete ? (
+              <p className="text-sm text-red-400">
+                This deletes your keywords, signals and Hunt Board for good.
+                Click again to confirm.
               </p>
             ) : (
               <p className="text-sm text-white/35">
@@ -222,19 +280,21 @@ export default function SettingsAccount() {
             )}
           </div>
           <button
-            disabled={isPaidPlan}
-            onClick={() => user.delete()}
+            disabled={isPaidPlan || deleting}
+            onClick={deleteAccount}
             className="text-sm cursor-pointer px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all shrink-0 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
           >
-            Delete Account
+            {deleting
+              ? "Deleting…"
+              : confirmDelete
+                ? "Yes, delete everything"
+                : "Delete Account"}
           </button>
         </div>
-      </div>
+      </SettingsCard>
 
-      <div className="rounded-xl glass-red border border-white/5 p-6">
-        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-6">
-          Active Sessions
-        </h2>
+      <SettingsCard>
+        <SectionTitle>Active Sessions</SectionTitle>
         <div className="space-y-1">
           <div className="grid grid-cols-[1fr_1fr_1fr_auto] gap-4 px-3 py-2">
             <span className="text-xs text-white/25 uppercase tracking-wider">
@@ -244,7 +304,7 @@ export default function SettingsAccount() {
               Location
             </span>
             <span className="text-xs text-white/25 uppercase tracking-wider">
-              Created
+              Last Active
             </span>
             <span />
           </div>
@@ -256,12 +316,18 @@ export default function SettingsAccount() {
             >
               <span className="text-sm text-white/70">{s.device}</span>
               <span className="text-sm text-white/50">{s.location}</span>
-              <span className="text-sm text-white/50">{s.created}</span>
-              <SessionMenu onTerminate={() => terminateSession(s.id)} />
+              <span className="text-sm text-white/50">{s.lastActive}</span>
+              {s.isCurrent ? (
+                <span className="text-xs text-white/40 px-1.5">
+                  This device
+                </span>
+              ) : (
+                <SessionMenu onTerminate={() => terminateSession(s)} />
+              )}
             </div>
           ))}
         </div>
-      </div>
+      </SettingsCard>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import type { HotSignal } from "@/types";
+import { PLATFORM_LABELS } from "@/lib/constants";
 import {
   Html,
   Head,
@@ -172,7 +173,7 @@ export default function HotSignalsDigest({ signals }: Props) {
                       ·
                     </span>
                     <span style={{ color: "#444444", fontSize: 10 }}>
-                      {signal.platform === "reddit" ? "Reddit" : "Hacker News"}
+                      {PLATFORM_LABELS[signal.platform]}
                     </span>
                   </Column>
                   <Column style={{ textAlign: "right" }}>

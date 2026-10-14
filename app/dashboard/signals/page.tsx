@@ -1,432 +1,399 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { useEffect, useRef, useState } from "react";
 import {
-  Radio,
-  Sparkles,
   ExternalLink,
-  XCircle,
-  Target,
   SlidersHorizontal,
-  ChevronDown,
-  Copy,
-  Check,
+  Sparkles,
+  Target,
+  X,
 } from "lucide-react";
-import { FaRedditAlien, FaYCombinator } from "react-icons/fa6";
-import Fire from "@/public/animations/fire.json";
-import Lottie from "lottie-react";
-import type { Signal, SignalType, SignalFilters } from "@/types";
-import { SIGNAL_TYPE_LABELS, SIGNAL_TYPE_TAG_CLASS } from "@/lib/constants";
-import { timeAgo, extractSub } from "@/lib/utils";
-import { useScanStore } from "@/store/scanStore";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import PlatformIcon from "@/components/ui/PlatformIcon";
+import ScoreArc from "@/components/sp/ScoreArc";
+import { apiFetch } from "@/lib/apiFetch";
+import { toMentionRow } from "@/lib/mentions";
+import { platformVar, scoreTier, shortAgo, type ScoreTier } from "@/lib/score";
 import {
-  TopSpotlight,
-  BottomSpotlight,
-  LeftSpotlight,
-  RightSpotlight,
-} from "@/components/ui/Spotlights";
+  PLATFORMS,
+  PLATFORM_LABELS,
+  SIGNAL_TYPE_LABELS,
+} from "@/lib/constants";
+import { useScanStore } from "@/store/scanStore";
+import { useStatsStore } from "@/store/statsStore";
+import { useToastStore } from "@/store/toastStore";
+import { cn } from "@/lib/utils";
+import {
+  Button,
+  GhostButton,
+  KwTag,
+  Loading,
+  Seg,
+  SegButton,
+  Switch,
+  Watermark,
+  ghostClass,
+} from "@/components/sp/ui";
+import type { MentionRow, SignalPlatform, SignalType } from "@/types";
 
-type Variant = "hot" | "warm" | "cold" | "unscored";
+type Filters = {
+  platform: "all" | SignalPlatform;
+  intent: "all" | ScoreTier;
+  type: "all" | SignalType;
+  keyword: string;
+  newOnly: boolean;
+};
 
-function scoreVariant(score: number | null): Variant {
-  if (score === null) return "unscored";
-  if (score >= 8) return "hot";
-  if (score >= 5) return "warm";
-  return "cold";
-}
+type Group = "platform" | "intent" | "type" | "keyword";
 
-function ScoreBadge({ score }: { score: number | null }) {
-  const v = scoreVariant(score);
+const EMPTY_FILTERS: Filters = {
+  platform: "all",
+  intent: "all",
+  type: "all",
+  keyword: "all",
+  newOnly: false,
+};
 
-  if (v === "unscored") {
-    return (
-      <span className="animate-pulse inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border badge-cold">
-        <span className="w-12 h-2 rounded bg-white/10" />
-      </span>
-    );
-  }
+const INTENT_OPTIONS: { value: ScoreTier; label: string; color: string }[] = [
+  { value: "hi", label: "High · 8+", color: "var(--r1)" },
+  { value: "md", label: "Medium · 5–7", color: "var(--amber)" },
+  { value: "lo", label: "Low · <5", color: "rgba(255,255,255,.35)" },
+];
 
-  const base =
-    "relative overflow-hidden inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border";
-  if (v === "hot")
-    return (
-      <span className={`${base} gap-1 badge-hot`}>
-        <TopSpotlight variant="hot" />
-        <BottomSpotlight variant="hot" />
-        <LeftSpotlight variant="hot" />
-        <RightSpotlight variant="hot" />
-        <span className="relative z-10 flex items-center gap-1">
-          <Lottie animationData={Fire} loop style={{ width: 16, height: 16 }} />
-          {score}/10 HOT
-        </span>
-      </span>
-    );
-  if (v === "warm")
-    return (
-      <span className={`${base} gap-1.5 badge-warm`}>
-        <TopSpotlight variant="warm" />
-        <BottomSpotlight variant="warm" />
-        <LeftSpotlight variant="warm" />
-        <RightSpotlight variant="warm" />
-        <span className="relative z-10">{score}/10 WARM</span>
-      </span>
-    );
-  return (
-    <span className={`${base} gap-1.5 badge-cold`}>
-      <TopSpotlight variant="cold" />
-      <BottomSpotlight variant="cold" />
-      <LeftSpotlight variant="cold" />
-      <RightSpotlight variant="cold" />
-      <span className="relative z-10">{score}/10 COLD</span>
-    </span>
-  );
-}
+const HUNTED = ["hunting", "interested", "engaged", "hunted"];
 
-function TypeTag({ type }: { type: SignalType }) {
-  return (
-    <span
-      className={`inline-flex px-2.5 py-1 rounded-md text-xs font-medium border ${SIGNAL_TYPE_TAG_CLASS[type]}`}
-    >
-      {SIGNAL_TYPE_LABELS[type]}
-    </span>
-  );
-}
+const TYPE_TAG: Record<SignalType, string> = {
+  seeking_recommendation: "bg-r1/13 text-[#ff7a86]",
+  pain_point: "bg-amber/12 text-amber",
+  competitor_complaint: "bg-[rgba(181,140,255,0.13)] text-[#c8adff]",
+  question: "bg-white/7 text-ink-2",
+  general: "bg-white/4 text-ink-3",
+};
 
-function PlatformPill({
-  platform,
-  source,
-}: {
-  platform: Signal["platform"];
-  source: string;
-}) {
-  const shared =
-    "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-xs font-medium";
-  if (platform === "reddit")
-    return (
-      <span className={`${shared} text-orange-400 platform-pill-reddit`}>
-        <FaRedditAlien size={11} /> {source}
-      </span>
-    );
-  return (
-    <span className={`${shared} text-orange-300 platform-pill-hn`}>
-      <FaYCombinator size={11} /> {source}
-    </span>
-  );
-}
+// the card sections line up after the 56px watermark gutter (none on mobile)
+const gutter = "ml-14 max-[700px]:ml-0";
+const gutterPad = "pl-14 max-[700px]:pl-0";
 
-function FilterSection({
-  label,
+// one row in the filter rail
+function FilterOption({
+  active,
+  zero = false,
+  count,
+  onClick,
   children,
 }: {
-  label: string;
+  active: boolean;
+  zero?: boolean;
+  count: number;
+  onClick: () => void;
   children: React.ReactNode;
 }) {
-  const [open, setOpen] = useState(true);
   return (
-    <div className="border-b border-white/5 pb-4 last:border-0 last:pb-0">
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex items-center justify-between w-full mb-3"
-      >
-        <span className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">
-          {label}
-        </span>
-        <ChevronDown
-          size={12}
-          className={`text-white/30 transition-transform ${open ? "" : "-rotate-90"}`}
-        />
-      </button>
-      {open && children}
-    </div>
-  );
-}
-
-function RadioGroup<T extends string>({
-  options,
-  value,
-  onChange,
-}: {
-  options: { label: string; value: T }[];
-  value: T;
-  onChange: (v: T) => void;
-}) {
-  return (
-    <div className="flex flex-col gap-1">
-      {options.map((opt) => (
-        <button
-          key={opt.value}
-          onClick={() => onChange(opt.value)}
-          className={`text-left text-sm px-2.5 py-1.5 rounded-lg transition-colors ${
-            value === opt.value
-              ? "bg-white/8 text-white border border-white/16"
-              : "text-white/35 hover:text-white/60 hover:bg-white/4"
-          }`}
-        >
-          {opt.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function ReplyModal({
-  reply,
-  loading,
-  onClose,
-}: {
-  reply: string;
-  loading: boolean;
-  onClose: () => void;
-}) {
-  const [copied, setCopied] = useState(false);
-
-  function copyReply() {
-    navigator.clipboard.writeText(reply);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.7)" }}
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-md rounded-2xl border border-white/10 p-6 flex flex-col gap-5"
-        style={{ background: "#111111" }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Sparkles size={14} className="text-white/50" />
-            <span className="text-sm font-semibold text-white">
-              AI Suggested Reply
-            </span>
-          </div>
-          <button
-            onClick={onClose}
-            className="text-white/30 hover:text-white/70 transition-colors"
-          >
-            <XCircle size={16} />
-          </button>
-        </div>
-
-        {loading ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-8">
-            <Sparkles size={20} className="text-white/40 animate-pulse" />
-            <p className="text-sm text-white/40">Generating reply...</p>
-          </div>
-        ) : (
-          <>
-            <p className="text-sm text-white/70 leading-relaxed">{reply}</p>
-            <button
-              onClick={copyReply}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold border border-white/10 bg-white/5 hover:bg-white/8 hover:text-white text-white/60 transition-colors"
-            >
-              {copied ? <Check size={13} /> : <Copy size={13} />}
-              {copied ? "Copied!" : "Copy Reply"}
-            </button>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function SignalCard({ signal, isNew }: { signal: Signal; isNew?: boolean }) {
-  const [dismissed, setDismissed] = useState(false);
-  const [hunting, setHunting] = useState(signal.status === "hunting");
-  const [replyOpen, setReplyOpen] = useState(false);
-  const [reply, setReply] = useState("");
-  const [replyLoading, setReplyLoading] = useState(false);
-  const [showNewBadge, setShowNewBadge] = useState(isNew ?? false);
-  const variant = scoreVariant(signal.aiScore);
-
-  async function addToHuntBoard() {
-    setHunting(true);
-    await fetch(`/api/mentions/${signal.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "hunting" }),
-    });
-  }
-
-  async function getReply() {
-    setReplyOpen(true);
-    if (reply) return;
-    setReplyLoading(true);
-    const res = await fetch("/api/ai/reply", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mentionId: signal.id }),
-    });
-    const data = await res.json();
-    setReply(data.reply ?? "Could not generate a reply.");
-    setReplyLoading(false);
-  }
-
-  if (dismissed) return null;
-
-  return (
-    <>
-      {replyOpen && (
-        <ReplyModal
-          reply={reply}
-          loading={replyLoading}
-          onClose={() => setReplyOpen(false)}
-        />
+    <button
+      onClick={onClick}
+      className={cn(
+        "flex w-full items-center gap-2.25 rounded-lg border-0 bg-transparent px-2 py-1.75 text-left text-[13px] text-ink-2 transition-colors hover:bg-panel-2 hover:text-ink",
+        active &&
+          "bg-r1/10 text-ink shadow-[inset_0_0_0_1px_rgba(255,36,56,0.22)] hover:bg-r1/10",
+        zero && "opacity-40",
       )}
-      <div
-        className="signal-card rounded-xl p-5 flex flex-col gap-4"
-        onMouseEnter={() => setShowNewBadge(false)}
+    >
+      {children}
+      <span
+        className={cn(
+          "ml-auto font-mono text-[11px] leading-[normal] font-medium",
+          active ? "text-r1" : "text-ink-3",
+        )}
       >
-        <RightSpotlight variant={variant} />
-        <AnimatePresence>
-          {showNewBadge && (
-            <motion.span
-              initial={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.4 }}
-              className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-red-500/15 text-red-400 border border-red-500/20 self-start"
-            >
-              New
-            </motion.span>
-          )}
-        </AnimatePresence>
-
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-2 flex-wrap">
-            <PlatformPill platform={signal.platform} source={signal.source} />
-            <span className="text-white/20 text-xs">·</span>
-            <span className="text-xs text-white/30">{signal.timeAgo}</span>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="text-[10px] px-2 py-0.5 rounded-md border keyword-tag font-medium">
-              {signal.keyword}
-            </span>
-            <button
-              onClick={() => setDismissed(true)}
-              className="text-white/20 hover:text-white/60 transition-colors"
-            >
-              <XCircle size={13} />
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <p className="text-sm font-semibold text-white leading-snug mb-1.5">
-            {signal.title}
-          </p>
-          {signal.body && (
-            <p className="text-sm text-white/55 leading-relaxed line-clamp-2">
-              {signal.body}
-            </p>
-          )}
-        </div>
-
-        <div
-          className={`ai-snake rounded-lg border p-3.5 flex flex-col gap-2.5 ai-block-${variant === "unscored" ? "cold" : variant}`}
-        >
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5">
-              <Sparkles size={12} className="sparkle-rgb" />
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
-                AI Analysis
-              </span>
-            </div>
-            <ScoreBadge score={signal.aiScore} />
-          </div>
-          {signal.aiScore !== null ? (
-            <div className="flex items-start gap-2 flex-wrap">
-              <p className="text-xs text-white/55 leading-relaxed flex-1 min-w-0">
-                {signal.aiReason}
-              </p>
-              {signal.aiType && <TypeTag type={signal.aiType} />}
-            </div>
-          ) : (
-            <p className="text-xs text-white/30 italic">
-              Scoring this signal...
-            </p>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2 flex-wrap">
-          <button
-            onClick={addToHuntBoard}
-            disabled={hunting}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-              hunting
-                ? "bg-white/8 text-white border border-white/18 cursor-default"
-                : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/8 hover:text-white hover:border-white/20"
-            }`}
-          >
-            <Target size={12} />
-            {hunting ? "In Hunt Board" : "+ Hunt Board"}
-          </button>
-
-          <button
-            onClick={getReply}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/4 text-white/70 border border-white/10 hover:bg-white/7 hover:text-white hover:border-white/18 transition-colors"
-          >
-            <Sparkles className="sparkle-rgb" size={12} />
-            Get Reply
-          </button>
-
-          <a
-            href={signal.postUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/5 text-white/50 border border-white/10 hover:text-white hover:border-white/20 transition-colors"
-          >
-            <ExternalLink size={12} />
-            View
-          </a>
-        </div>
-      </div>
-    </>
+        {count}
+      </span>
+    </button>
   );
 }
 
-function toSignal(row: Record<string, unknown>): Signal {
-  return {
-    id: row.id as string,
-    platform: row.platform as Signal["platform"],
-    source: extractSub(row.platform as string, row.post_url as string),
-    author: (row.author as string) ?? "unknown",
-    timeAgo: timeAgo(row.created_at as string),
-    keyword: row.keyword as string,
-    title: (row.post_title as string) ?? "(no title)",
-    body: row.post_body as string,
-    postUrl: row.post_url as string,
-    aiScore: row.ai_score as number | null,
-    aiReason: row.ai_reason as string | null,
-    createdAt: row.created_at as string,
-    aiType: row.ai_type as Signal["aiType"],
-    status: (row.status as Signal["status"]) ?? "new",
-  };
+function FilterGroup({
+  title,
+  children,
+}: {
+  title?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="border-t border-line px-2 pt-2.5 pb-3">
+      {title && (
+        <h6 className="mb-1.5 px-2 font-mono text-[10px] leading-[normal] font-medium tracking-[0.18em] text-ink-3">
+          {title}
+        </h6>
+      )}
+      {children}
+    </div>
+  );
+}
+
+const optionLabel = "min-w-0 truncate";
+const clearClass =
+  "border-0 bg-transparent p-0 text-[12px] text-ink-3 hover:text-r1";
+
+function SignalCard({
+  mention,
+  isNew,
+  onHunt,
+  onDismiss,
+}: {
+  mention: MentionRow;
+  isNew: boolean;
+  onHunt: (m: MentionRow) => void;
+  onDismiss: (m: MentionRow, el: HTMLElement) => void;
+}) {
+  const toast = useToastStore((s) => s.show);
+  const ref = useRef<HTMLElement>(null);
+  const draftRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLTextAreaElement>(null);
+  const [expanded, setExpanded] = useState(false);
+  const [draftOpen, setDraftOpen] = useState(false);
+  const [draftState, setDraftState] = useState<"idle" | "writing" | "ready">(
+    "idle",
+  );
+  const [reply, setReply] = useState(mention.reply ?? "");
+  const onBoard = HUNTED.includes(mention.status);
+  const long = mention.body.length > 140;
+
+  async function toggleDraft() {
+    if (draftOpen) {
+      gsap.to(draftRef.current, {
+        height: 0,
+        opacity: 0,
+        duration: 0.3,
+        ease: "power2.in",
+        onComplete: () => setDraftOpen(false),
+      });
+      return;
+    }
+    setDraftOpen(true);
+    if (draftState === "ready") return;
+    setDraftState("writing");
+    try {
+      const data = await apiFetch<{ reply?: string }>("/api/ai/reply", {
+        method: "POST",
+        body: JSON.stringify({ mentionId: mention.id }),
+      });
+      const text = (data.reply ?? "").trim() || "Could not generate a reply.";
+      const typing = { n: 0 };
+      gsap.to(typing, {
+        n: text.length,
+        duration: Math.min(2.2, text.length / 110),
+        ease: "none",
+        onUpdate: () => setReply(text.slice(0, Math.round(typing.n))),
+        onComplete: () => setDraftState("ready"),
+      });
+    } catch (err) {
+      setDraftOpen(false);
+      setDraftState("idle");
+      toast(err instanceof Error ? err.message : "Couldn't generate a reply");
+    }
+  }
+
+  useGSAP(
+    () => {
+      if (draftOpen && draftRef.current) {
+        gsap.fromTo(
+          draftRef.current,
+          { height: 0, opacity: 0 },
+          { height: "auto", opacity: 1, duration: 0.45, ease: "power3.out" },
+        );
+      }
+    },
+    { dependencies: [draftOpen] },
+  );
+
+  async function copyReply() {
+    try {
+      await navigator.clipboard.writeText(textRef.current?.value ?? reply);
+      toast("Reply copied", "success");
+    } catch {
+      toast("Couldn't copy — select the text and copy it manually");
+    }
+  }
+
+  return (
+    <article
+      ref={ref}
+      className="group relative overflow-hidden rounded-[18px] border border-line bg-linear-to-b from-white/3.5 to-white/1.5 px-5.5 pt-5 pb-4.5 transition-[border-color,background-color] duration-200 hover:border-line-2 [&>*:not([data-wm])]:relative before:pointer-events-none before:absolute before:-top-25 before:-left-22.5 before:size-75 before:rounded-full before:bg-[radial-gradient(circle,color-mix(in_oklab,var(--pc)_26%,transparent)_0%,color-mix(in_oklab,var(--pc)_8%,transparent)_40%,transparent_68%)] before:opacity-85 before:[transition:opacity_0.3s,transform_0.5s] hover:before:scale-108 hover:before:opacity-100"
+      style={{ "--pc": platformVar(mention.platform) } as React.CSSProperties}
+    >
+      <Watermark
+        platform={mention.platform}
+        className="group-hover:opacity-17 group-hover:[transform:rotate(-12deg)_scale(1.04)]"
+      />
+
+      <div
+        className={cn(
+          "flex min-h-7 items-center gap-2.5 text-[12.5px] text-ink-3",
+          gutterPad,
+        )}
+      >
+        <span className="inline-flex min-w-0 items-center gap-1.75 font-medium text-ink">
+          <PlatformIcon platform={mention.platform} size={15} />
+          {PLATFORM_LABELS[mention.platform]}
+          <span className="truncate font-normal text-ink-3">
+            · {mention.source}
+          </span>
+        </span>
+        <span>{shortAgo(mention.createdAt)} ago</span>
+        {isNew && (
+          <span
+            className="size-1.75 flex-none rounded-full bg-r1 shadow-[0_0_8px_var(--r1)]"
+            title="New since your last visit"
+          />
+        )}
+        <KwTag className="ml-auto" title="Matched keyword">
+          {mention.keyword}
+        </KwTag>
+      </div>
+
+      <div
+        className={cn(
+          "mt-3.5 grid grid-cols-[minmax(0,1fr)_80px] gap-6 max-[700px]:grid-cols-[minmax(0,1fr)_64px] max-[700px]:gap-3.5",
+          gutterPad,
+        )}
+      >
+        <div>
+          <h3 className="mt-0 mb-2 text-[16.5px] leading-[1.4] font-medium tracking-[-0.005em] text-pretty wrap-anywhere">
+            {mention.title}
+          </h3>
+          {mention.body && (
+            <>
+              <p
+                className={cn(
+                  "m-0 text-[13.5px] leading-[1.6] text-pretty wrap-anywhere text-ink-2",
+                  !expanded && "line-clamp-2",
+                )}
+              >
+                {mention.body}
+              </p>
+              {long && (
+                <button
+                  className="mt-1 border-0 bg-transparent p-0 text-[12px] text-ink-3 hover:text-ink"
+                  onClick={() => setExpanded((v) => !v)}
+                >
+                  {expanded ? "Show less" : "Show more"}
+                </button>
+              )}
+            </>
+          )}
+        </div>
+        <ScoreArc score={mention.score} size="dial" delay={0.2} />
+      </div>
+
+      {mention.reason && (
+        <div
+          className={cn(
+            "mt-4 grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 rounded-xl border border-line bg-black/28 px-3.5 py-3",
+            gutter,
+          )}
+        >
+          <div className="flex items-center gap-1.5 pt-0.5 font-mono text-[10px] leading-[normal] font-medium tracking-[0.16em] whitespace-nowrap text-ink-3 [&_svg]:size-3 [&_svg]:text-r1">
+            <Sparkles />
+            AI READ
+          </div>
+          <p className="m-0 text-[13px] leading-[1.55] text-pretty text-ink-2">
+            {mention.type && (
+              <span
+                className={cn(
+                  "mr-2 inline-block rounded-md px-2 py-0.5 align-[1px] font-mono text-[10.5px] leading-[normal] font-medium tracking-[0.06em]",
+                  TYPE_TAG[mention.type],
+                )}
+              >
+                {SIGNAL_TYPE_LABELS[mention.type]}
+              </span>
+            )}
+            {mention.reason}
+          </p>
+        </div>
+      )}
+
+      <div className={cn("mt-4 flex flex-wrap items-center gap-2", gutter)}>
+        <GhostButton
+          tone={onBoard ? "done" : "default"}
+          onClick={() => !onBoard && onHunt(mention)}
+          disabled={onBoard}
+        >
+          <Target />
+          {onBoard ? "On Hunt Board" : "Hunt Board"}
+        </GhostButton>
+        <GhostButton onClick={toggleDraft}>
+          <Sparkles />
+          {draftOpen ? "Hide reply" : "Draft reply"}
+        </GhostButton>
+        <a
+          className={ghostClass()}
+          href={mention.url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <ExternalLink />
+          Open
+        </a>
+        <span className="flex-1" />
+        <GhostButton
+          tone="danger"
+          onClick={() => ref.current && onDismiss(mention, ref.current)}
+          title="Dismiss"
+        >
+          <X />
+          Dismiss
+        </GhostButton>
+      </div>
+
+      {draftOpen && (
+        <div className={cn("mt-3 overflow-hidden", gutter)} ref={draftRef}>
+          <div className="rounded-xl border border-r1/25 bg-r1/4 p-3.5">
+            <div className="mb-2 flex items-center justify-between font-mono text-[10px] leading-[normal] font-medium tracking-[0.16em] text-ink-3">
+              <span>
+                DRAFT REPLY · {PLATFORM_LABELS[mention.platform].toUpperCase()}
+              </span>
+              <span>{draftState === "writing" ? "WRITING…" : "EDITABLE"}</span>
+            </div>
+            <textarea
+              ref={textRef}
+              value={reply}
+              readOnly={draftState !== "ready"}
+              onChange={(e) => setReply(e.target.value)}
+              className="min-h-24 w-full resize-y border-0 bg-transparent p-0 font-body text-[13.5px] leading-[1.6] text-ink outline-0"
+            />
+            <div className="mt-2 flex justify-end gap-2">
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={copyReply}
+                disabled={draftState !== "ready"}
+              >
+                Copy reply
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </article>
+  );
 }
 
 export default function SignalsPage() {
-  const [filters, setFilters] = useState<SignalFilters>({
-    platform: "all",
-    intent: "all",
-    sort: "score",
-    type: "all",
-  });
-  const [signals, setSignals] = useState<Signal[]>([]);
-  const [loading, setLoading] = useState(true);
+  const toast = useToastStore((s) => s.show);
   const clearNewSignals = useScanStore((s) => s.clearNewSignals);
+  const refreshStats = useStatsStore((s) => s.refresh);
+
+  const [mentions, setMentions] = useState<MentionRow[] | null>(null);
+  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+  const [sort, setSort] = useState<"intent" | "newest">("intent");
+  const [railOpen, setRailOpen] = useState(false);
   const [lastVisitedAt] = useState<Date | null>(() => {
     if (typeof window === "undefined") return null;
     const prev = localStorage.getItem("signals_lastVisitedAt");
     return prev ? new Date(prev) : null;
   });
-  const [showNew, setShowNew] = useState(false);
-
-  const set = <K extends keyof SignalFilters>(key: K, val: SignalFilters[K]) =>
-    setFilters((f) => ({ ...f, [key]: val }));
+  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     localStorage.setItem("signals_lastVisitedAt", new Date().toISOString());
@@ -434,152 +401,390 @@ export default function SignalsPage() {
   }, [clearNewSignals]);
 
   useEffect(() => {
-    const params = new URLSearchParams(filters);
-    (async () => {
-      setLoading(true);
-      const r = await fetch(`/api/mentions?${params}`);
-      const rows = await r.json();
-      setSignals(rows.map(toSignal));
-      setLoading(false);
-    })();
-  }, [filters]);
+    async function load() {
+      try {
+        const rows = await apiFetch<Record<string, unknown>[]>(
+          "/api/mentions?limit=500&sort=newest",
+        );
+        setMentions(rows.map(toMentionRow));
+      } catch (err) {
+        toast(err instanceof Error ? err.message : "Couldn't load signals");
+        setMentions([]);
+      }
+    }
+    load();
+  }, [toast]);
 
-  const hotCount = signals.filter(
-    (s) => s.aiScore !== null && s.aiScore >= 8,
-  ).length;
+  const isNew = (m: MentionRow) =>
+    !!lastVisitedAt && new Date(m.createdAt) > lastVisitedAt;
 
-  const displayed =
-    showNew && lastVisitedAt
-      ? signals.filter((s) => new Date(s.createdAt) > lastVisitedAt)
-      : signals;
+  function passes(m: MentionRow, skip?: Group) {
+    if (
+      skip !== "platform" &&
+      filters.platform !== "all" &&
+      m.platform !== filters.platform
+    )
+      return false;
+    if (
+      skip !== "intent" &&
+      filters.intent !== "all" &&
+      scoreTier(m.score) !== filters.intent
+    )
+      return false;
+    if (skip !== "type" && filters.type !== "all" && m.type !== filters.type)
+      return false;
+    if (
+      skip !== "keyword" &&
+      filters.keyword !== "all" &&
+      m.keyword !== filters.keyword
+    )
+      return false;
+    if (filters.newOnly && !isNew(m)) return false;
+    return true;
+  }
+
+  const all = mentions ?? [];
+  const visible = all
+    .filter((m) => passes(m))
+    .sort((a, b) =>
+      sort === "intent"
+        ? (b.score ?? 0) - (a.score ?? 0) ||
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+  const keywordOptions = [...new Set(all.map((m) => m.keyword))].sort();
+  const hotCount = all.filter((m) => (m.score ?? 0) >= 8).length;
+  const newCount = all.filter(isNew).length;
+
+  function count(group: Group, match: (m: MentionRow) => boolean) {
+    return all.filter((m) => passes(m, group) && match(m)).length;
+  }
+
+  function setFilter<K extends keyof Filters>(key: K, value: Filters[K]) {
+    setFilters((f) => ({ ...f, [key]: value }));
+  }
+
+  const listKey = `${JSON.stringify(filters)}-${sort}-${mentions === null ? "x" : "ok"}`;
+  useGSAP(
+    () => {
+      const cards = listRef.current?.querySelectorAll("article");
+      if (!cards?.length) return;
+      gsap.fromTo(
+        cards,
+        { opacity: 0, y: 14 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.45,
+          stagger: 0.05,
+          ease: "power2.out",
+          clearProps: "transform",
+        },
+      );
+      gsap.fromTo(
+        listRef.current!.querySelectorAll("[data-wm]"),
+        { rotate: -30, opacity: 0, x: -10 },
+        {
+          rotate: -16,
+          opacity: 0.12,
+          x: 0,
+          duration: 0.9,
+          stagger: 0.05,
+          delay: 0.1,
+          ease: "power3.out",
+          clearProps: "transform,opacity",
+        },
+      );
+    },
+    { dependencies: [listKey] },
+  );
+
+  async function hunt(m: MentionRow) {
+    setMentions(
+      (prev) =>
+        prev?.map((x) => (x.id === m.id ? { ...x, status: "hunting" } : x)) ??
+        prev,
+    );
+    try {
+      await apiFetch(`/api/mentions/${m.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: "hunting" }),
+      });
+      toast("Added to Hunt Board", "success");
+      refreshStats();
+    } catch (err) {
+      setMentions(
+        (prev) =>
+          prev?.map((x) => (x.id === m.id ? { ...x, status: m.status } : x)) ??
+          prev,
+      );
+      toast(err instanceof Error ? err.message : "Couldn't add to Hunt Board");
+    }
+  }
+
+  function dismiss(m: MentionRow, el: HTMLElement) {
+    gsap.to(el, {
+      opacity: 0,
+      x: 40,
+      duration: 0.25,
+      ease: "power2.in",
+      onComplete: async () => {
+        setMentions((prev) => prev?.filter((x) => x.id !== m.id) ?? prev);
+        try {
+          await apiFetch(`/api/mentions/${m.id}`, {
+            method: "PATCH",
+            body: JSON.stringify({ status: "dismissed" }),
+          });
+          toast("Dismissed");
+        } catch (err) {
+          setMentions((prev) => (prev ? [...prev, m] : prev));
+          toast(err instanceof Error ? err.message : "Couldn't dismiss");
+        }
+      },
+    });
+  }
+
+  const chips: { key: keyof Filters; label: string }[] = [];
+  if (filters.platform !== "all")
+    chips.push({ key: "platform", label: PLATFORM_LABELS[filters.platform] });
+  if (filters.intent !== "all")
+    chips.push({
+      key: "intent",
+      label: INTENT_OPTIONS.find((o) => o.value === filters.intent)!.label,
+    });
+  if (filters.type !== "all")
+    chips.push({ key: "type", label: SIGNAL_TYPE_LABELS[filters.type] });
+  if (filters.keyword !== "all")
+    chips.push({ key: "keyword", label: filters.keyword });
+  if (filters.newOnly) chips.push({ key: "newOnly", label: "New only" });
+
+  function clearChip(key: keyof Filters) {
+    setFilters((f) => ({ ...f, [key]: key === "newOnly" ? false : "all" }));
+  }
+
+  if (mentions === null) {
+    return <Loading>LOADING SIGNALS…</Loading>;
+  }
 
   return (
-    <div className="p-5 h-full flex gap-4 min-h-0">
-      <div className="w-70 rounded-xl glass-red border border-white/5 p-5 flex flex-col gap-4 min-h-0 overflow-y-auto shrink-0">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-white">Filters</h2>
-          <SlidersHorizontal size={14} className="text-white/20" />
+    <div className="grid grid-cols-[232px_minmax(0,1fr)] items-start gap-6 max-[1100px]:grid-cols-[minmax(0,1fr)]">
+      <div className="col-span-full flex flex-wrap items-end justify-between gap-6">
+        <div>
+          <div className="flex flex-wrap items-center gap-3 text-[13.5px] text-ink-2">
+            <span>
+              {all.length} signals{newCount > 0 && ` · ${newCount} new`}
+            </span>
+            <span>·</span>
+            <span className="font-medium text-r1">{hotCount} hot leads</span>
+          </div>
         </div>
-        <div className="flex flex-col gap-4">
-          <FilterSection label="New Signals">
-            <button
-              onClick={() => setShowNew((v) => !v)}
-              className={`text-left text-sm px-2.5 py-1.5 rounded-lg transition-colors w-full ${
-                showNew
-                  ? "bg-white/8 text-white border border-white/16"
-                  : "text-white/35 hover:text-white/60 hover:bg-white/4"
-              }`}
+        <div className="flex items-center gap-2.5">
+          <Button
+            size="sm"
+            className="hidden max-[1100px]:inline-flex"
+            onClick={() => setRailOpen((v) => !v)}
+          >
+            <SlidersHorizontal />
+            Filters
+          </Button>
+          <Seg>
+            <SegButton
+              active={sort === "intent"}
+              onClick={() => setSort("intent")}
             >
-              Show New Only
-            </button>
-          </FilterSection>
-          <FilterSection label="Platform">
-            <RadioGroup
-              value={filters.platform}
-              onChange={(v) => set("platform", v)}
-              options={[
-                { label: "All Platforms", value: "all" },
-                { label: "Reddit", value: "reddit" },
-                { label: "Hacker News", value: "hackernews" },
-              ]}
-            />
-          </FilterSection>
-          <FilterSection label="Intent Score">
-            <RadioGroup
-              value={filters.intent}
-              onChange={(v) => set("intent", v)}
-              options={[
-                { label: "All", value: "all" },
-                { label: "High  8+", value: "high" },
-                { label: "Medium  5–7", value: "medium" },
-                { label: "Low  <5", value: "low" },
-              ]}
-            />
-          </FilterSection>
-          <FilterSection label="Signal Type">
-            <RadioGroup
-              value={filters.type}
-              onChange={(v) => set("type", v)}
-              options={[
-                { label: "All Types", value: "all" },
-                { label: "Seeking Rec", value: "seeking_recommendation" },
-                { label: "Pain Point", value: "pain_point" },
-                { label: "Competitor", value: "competitor_complaint" },
-                { label: "Question", value: "question" },
-                { label: "General", value: "general" },
-              ]}
-            />
-          </FilterSection>
-          <FilterSection label="Sort By">
-            <RadioGroup
-              value={filters.sort}
-              onChange={(v) => set("sort", v)}
-              options={[
-                { label: "AI Score", value: "score" },
-                { label: "Newest", value: "newest" },
-                { label: "Oldest", value: "oldest" },
-              ]}
-            />
-          </FilterSection>
+              Highest intent
+            </SegButton>
+            <SegButton
+              active={sort === "newest"}
+              onClick={() => setSort("newest")}
+            >
+              Newest
+            </SegButton>
+          </Seg>
         </div>
       </div>
 
-      <div className="flex-8 flex flex-col gap-4 min-h-0 min-w-0">
-        <div className="rounded-xl glass-red border border-white/5 px-5 py-3.5 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <Radio size={14} className="text-white/50" />
-            <h2 className="text-sm font-semibold text-white">Signals Inbox</h2>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/40 font-semibold">
-              {loading ? "—" : `${signals.length} signals`}
-            </span>
-          </div>
-          {hotCount > 0 && (
-            <div className="flex items-center gap-1.5">
-              <Lottie
-                animationData={Fire}
-                loop
-                style={{ width: 16, height: 16 }}
-              />
-              <span className="text-[11px] font-medium tracking-wide text-white/50">
-                {hotCount} hot lead{hotCount !== 1 ? "s" : ""}
-              </span>
-            </div>
-          )}
+      <aside
+        className={cn(
+          "sticky top-0 rounded-2xl border border-line bg-panel py-1.5 backdrop-blur-md max-[1100px]:static",
+          !railOpen && "max-[1100px]:hidden",
+        )}
+      >
+        <div className="flex items-center justify-between px-4 pt-3 pb-2">
+          <b className="text-[13.5px] font-medium">Filters</b>
+          <button
+            className={clearClass}
+            onClick={() => setFilters(EMPTY_FILTERS)}
+          >
+            Clear all
+          </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto min-h-0 flex flex-col gap-3 pr-0.5">
-          {loading ? (
-            <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center py-24">
-              <div className="w-12 h-12 rounded-full bg-white/3 flex items-center justify-center">
-                <Radio size={20} className="text-white/15 animate-pulse" />
-              </div>
-              <p className="text-sm text-white/25">Loading signals...</p>
-            </div>
-          ) : displayed.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center py-24">
-              <div className="w-12 h-12 rounded-full bg-white/3 flex items-center justify-center">
-                <Radio size={20} className="text-white/15" />
-              </div>
-              <p className="text-sm text-white/25">
-                No signals match your filters
-              </p>
-              <p className="text-xs text-white/15">
-                Try adjusting or clearing the filters
-              </p>
-            </div>
-          ) : (
-            displayed.map((signal) => (
+        <FilterGroup>
+          <div className="flex items-center justify-between px-2 py-1.5 text-[13px] text-ink-2">
+            New since last visit
+            <Switch
+              on={filters.newOnly}
+              onClick={() => setFilter("newOnly", !filters.newOnly)}
+              aria-label="New since last visit"
+            />
+          </div>
+        </FilterGroup>
+
+        <FilterGroup title="PLATFORM">
+          {[
+            { value: "all" as const, label: "All platforms" },
+            ...PLATFORMS,
+          ].map((p) => {
+            const c = count(
+              "platform",
+              (m) => p.value === "all" || m.platform === p.value,
+            );
+            return (
+              <FilterOption
+                key={p.value}
+                active={filters.platform === p.value}
+                zero={!c}
+                count={c}
+                onClick={() => setFilter("platform", p.value)}
+              >
+                {p.value !== "all" && (
+                  <span className="grid size-3.5 flex-none place-items-center">
+                    <PlatformIcon platform={p.value} size={13} />
+                  </span>
+                )}
+                <span className={optionLabel}>{p.label}</span>
+              </FilterOption>
+            );
+          })}
+        </FilterGroup>
+
+        <FilterGroup title="INTENT">
+          <FilterOption
+            active={filters.intent === "all"}
+            count={count("intent", () => true)}
+            onClick={() => setFilter("intent", "all")}
+          >
+            <span className={optionLabel}>Any intent</span>
+          </FilterOption>
+          {INTENT_OPTIONS.map((o) => {
+            const c = count("intent", (m) => scoreTier(m.score) === o.value);
+            return (
+              <FilterOption
+                key={o.value}
+                active={filters.intent === o.value}
+                zero={!c}
+                count={c}
+                onClick={() => setFilter("intent", o.value)}
+              >
+                <span
+                  className="size-1.75 flex-none rounded-full"
+                  style={{ background: o.color }}
+                />
+                <span className={optionLabel}>{o.label}</span>
+              </FilterOption>
+            );
+          })}
+        </FilterGroup>
+
+        <FilterGroup title="SIGNAL TYPE">
+          <FilterOption
+            active={filters.type === "all"}
+            count={count("type", () => true)}
+            onClick={() => setFilter("type", "all")}
+          >
+            <span className={optionLabel}>All types</span>
+          </FilterOption>
+          {(Object.keys(SIGNAL_TYPE_LABELS) as SignalType[]).map((t) => {
+            const c = count("type", (m) => m.type === t);
+            return (
+              <FilterOption
+                key={t}
+                active={filters.type === t}
+                zero={!c}
+                count={c}
+                onClick={() => setFilter("type", t)}
+              >
+                <span className={optionLabel}>{SIGNAL_TYPE_LABELS[t]}</span>
+              </FilterOption>
+            );
+          })}
+        </FilterGroup>
+
+        {keywordOptions.length > 0 && (
+          <FilterGroup title="KEYWORD">
+            <FilterOption
+              active={filters.keyword === "all"}
+              count={count("keyword", () => true)}
+              onClick={() => setFilter("keyword", "all")}
+            >
+              <span className={optionLabel}>All keywords</span>
+            </FilterOption>
+            {keywordOptions.map((k) => {
+              const c = count("keyword", (m) => m.keyword === k);
+              return (
+                <FilterOption
+                  key={k}
+                  active={filters.keyword === k}
+                  zero={!c}
+                  count={c}
+                  onClick={() => setFilter("keyword", k)}
+                >
+                  <span className={optionLabel}>{k}</span>
+                </FilterOption>
+              );
+            })}
+          </FilterGroup>
+        )}
+      </aside>
+
+      <section className="flex min-w-0 flex-col gap-3.5">
+        <div className="flex min-h-7 flex-wrap items-center gap-2.5 text-[12.5px] text-ink-3">
+          <span>Showing {visible.length}</span>
+          {chips.map((c) => (
+            <button
+              key={c.key}
+              className="inline-flex items-center gap-1.5 rounded-full border border-line-2 bg-transparent py-0.75 pr-1.5 pl-2.5 text-[12px] text-ink-2 hover:border-r1 hover:text-ink [&_svg]:size-2.75"
+              onClick={() => clearChip(c.key)}
+            >
+              {c.label}
+              <X />
+            </button>
+          ))}
+        </div>
+        <div ref={listRef} className="flex flex-col gap-3.5">
+          {visible.length ? (
+            visible.map((m) => (
               <SignalCard
-                key={signal.id}
-                signal={signal}
-                isNew={
-                  !!lastVisitedAt && new Date(signal.createdAt) > lastVisitedAt
-                }
+                key={m.id}
+                mention={m}
+                isNew={isNew(m)}
+                onHunt={hunt}
+                onDismiss={dismiss}
               />
             ))
+          ) : (
+            <div className="rounded-[18px] border border-dashed border-line-2 px-6 py-12 text-center text-ink-3">
+              <h4 className="mt-0 mb-1.5 font-display text-[24px] leading-[normal] font-normal text-ink">
+                {all.length ? "Nothing here yet." : "No signals yet."}
+              </h4>
+              {all.length ? (
+                <>
+                  No signals match these filters.{" "}
+                  <button
+                    className={cn(clearClass, "text-r1")}
+                    onClick={() => setFilters(EMPTY_FILTERS)}
+                  >
+                    Clear filters
+                  </button>
+                </>
+              ) : (
+                "Add a keyword and run a scan — scored posts land here."
+              )}
+            </div>
           )}
         </div>
-      </div>
+      </section>
     </div>
   );
 }

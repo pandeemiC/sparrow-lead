@@ -1,0 +1,39 @@
+"use client";
+
+import { useRef } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+
+export default function CountUp({
+  value,
+  decimals = 0,
+  delay = 0.2,
+}: {
+  value: number;
+  decimals?: number;
+  delay?: number;
+}) {
+  const ref = useRef<HTMLSpanElement>(null);
+  // remembers what is on screen, so a change counts from there instead of from 0
+  const shown = useRef(0);
+
+  useGSAP(
+    () => {
+      const counter = { v: shown.current };
+      gsap.to(counter, {
+        v: value,
+        duration: 1,
+        delay,
+        ease: "power2.out",
+        onUpdate: () => {
+          shown.current = counter.v;
+          if (ref.current)
+            ref.current.textContent = counter.v.toFixed(decimals);
+        },
+      });
+    },
+    { dependencies: [value] },
+  );
+
+  return <span ref={ref}>{value.toFixed(decimals)}</span>;
+}

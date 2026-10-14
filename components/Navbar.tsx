@@ -1,73 +1,100 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import sparrowLogo from "@/public/sparrow-no-text-logo.png";
+import Brand from "@/components/home/Brand";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
+import { cn } from "@/lib/utils";
+import SocialLinks from "@/components/home/SocialLinks";
+import { CONTACT_EMAIL } from "@/components/home/contact";
+
+const LINKS = [
+  { label: "How it works", href: "#how" },
+  { label: "Intent score", href: "#intent" },
+  { label: "Questions", href: "#faq" },
+];
 
 export default function Navbar() {
   const pathname = usePathname();
-  const isDashboardPage = pathname.startsWith("/dashboard");
-  const isAuthPage =
-    pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
-  const isCallbackPage = pathname.startsWith("/sso-callback");
+  const { isSignedIn } = useAuth();
+  const [hidden, setHidden] = useState(false);
+  const [solid, setSolid] = useState(false);
 
-  if (isAuthPage || isDashboardPage || isCallbackPage) {
-    return null;
-  }
+  // hide while scrolling down, come back after a deliberate scroll up
+  useEffect(() => {
+    let last = window.scrollY;
+    let upTravel = 0;
+    const onScroll = () => {
+      const y = window.scrollY;
+      const delta = y - last;
+      last = y;
+      setSolid(y > 20);
+      if (y < 120) {
+        upTravel = 0;
+        setHidden(false);
+      } else if (delta > 0) {
+        upTravel = 0;
+        setHidden(true);
+      } else if (delta < 0) {
+        upTravel -= delta;
+        if (upTravel > 24) setHidden(false);
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // only the marketing homepage uses this navbar
+  if (pathname !== "/") return null;
 
   return (
-    <div className="fixed top-5 left-0 right-0 overflow-x-hidden z-50">
-      <div className="flex items-center justify-between w-full max-w-6xl bg-neutral-700/20 mx-auto h-14 px-6 rounded-full border border-white/10">
-        <Link href="/" className="flex items-center">
-          <Image
-            src={sparrowLogo}
-            alt="Sparrow Logo"
-            width={50}
-            height={50}
-            style={{ width: "auto", height: "auto" }}
-          />
-          <span className="text-white text-xl font-serif italic tracking-tighter">
-            Sparrow
-          </span>
-        </Link>
-
-        <nav className="hidden md:flex items-center gap-8">
-          <Link
-            href="#"
-            className="text-[11px] text-white/70 uppercase font-bold tracking-widest hover:text-white transition-colors"
-          >
-            How It Works
-          </Link>
-          <Link
-            href="#"
-            className="text-[11px] text-white/70 uppercase font-bold tracking-widest hover:text-white transition-colors"
-          >
-            Pricing
-          </Link>
-          <Link
-            href="#"
-            className="text-[11px] text-white/70 uppercase font-bold tracking-widest hover:text-white transition-colors"
-          >
-            About Us
-          </Link>
+    <header
+      className={cn(
+        "fixed inset-x-0 top-0 z-50 border-b border-transparent transition-[translate,opacity,background-color,border-color]",
+        hidden
+          ? "-translate-y-full opacity-0 duration-300 ease-in"
+          : "translate-y-0 opacity-100 duration-700 ease-[cubic-bezier(.16,1,.3,1)]",
+        solid && "border-white/7 bg-[rgba(11,6,7,0.72)] backdrop-blur-xl",
+      )}
+    >
+      <div className="mx-auto flex h-17 max-w-310 items-center gap-10 px-5 md:px-10">
+        <Brand />
+        <nav className="hidden items-center gap-7 md:flex">
+          {LINKS.map((l) => (
+            <a
+              key={l.href}
+              href={l.href}
+              className="text-[13.5px] whitespace-nowrap text-ink-2 transition-colors hover:text-ink"
+            >
+              {l.label}
+            </a>
+          ))}
         </nav>
-
-        <div className="flex items-center gap-4">
-          <Link
-            href="/sign-in"
-            className="hidden sm:block text-[11px] text-white/60 uppercase tracking-widest hover:text-white transition-colors"
+        <div className="ml-auto flex items-center gap-5">
+          <SocialLinks size="sm" className="hidden lg:flex" />
+          {!isSignedIn && (
+            <Link
+              href="/sign-in"
+              className="hidden text-[13.5px] whitespace-nowrap text-ink-2 transition-colors hover:text-ink sm:block"
+            >
+              Sign in
+            </Link>
+          )}
+          <a
+            href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Sparrow demo request")}`}
+            className="hidden h-9 items-center rounded-[10px] border border-white/15 bg-white/4 px-4 text-[13px] font-medium whitespace-nowrap text-ink transition-colors hover:border-white/25 hover:bg-white/8 md:inline-flex"
           >
-            Log In
-          </Link>
+            Request a demo
+          </a>
           <Link
-            href="/sign-up"
-            className="flex items-center cursor-pointer gap-2 bg-sparrow-red hover:bg-sparrow-bright text-white text-[11px] font-bold uppercase tracking-widest px-5 py-2 rounded-lg transition-colors"
+            href={isSignedIn ? "/dashboard" : "/sign-up"}
+            className="inline-flex h-9 items-center rounded-[10px] bg-linear-to-b from-[#ff3446] to-r2 px-4 text-[13px] font-medium whitespace-nowrap text-white shadow-[0_8px_30px_-10px_rgba(255,36,56,0.7),inset_0_1px_0_rgba(255,255,255,0.25)]"
           >
-            Get Started
+            {isSignedIn ? "Dashboard" : "Start free"}
           </Link>
         </div>
       </div>
-    </div>
+    </header>
   );
 }

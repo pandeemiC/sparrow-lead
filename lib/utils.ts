@@ -18,7 +18,10 @@ export function timeAgo(dateStr: string): string {
 }
 
 export function extractSub(platform: string, postUrl: string): string {
-  if (platform !== "reddit") return "HN";
-  const match = postUrl.match(/reddit\.com\/(r\/[^/]+)/);
-  return match ? match[1] : "Reddit";
+  if (platform === "reddit") {
+    const match = postUrl.match(/reddit\.com\/(r\/[^/]+)/);
+    return match ? match[1] : "Reddit";
+  }
+  if (platform === "bluesky") return "Bluesky";
+  return "HN";
 }

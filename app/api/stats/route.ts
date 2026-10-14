@@ -1,8 +1,11 @@
 import { auth } from "@clerk/nextjs/server";
 import { getDb } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { handler } from "@/lib/api";
+import { redditConfigured } from "@/lib/reddit";
+import { blueSkyConfigured } from "@/lib/bluesky";
 
-export async function GET() {
+export const GET = handler(async () => {
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -23,8 +26,19 @@ export async function GET() {
   const [kwRow] = await sql`
     SELECT COUNT(*)::int AS keywords_tracked
     FROM keywords
-    WHERE user_id = ${userId}
+    WHERE user_id = ${userId} AND active = true
   `;
+
+  const [monthRow] = await sql`
+    SELECT COUNT(*)::int AS signals_this_month
+    FROM mentions m
+    JOIN keywords k ON m.keyword_id = k.id
+    WHERE k.user_id = ${userId}
+      AND m.created_at >= date_trunc('month', NOW())
+  `;
+
+  const [userRow] =
+    await sql`SELECT auto_scan FROM users WHERE user_id = ${userId}`;
 
   const huntRows = await sql`
     SELECT m.status, COUNT(*)::int AS count
@@ -60,7 +74,7 @@ export async function GET() {
   `;
 
   const keywords = await sql`
-    SELECT k.keyword, k.platform, COUNT(m.id)::int AS mention_count
+    SELECT k.keyword, k.platforms, COUNT(m.id)::int AS mention_count
     FROM keywords k
     LEFT JOIN mentions m ON m.keyword_id = k.id
     WHERE k.user_id = ${userId}
@@ -88,5 +102,12 @@ export async function GET() {
     recentSignals,
     keywords,
     huntLeads,
+    signalsThisMonth: monthRow.signals_this_month,
+    sources: [
+      { platform: "reddit", active: redditConfigured() },
+      { platform: "hackernews", active: true },
+      { platform: "bluesky", active: blueSkyConfigured() },
+    ],
+    autoScan: userRow?.auto_scan ?? true,
   });
-}
+});

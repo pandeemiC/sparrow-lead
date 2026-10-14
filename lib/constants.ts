@@ -1,4 +1,5 @@
 import {
+  Crosshair,
   LayoutDashboard,
   Radio,
   Tag,
@@ -11,12 +12,25 @@ import {
   BarChart2,
   User,
 } from "lucide-react";
-import type { Signal, SignalType, HuntStatus, Lead } from "@/types";
+import type { SignalPlatform, SignalType, HuntStatus, Lead } from "@/types";
+
+export const PLATFORMS: { value: SignalPlatform; label: string }[] = [
+  { value: "reddit", label: "Reddit" },
+  { value: "hackernews", label: "Hacker News" },
+  { value: "bluesky", label: "Bluesky" },
+];
+
+export const PLATFORM_LABELS: Record<SignalPlatform, string> = {
+  reddit: "Reddit",
+  hackernews: "Hacker News",
+  bluesky: "Bluesky",
+};
 
 export const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Signals", href: "/dashboard/signals", icon: Radio },
   { label: "Keywords", href: "/dashboard/keywords", icon: Tag },
+  { label: "Hunt Profile", href: "/dashboard/hunt-profile", icon: Crosshair },
   { label: "Hunt Board", href: "/dashboard/hunt-board", icon: Target },
 ];
 
@@ -52,6 +66,20 @@ export const settingsItems = [
   { label: "Privacy", href: "/dashboard/settings/privacy", icon: Shield },
   { label: "Billing", href: "/dashboard/settings/billing", icon: CreditCard },
   { label: "Usage", href: "/dashboard/settings/usage", icon: BarChart2 },
+];
+
+export const ROLE_OPTIONS = [
+  { label: "Founder / Business Owner", value: "founder" },
+  { label: "Developer", value: "developer" },
+  { label: "Marketer / Growth", value: "marketer" },
+  { label: "Student", value: "student" },
+  { label: "Other", value: "other" },
+];
+
+export const ALERT_SCORE_OPTIONS = [
+  { label: "Warm (5+)", value: "5" },
+  { label: "Hot (7+)", value: "7" },
+  { label: "Very hot (9+)", value: "9" },
 ];
 
 export const HUNT_COLUMNS: { id: HuntStatus; label: string; color: string }[] =
