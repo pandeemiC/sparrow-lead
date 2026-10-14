@@ -2,6 +2,7 @@
 
 import { CreditCard } from "lucide-react";
 import { GrCodeSandbox } from "react-icons/gr";
+import { PLAN_LIMITS } from "@/lib/plans";
 import { SettingsCard } from "@/components/ui/SettingsUI";
 import { GhostButton, SectionTitle } from "@/components/sp/ui";
 
@@ -51,7 +52,8 @@ export default function SettingsBilling() {
                 </>
               ) : (
                 <p className="text-sm text-white/35">
-                  5 keywords · 100 signals/mo · No card required
+                  {PLAN_LIMITS.free.keywords} keywords ·{" "}
+                  {PLAN_LIMITS.free.signals} signals/mo · No card required
                 </p>
               )}
             </div>
