@@ -2,6 +2,7 @@ import { Webhook } from "svix";
 import { headers } from "next/headers";
 import { WebhookEvent } from "@clerk/nextjs/server";
 import { getDb } from "@/lib/db";
+import { deleteUserData } from "@/lib/account";
 
 export async function POST(req: Request) {
   const secret = process.env.CLERK_WEBHOOK_SECRET;
@@ -43,6 +44,11 @@ export async function POST(req: Request) {
     VALUES (${id}, ${email})
     ON CONFLICT (user_id) DO NOTHING
     `;
+  }
+
+  // users deleted from the clerk dashboard, or anywhere outside the app
+  if (event.type === "user.deleted" && event.data.id) {
+    await deleteUserData(event.data.id);
   }
 
   return new Response("OK", { status: 200 });
