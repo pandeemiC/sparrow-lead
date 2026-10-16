@@ -1,38 +1,57 @@
-## SPARROW
+# sparrow
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Sparrow is a social listener. You give it keywords and it goes through Reddit, Hacker News and Bluesky looking for posts that match what you offer or what you're looking for. Then the AI scores each post on how relevant it is, so the good ones float to the top and you don't have to scroll through everything yourself.
 
-## Getting Started
+Live here: https://sparrow-self.vercel.app
 
-First, run the development server:
+## what it does
+
+- tracks your keywords across Reddit, Hacker News and Bluesky
+- scores every post from 1 to 10 with AI
+- scans on its own every 6 hours, or you can hit scan now
+- hunt profile, where you tell the AI who you're after and what to ignore
+- hunt board to move good leads along (hunting, interested, engaged, hunted)
+- drafts a reply for you in your own tone
+
+## built with
+
+- Next.js 16, React 19, Tailwind v4
+- Clerk for auth
+- Neon (Postgres) for the database
+- Trigger.dev for the background scans
+- Gemini for the scoring and replies
+- GSAP and Lenis for the homepage animations
+- Zustand for state
+
+## running it locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The scans run on Trigger.dev, so open a second terminal and run this too:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run trigger
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+You'll need a `.env.local` with these:
 
-## Learn More
+```
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
+CLERK_WEBHOOK_SECRET=
+DATABASE_URL=
+GEMINI_API_KEY=
+TRIGGER_SECRET_KEY=
+RESEND_API_KEY=
+BLUESKY_HANDLE=
+BLUESKY_APP_PASSWORD=
+```
 
-To learn more about Next.js, take a look at the following resources:
+Reddit is optional. Without `REDDIT_CLIENT_ID` and `REDDIT_CLIENT_SECRET` it just skips Reddit and searches the other two.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## notes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Paid plans are not live yet, everyone is on the free plan for now.
