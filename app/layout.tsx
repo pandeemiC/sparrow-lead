@@ -24,9 +24,19 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sparrow",
+  metadataBase: new URL("https://sparrow-self.vercel.app"),
+  title: {
+    default: "Sparrow - Find signals on Reddit, Hacker News and Bluesky",
+    template: "%s | Sparrow",
+  },
   description:
-    "Sparrow reads Reddit, Hacker News and Bluesky for posts that match what you offer or what you're searching for, and scores how serious each one is.",
+    "Sparrow listens to Reddit, Hacker News and Bluesky for posts that match what you offer or what you're searching for, and scores how relevant each one is.",
+  openGraph: {
+    type: "website",
+    siteName: "Sparrow",
+    url: "/",
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 export default function RootLayout({
