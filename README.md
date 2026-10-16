@@ -1,4 +1,13 @@
-# sparrow
+<p align="center">
+  <img src=".github/readme/logo.png" alt="" width="160">
+</p>
+
+<h1 align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/readme/title-dark.png">
+    <img src=".github/readme/title-light.png" alt="Sparrow" height="72">
+  </picture>
+</h1>
 
 Sparrow is a social listener. You give it keywords and it goes through Reddit, Hacker News and Bluesky looking for posts that match what you offer or what you're looking for. Then the AI scores each post on how relevant it is, so the good ones float to the top and you don't have to scroll through everything yourself.
 
