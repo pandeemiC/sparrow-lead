@@ -55,3 +55,7 @@ Reddit is optional. Without `REDDIT_CLIENT_ID` and `REDDIT_CLIENT_SECRET` it jus
 ## notes
 
 Paid plans are not live yet, everyone is on the free plan for now.
+
+## license
+
+All rights reserved. The code is public so you can look through it since it was made for educational (at the time being) purposes, but please don't re-use it without asking.
