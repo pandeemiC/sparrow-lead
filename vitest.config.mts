@@ -1,9 +1,10 @@
 import { defineConfig } from "vitest/config";
-import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
-  plugins: [tsconfigPaths()],
+  // lets tests understand imports like "@/lib/score", same as next does
+  resolve: { tsconfigPaths: true },
   test: {
+    // "node" because we're testing plain functions, not things in a browser
     environment: "node",
   },
 });
