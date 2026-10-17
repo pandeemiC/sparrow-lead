@@ -50,3 +50,4 @@ project.md
 next-env.d.ts
 
 .trigger
+.vitest/
