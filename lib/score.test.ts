@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { scoreTier } from "@/lib/score";
+import { scoreTier, scoreLabel, scoreColor, platformVar } from "@/lib/score";
 
 // hi (high), md (medium), lo, (low)
 
@@ -16,6 +16,45 @@ describe("scoreTier", () => {
     [null, "lo"],
   ])("scoreTier(%s) is %s", (score, tier) => {
     expect(scoreTier(score)).toBe(tier);
+  });
+});
+
+describe("scoreLabel", () => {
+  it.each([
+    [10, "HOT"],
+    [8, "HOT"],
+    [7, "WARM"],
+    [5, "WARM"],
+    [4, "COLD"],
+    [1, "COLD"],
+    [null, "COLD"],
+  ])("scoreLabel(%s) is %s", (score, label) => {
+    expect(scoreLabel(score)).toBe(label);
+  });
+});
+
+describe("scoreColor", () => {
+  it.each([
+    [10, "var(--r1)"],
+    [8, "var(--r1)"],
+    [7, "var(--amber)"],
+    [5, "var(--amber)"],
+    [4, "rgba(255,255,255,.4)"],
+    [1, "rgba(255,255,255,.4)"],
+    [null, "rgba(255,255,255,.4)"],
+  ])("scoreColor(%s) is %s", (score, color) => {
+    expect(scoreColor(score)).toBe(color);
+  });
+});
+
+describe("platformVar", () => {
+  it.each([
+    ["reddit", "var(--rd)"],
+    ["hackernews", "var(--hn)"],
+    ["bluesky", "var(--bs)"],
+    ["anything else", "var(--unk)"],
+  ])("platformVar(%s) is %s", (platform, color) => {
+    expect(platformVar(platform)).toBe(color);
   });
 });
 
