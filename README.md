@@ -9,6 +9,8 @@
   </picture>
 </h1>
 
+![ci](https://github.com/pandeemiC/sparrow-lead/actions/workflows/ci.yml/badge.svg)
+
 Sparrow is a social listener. You give it keywords and it goes through Reddit, Hacker News and Bluesky looking for posts that match what you offer or what you're looking for. Then the AI scores each post on how relevant it is, so the good ones float to the top and you don't have to scroll through everything yourself.
 
 Live here: https://sparrow-self.vercel.app
