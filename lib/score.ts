@@ -34,5 +34,6 @@ export function shortAgo(dateStr: string): string {
 export function platformVar(platform: string): string {
   if (platform === "reddit") return "var(--rd)";
   if (platform === "hackernews") return "var(--hn)";
-  return "var(--bs)";
+  if (platform === "bluesky") return "var(--bs)";
+  return "var(--unk)";
 }

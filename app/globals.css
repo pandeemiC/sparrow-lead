@@ -22,6 +22,7 @@
   --rd: #e2501a;
   --hn: #ffa552;
   --bs: #6ec1ff;
+  --unk: #b4b4b4;
   --serif: var(--font-playfair), "Playfair Display", Georgia, serif;
   --sans: var(--font-inter), "Inter", system-ui, sans-serif;
   --mono: var(--font-jetbrains), "JetBrains Mono", ui-monospace, monospace;
