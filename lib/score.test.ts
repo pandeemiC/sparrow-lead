@@ -1,5 +1,11 @@
-import { describe, it, expect } from "vitest";
-import { scoreTier, scoreLabel, scoreColor, platformVar } from "@/lib/score";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import {
+  scoreTier,
+  scoreLabel,
+  scoreColor,
+  platformVar,
+  shortAgo,
+} from "@/lib/score";
 
 // hi (high), md (medium), lo, (low)
 
@@ -55,6 +61,30 @@ describe("platformVar", () => {
     ["anything else", "var(--unk)"],
   ])("platformVar(%s) is %s", (platform, color) => {
     expect(platformVar(platform)).toBe(color);
+  });
+});
+
+describe("shortAgo", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-21T12:00:00Z"));
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  // shortago uses math.round
+  it.each([
+    ["2026-10-21T11:55:00Z", "5m"],
+    ["2026-10-21T11:01:00Z", "59m"],
+    ["2026-10-21T11:00:00Z", "1h"],
+    ["2026-10-21T10:30:00Z", "2h"],
+    ["2026-10-20T13:00:00Z", "23h"],
+    ["2026-10-20T12:00:00Z", "1d"],
+    ["2026-10-20T00:00:00Z", "2d"],
+    ["2026-10-21T12:05:00Z", "0m"],
+  ])("shortAgo(%s) is %s", (date, expected) => {
+    expect(shortAgo(date)).toBe(expected);
   });
 });
 
