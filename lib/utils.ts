@@ -6,7 +6,10 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function timeAgo(dateStr: string): string {
-  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  const diff = Math.max(
+    0,
+    Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000),
+  );
   //sec
   if (diff < 60) return `${diff}s ago`;
   //min
