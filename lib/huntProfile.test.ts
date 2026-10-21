@@ -95,4 +95,24 @@ describe("profileForReply", () => {
   });
 });
 
-const changed = { ...base, replyTone: "formal" };
+describe("toHuntProfile", () => {
+  it("maps database column names to profile fields", () => {
+    const row = {
+      role: "freelancer",
+      description: "client portals for designers",
+      listener_context: "small agencies",
+      hunt_signals: "mentions a budget",
+      hunt_ignore: "job ads",
+      reply_tone: "friendly and short",
+      profile_updated_at: "2026-10-01T12:00:00.000Z",
+    };
+    expect(toHuntProfile(row)).toEqual({
+      ...base,
+      updatedAt: "2026-10-01T12:00:00.000Z",
+    });
+  });
+
+  it("turns missing or null fields into empty strings", () => {
+    expect(toHuntProfile({ role: null })).toEqual(empty);
+  });
+});
