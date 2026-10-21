@@ -76,4 +76,23 @@ describe("profileForScoring", () => {
   });
 });
 
+describe("profileForReply", () => {
+  it("includes role, offer, tone", () => {
+    const text = profileForReply(base);
+    expect(text).toContain("You are writing as: freelancer");
+    expect(text).toContain("What you offer: client portals for designers");
+    expect(text).toContain("How the reply should sound: friendly and short");
+  });
+
+  it("leaves out the scoring-only fields", () => {
+    const text = profileForReply(base);
+    expect(text).not.toContain("job ads");
+    expect(text).not.toContain("small agencies");
+  });
+
+  it("is empty for an empty profile", () => {
+    expect(profileForReply(empty)).toBe("");
+  });
+});
+
 const changed = { ...base, replyTone: "formal" };
