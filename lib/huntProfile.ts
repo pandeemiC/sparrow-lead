@@ -2,7 +2,7 @@ import type { HuntProfile } from "@/types";
 
 export const PROFILE_MAX_LENGTH = 1000;
 
-// db row (users table) → hunt profile
+// db row (users table) -> hunt profile
 export function toHuntProfile(row: Record<string, unknown>): HuntProfile {
   const text = (v: unknown) => (typeof v === "string" ? v : "");
   return {
