@@ -1,5 +1,12 @@
 import { generateContent } from "./gemini";
 import type { AnalyzePostInput } from "@/types";
+import { SIGNAL_TYPES } from "@/lib/constants";
+
+const FALLBACK = {
+  score: 1,
+  reason: "Could not analyze this post",
+  type: "general",
+};
 
 export async function analyzePost({
   keyword,
@@ -17,7 +24,7 @@ export async function analyzePost({
     {
       "score": <number 1-10 buyer intent>,
       "reason": "<one sentence why>",
-      "type": "<seeking_recommendation|pain_point|competitor_complaint|question|general>"
+      "type": "<${SIGNAL_TYPES.join("|")}>"
     }`,
     config: {
       responseMimeType: "application/json",
@@ -28,11 +35,21 @@ export async function analyzePost({
 
   const text = response.text ?? "";
 
+  let parsed;
   try {
-    return JSON.parse(text);
+    parsed = JSON.parse(text);
   } catch {
-    return { score: 1, reason: "Could not analyze this post", type: "general" };
+    return FALLBACK;
   }
+
+  const score = Number(parsed?.score);
+  if (!Number.isFinite(score)) return FALLBACK;
+
+  return {
+    score: Math.min(10, Math.max(1, Math.round(score))),
+    reason: typeof parsed.reason === "string" ? parsed.reason : "",
+    type: SIGNAL_TYPES.includes(parsed.type) ? parsed.type : "general",
+  };
 }
 
 //  GROQ SDK
