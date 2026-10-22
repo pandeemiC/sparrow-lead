@@ -50,6 +50,8 @@ export const SIGNAL_TYPE_LABELS: Record<SignalType, string> = {
   general: "General",
 };
 
+export const SIGNAL_TYPES = Object.keys(SIGNAL_TYPE_LABELS) as SignalType[];
+
 export const settingsItems = [
   { label: "Overview", href: "/dashboard/settings/overview", icon: LayoutList },
   { label: "Account", href: "/dashboard/settings/account", icon: User },
