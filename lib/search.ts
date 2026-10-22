@@ -72,7 +72,7 @@ export async function searchReddit(keyword: string): Promise<ScannedPost[]> {
 }
 
 // hacker news returns html in story and comment text
-function cleanHtml(html: string) {
+export function cleanHtml(html: string) {
   return html
     .replace(/<p>/gi, " ")
     .replace(/<[^>]+>/g, "")
