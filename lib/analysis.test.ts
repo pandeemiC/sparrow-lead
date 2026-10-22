@@ -85,4 +85,33 @@ describe("analyzePost", () => {
     const prompt = mockGemini.mock.calls[0][0].contents as string;
     expect(prompt).not.toContain("About the user");
   });
+
+  it.each([
+    ['{"score": 15, "reason": "x", "type": "question"}', 10], // too high: capped at 10
+    ['{"score": 0, "reason": "x", "type": "question"}', 1], // too low: raised to 1
+    ['{"score": 7.6, "reason": "x", "type": "question"}', 8], // decimal: rounded
+    ['{"score": "7", "reason": "x", "type": "question"}', 7], // number as text: considered usable
+  ])("keeps the score between 1 and 10 for %s", async (reply, expected) => {
+    geminiReplies(reply);
+
+    const result = await analyzePost(post);
+
+    expect(result.score).toBe(expected);
+  });
+
+  it("falls back when the score isn't a num", async () => {
+    geminiReplies('{"score": "high", "reason": "x", "type": "question"}');
+
+    const result = await analyzePost(post);
+
+    expect(result.score).toBe(1);
+    expect(result.reason).toBe("Could not analyze this post");
+  });
+
+  it("uses general for a type it doesn't know", async () => {
+    geminiReplies('{"score": 6, "reason": "x", "type": "spam_bot"}');
+    const result = await analyzePost(post);
+
+    expect(result.type).toBe("general");
+  });
 });
