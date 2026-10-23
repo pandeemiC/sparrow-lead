@@ -12,6 +12,7 @@
 
 # testing
 /coverage
+.vitest/
 
 # next.js
 /.next/
@@ -49,5 +50,5 @@ project.md
 *.tsbuildinfo
 next-env.d.ts
 
+# bg job
 .trigger
-.vitest/
