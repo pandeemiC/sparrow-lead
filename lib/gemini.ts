@@ -10,6 +10,7 @@ export async function generateContent(params: GenerateParams, retries = 3) {
       return await ai.models.generateContent(params);
     } catch (err) {
       const status = (err as { status?: number }).status;
+      // retry with backoff
       if ((status === 503 || status === 429) && attempt < retries) {
         await new Promise((resolve) => setTimeout(resolve, 500 * 2 ** attempt));
         continue;
