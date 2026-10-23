@@ -3,6 +3,7 @@ import { Playfair_Display, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import Navbar from "@/components/Navbar";
+import { Analytics } from "@vercel/analytics/next";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -54,6 +55,7 @@ export default function RootLayout({
         <body className="min-h-full flex flex-col">
           <Navbar />
           {children}
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>
