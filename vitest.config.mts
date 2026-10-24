@@ -4,6 +4,7 @@ export default defineConfig({
   // lets tests understand imports like "@/lib/score", same as next does
   resolve: { tsconfigPaths: true },
   test: {
+    include: ["lib/**/*.test.ts"],
     coverage: {
       include: ["lib/**"],
     },
