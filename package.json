@@ -10,7 +10,8 @@
     "lint": "eslint",
     "test": "vitest",
     "coverage": "vitest run --coverage",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "e2e:codegen": "playwright codegen --load-storage=e2e/.auth/user.json localhost:3000/dashboard"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.9.5",
