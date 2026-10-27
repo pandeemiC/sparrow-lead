@@ -2,7 +2,15 @@
 
 import Link from "next/link";
 import { Fragment, useEffect, useRef, useState } from "react";
-import { ChevronDown, Pause, Play, Plus, RefreshCw } from "lucide-react";
+import {
+  ChevronDown,
+  Pause,
+  Play,
+  Plus,
+  RefreshCw,
+  Trash2,
+  X,
+} from "lucide-react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import PlatformIcon from "@/components/ui/PlatformIcon";
@@ -35,7 +43,7 @@ type Row = Keyword & { paused: boolean };
 
 // table columns, sources + avg intent drop off on smaller screens
 const tableCols =
-  "grid grid-cols-[minmax(0,1.6fr)_88px_150px_120px_70px_90px] items-center gap-3 px-4.5 max-[1180px]:grid-cols-[minmax(180px,1fr)_124px_50px_92px]";
+  "grid grid-cols-[minmax(0,1.6fr)_88px_150px_120px_70px_108px] items-center gap-3 px-4.5 max-[1180px]:grid-cols-[minmax(180px,1fr)_124px_50px_108px]";
 
 const SCORE_BOX = {
   hi: "bg-r1/14 text-r1 shadow-[inset_0_0_0_1px_rgba(255,36,56,0.3)]",
@@ -155,6 +163,8 @@ export default function KeywordsPage() {
   ]);
   const [adding, setAdding] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
+  // the paused keyword waiting for "delete for good" to be confirmed
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [feedFilter, setFeedFilter] = useState<"all" | "hot" | SignalPlatform>(
     "all",
   );
@@ -374,6 +384,23 @@ export default function KeywordsPage() {
       toast(err instanceof Error ? err.message : "Couldn't add keyword");
     } finally {
       setAdding(false);
+    }
+  }
+
+  // really deletes a paused keyword and its signals (the server refuses if any
+  // of them are on the hunt board)
+  async function deleteKeyword(row: Row) {
+    try {
+      await apiFetch(`/api/keywords/${row.id}`, { method: "DELETE" });
+      setRows((prev) => prev?.filter((r) => r.id !== row.id) ?? prev);
+      setMentions((prev) => prev.filter((m) => m.keyword !== row.keyword));
+      if (openId === row.id) setOpenId(null);
+      toast(`Deleted “${row.keyword}”`, "success");
+      refreshStats();
+    } catch (err) {
+      toast(err instanceof Error ? err.message : "Couldn't delete keyword");
+    } finally {
+      setConfirmDeleteId(null);
     }
   }
 
@@ -706,24 +733,67 @@ export default function KeywordsPage() {
                     open && "opacity-100",
                   )}
                 >
-                  <IconButton
-                    title={row.paused ? "Resume" : "Pause"}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setPaused(row, !row.paused);
-                    }}
-                  >
-                    {row.paused ? <Play /> : <Pause />}
-                  </IconButton>
-                  <IconButton
-                    title={open ? "Collapse" : "Expand"}
-                    className={cn(
-                      "[&_svg]:transition-transform [&_svg]:duration-300 [&_svg]:ease-[cubic-bezier(0.4,0,0.2,1)]",
-                      open && "[&_svg]:rotate-180",
-                    )}
-                  >
-                    <ChevronDown />
-                  </IconButton>
+                  {confirmDeleteId === row.id ? (
+                    <>
+                      <button
+                        type="button"
+                        title={`Delete for good, along with its ${row.mention_count ?? 0} signal(s)`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteKeyword(row);
+                        }}
+                        className="h-8 rounded-[9px] border border-r1/40 px-2.5 text-[12px] whitespace-nowrap text-[#ff6b78] transition-colors hover:bg-r1/10"
+                      >
+                        Delete
+                      </button>
+                      <IconButton
+                        title="Cancel"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setConfirmDeleteId(null);
+                        }}
+                      >
+                        <X />
+                      </IconButton>
+                    </>
+                  ) : (
+                    <>
+                      <IconButton
+                        title={row.paused ? "Resume" : "Pause"}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPaused(row, !row.paused);
+                        }}
+                      >
+                        {row.paused ? <Play /> : <Pause />}
+                      </IconButton>
+                      {/* only paused keywords can be deleted, pausing stays the
+                          normal way to stop tracking */}
+                      {row.paused && (
+                        <IconButton
+                          title="Delete"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setConfirmDeleteId(row.id);
+                          }}
+                        >
+                          <Trash2 />
+                        </IconButton>
+                      )}
+                    </>
+                  )}
+                  {/* hidden while confirming a delete, so the row doesn't overflow */}
+                  {confirmDeleteId !== row.id && (
+                    <IconButton
+                      title={open ? "Collapse" : "Expand"}
+                      className={cn(
+                        "[&_svg]:transition-transform [&_svg]:duration-300 [&_svg]:ease-[cubic-bezier(0.4,0,0.2,1)]",
+                        open && "[&_svg]:rotate-180",
+                      )}
+                    >
+                      <ChevronDown />
+                    </IconButton>
+                  )}
                 </div>
               </div>
 
