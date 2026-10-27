@@ -4,6 +4,8 @@ export type Keyword = {
   keyword: string;
   platforms: string[];
   created_at: string;
+  // how many signals came from it, sent by GET /api/keywords
+  mention_count?: number;
 };
 
 export type Payload = {
