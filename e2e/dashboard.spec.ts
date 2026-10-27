@@ -1,20 +1,11 @@
-import { clerk } from "@clerk/testing/playwright";
 import { test, expect } from "@playwright/test";
 
-test("a signed in user sees their dashboard", async ({ page, context }) => {
-  await page.goto("/");
-
-  await clerk.signIn({ page, emailAddress: process.env.E2E_CLERK_USER_EMAIL! });
-  await context.addCookies([
-    { name: "onboarded", value: "true", url: "http://localhost:3000" },
-  ]);
-
-  await context.storageState({ path: "e2e/.auth/user.json" });
-
+// starts already signed in as the test user, see e2e/auth.setup.ts
+test("a signed in user sees their dashboard", async ({ page }) => {
   await page.goto("/dashboard");
 
   await expect(page).toHaveURL(/\/dashboard/);
-  //picking one part in the DBoard
+  // the main action is there and it knows who's signed in
   await expect(page.getByRole("button", { name: "Scan now" })).toBeVisible();
   await expect(page.getByText("jordan buffet")).toBeVisible();
 });
