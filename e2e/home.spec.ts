@@ -1,5 +1,9 @@
 import { test, expect } from "@playwright/test";
 
+// the homepage is for visitors, so these tests start logged out:
+// an empty browser instead of the saved session
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test("homepage shows the headline", async ({ page }) => {
   await page.goto("/");
 
