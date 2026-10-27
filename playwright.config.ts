@@ -12,10 +12,16 @@ export default defineConfig({
   },
 
   projects: [
-    { name: "setup", testMatch: /global\.setup\.ts/ },
+    // signs in once and saves the session (e2e/auth.setup.ts)
+    { name: "setup", testMatch: /.*\.setup\.ts/ },
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        // every test starts with the saved, signed-in browser session
+        storageState: "e2e/.auth/user.json",
+      },
+      // don't start the tests until the setup has signed in
       dependencies: ["setup"],
     },
   ],
