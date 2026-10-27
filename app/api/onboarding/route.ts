@@ -2,7 +2,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { getDb } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { handler } from "@/lib/api";
-import { cookies } from "next/headers";
+import { setOnboardedCookie } from "@/lib/onboarding";
 
 export const POST = handler(async (req: Request) => {
   const { userId } = await auth();
@@ -25,13 +25,7 @@ export const POST = handler(async (req: Request) => {
       onboarded_at = NOW()
   `;
 
-  const cookieStore = await cookies();
-  cookieStore.set("onboarded", "true", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 365,
-  });
-
-  return NextResponse.json({ ok: true });
+  const res = NextResponse.json({ ok: true });
+  setOnboardedCookie(res);
+  return res;
 });
