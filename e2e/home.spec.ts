@@ -17,3 +17,13 @@ test("sign in link opens the sign in page", async ({ page }) => {
 
   await expect(page).toHaveURL(/\/sign-in/);
 });
+
+test("test", async ({ page }) => {
+  await page.goto("/");
+  await page
+    .getByRole("banner")
+    .getByRole("link", { name: "Start free" })
+    .click();
+
+  await expect(page).toHaveURL(/\/sign-up/);
+});
